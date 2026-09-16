@@ -1,0 +1,21 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#f8f4ed"><title>к Женщине</title><style>
+*{box-sizing:border-box}html,body{margin:0;background:#f7f3ed;font-family:Arial,sans-serif}.app{max-width:948px;margin:0 auto;position:relative;min-height:100vh}.screen{display:block;width:100%;height:auto}.hot{position:absolute;z-index:5;background:transparent;border:0;cursor:pointer}.nav{position:absolute;left:3%;right:3%;bottom:1.7%;height:8.8%;display:grid;grid-template-columns:repeat(4,1fr);z-index:8}.nav button{border:0;background:transparent;cursor:pointer}.picker{position:fixed;right:10px;top:10px;z-index:20;border:1px solid #d6c2a6;background:rgba(255,255,255,.88);border-radius:999px;padding:8px 12px;font-size:12px;color:#5d5146;backdrop-filter:blur(8px)}
+</style></head><body><main id="app" class="app"></main><select id="picker" class="picker" aria-label="Экран"></select><script>
+const screens={
+ welcome:'assets/welcome.png', ecosystem:'assets/ecosystem.png', space:'assets/space.png', 'space-alt':'assets/space-alt.png', path:'assets/path.png', meetings:'assets/meetings.png', me:'assets/me.png', 'me-alt':'assets/me-alt.png', 'ritual-system':'assets/ritual-system.png', ritual:'assets/ritual.png', 'ritual-alt':'assets/ritual-alt.png'
+};
+const labels={welcome:'Приветствие',ecosystem:'Экосистема',space:'Пространство','space-alt':'Пространство — вариант',path:'Путь',meetings:'Встречи',me:'Я','me-alt':'Я — вариант','ritual-system':'Система ритуалов',ritual:'Ритуал видимости','ritual-alt':'Ритуал — вариант'};
+const q=new URLSearchParams(location.search); let current=q.get('screen')||'welcome'; if(!screens[current])current='welcome';
+const app=document.getElementById('app'), picker=document.getElementById('picker'); Object.keys(screens).forEach(k=>{let o=document.createElement('option');o.value=k;o.textContent=labels[k];picker.appendChild(o)});picker.value=current;picker.onchange=()=>go(picker.value);
+function go(k){history.pushState({},'',`?screen=${k}`);render(k)};window.onpopstate=()=>render(new URLSearchParams(location.search).get('screen')||'welcome');
+function render(k){current=k;picker.value=k;app.innerHTML=`<img class="screen" src="${screens[k]}" alt="${labels[k]}">`;
+ if(['space','space-alt','path','meetings','me','me-alt'].includes(k)){let nav=document.createElement('div');nav.className='nav';[['space','Пространство'],['path','Путь'],['meetings','Встречи'],['me','Я']].forEach(([to,a])=>{let b=document.createElement('button');b.setAttribute('aria-label',a);b.onclick=()=>go(to);nav.appendChild(b)});app.appendChild(nav)}
+ if(k==='welcome') hotspot(12,82,76,10,'ecosystem','Стать частью экосистемы');
+ if(k==='ecosystem') hotspot(15,83,70,10,'space','Перейти в пространство');
+ if(k==='space'||k==='space-alt') hotspot(7,48,42,9,'ritual','Открыть ритуал');
+ if(k==='path') hotspot(5,25,48,8,'ritual-system','Практика многомерности');
+ if(k==='ritual-system') hotspot(0,0,100,8,'space','Назад');
+ if(k==='ritual'||k==='ritual-alt') hotspot(0,0,100,8,'space','Назад');
+}
+function hotspot(x,y,w,h,to,label){let b=document.createElement('button');b.className='hot';Object.assign(b.style,{left:x+'%',top:y+'%',width:w+'%',height:h+'%'});b.setAttribute('aria-label',label);b.onclick=()=>go(to);app.appendChild(b)}render(current);
+</script></body></html>
