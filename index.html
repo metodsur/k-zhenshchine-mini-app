@@ -9,506 +9,538 @@
 <style>
 :root{
   --bg:#f8f5ef;
-  --paper:rgba(255,255,255,.76);
-  --paper2:rgba(255,255,255,.9);
-  --text:#343331;
-  --muted:#817b73;
-  --line:rgba(184,154,107,.24);
-  --gold:#c99b55;
-  --gold2:#e4c891;
-  --shadow:0 18px 45px rgba(97,75,46,.09);
+  --text:#302f2d;
+  --muted:#77716a;
+  --gold:#c9954c;
+  --gold2:#edcf94;
+  --line:rgba(171,137,87,.22);
+  --glass:rgba(255,255,255,.72);
 }
-
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
-
 body{
   margin:0;
-  background:
-    radial-gradient(circle at 90% 4%,rgba(237,207,151,.28),transparent 26%),
-    radial-gradient(circle at 5% 30%,rgba(255,255,255,.9),transparent 34%),
-    linear-gradient(180deg,#faf7f1,#f6f1e9);
   color:var(--text);
   font-family:Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 90% 5%,rgba(239,205,143,.28),transparent 24%),
+    radial-gradient(circle at 5% 25%,rgba(255,255,255,.95),transparent 30%),
+    linear-gradient(180deg,#fbf8f2,#f5efe6);
 }
-
 button{font:inherit}
-button:active{transform:scale(.985)}
-
 .app{
   width:100%;
   max-width:520px;
   min-height:100vh;
   margin:auto;
-  position:relative;
-  padding-bottom:112px;
+  padding-bottom:105px;
 }
-
 .page{
-  padding:28px 20px 42px;
-  animation:appear .28s ease;
+  padding:26px 19px 42px;
+  animation:in .22s ease;
 }
-
-@keyframes appear{
-  from{opacity:.3;transform:translateY(5px)}
+@keyframes in{
+  from{opacity:.4;transform:translateY(4px)}
   to{opacity:1;transform:none}
 }
-
-.eyebrow{
-  margin:0 0 12px;
-  font-size:11px;
-  letter-spacing:.18em;
-  text-transform:uppercase;
-  color:#9d815a;
+.brand{
+  margin-bottom:27px;
 }
-
+.brand-name{
+  font-size:25px;
+  font-weight:300;
+  letter-spacing:-.03em;
+}
+.brand-sub{
+  margin-top:4px;
+  font-size:8px;
+  letter-spacing:.22em;
+  color:#9b835f;
+}
+.kicker{
+  font-size:9px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:#a08359;
+  margin-bottom:8px;
+}
 h1{
   margin:0;
-  font-size:36px;
-  line-height:1.08;
-  font-weight:400;
-  letter-spacing:-.035em;
+  font-weight:300;
+  font-size:37px;
+  line-height:1.02;
+  letter-spacing:-.045em;
 }
-
 h2{
   margin:0;
-  font-size:27px;
-  line-height:1.13;
-  font-weight:400;
-  letter-spacing:-.025em;
+  font-size:25px;
+  line-height:1.08;
+  font-weight:300;
+  letter-spacing:-.035em;
 }
-
 h3{
   margin:0;
-  font-size:18px;
-  line-height:1.3;
+  font-size:17px;
+  line-height:1.25;
   font-weight:500;
 }
-
-p{
-  line-height:1.55;
-  margin:0;
+p{margin:0;line-height:1.5}
+.sub{
+  margin-top:12px;
+  color:#706b65;
+  font-size:14px;
 }
-
-.lead{
-  margin-top:14px;
-  color:#66615b;
-  font-size:15px;
-  max-width:420px;
+.section{
+  margin-top:30px;
 }
-
+.section-title{
+  margin-bottom:12px;
+  font-size:10px;
+  letter-spacing:.19em;
+  color:#8f7756;
+}
 .hero{
   position:relative;
+  min-height:245px;
   overflow:hidden;
-  min-height:255px;
-  padding:30px 24px;
-  border-radius:32px;
-  border:1px solid rgba(211,178,124,.25);
+  border-radius:0 0 32px 32px;
+  margin:-26px -19px 0;
+  padding:27px 24px;
   background:
-    radial-gradient(circle at 75% 25%,rgba(255,225,163,.72),transparent 24%),
-    radial-gradient(circle at 20% 100%,rgba(255,255,255,.9),transparent 38%),
-    linear-gradient(135deg,#fffdf8,#f1e5d2);
-  box-shadow:var(--shadow);
+    radial-gradient(circle at 78% 46%,rgba(255,211,126,.62),transparent 15%),
+    radial-gradient(circle at 85% 55%,rgba(255,255,255,.9),transparent 27%),
+    linear-gradient(135deg,#f9f5ed,#eadcc6);
 }
-
-.hero:after{
+.hero:before{
   content:"";
   position:absolute;
-  width:190px;
-  height:190px;
-  border:1px solid rgba(190,145,75,.28);
+  width:215px;
+  height:215px;
+  right:-48px;
+  top:23px;
   border-radius:50%;
-  right:-40px;
-  top:-25px;
+  border:1px solid rgba(184,139,72,.34);
   box-shadow:
-    0 0 0 18px rgba(218,181,116,.07),
-    0 0 0 38px rgba(218,181,116,.04);
+    0 0 0 22px rgba(207,165,101,.07),
+    0 0 0 44px rgba(207,165,101,.035);
 }
-
 .hero>*{position:relative;z-index:1}
-
-.hero-copy{
-  max-width:75%;
+.hero h1{max-width:310px}
+.greeting{
+  margin-top:19px;
+  font-size:18px;
 }
-
 .hero-small{
-  margin-top:12px;
-  color:#6f675d;
-  font-size:14px;
+  margin-top:7px;
+  max-width:180px;
+  color:#706960;
+  font-size:12px;
 }
-
-.section{
-  margin-top:32px;
+.side-words{
+  position:absolute;
+  z-index:2;
+  right:24px;
+  bottom:27px;
+  text-align:right;
+  font-size:8px;
+  line-height:1.5;
+  letter-spacing:.17em;
+  color:#a4875c;
 }
-
-.section-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-end;
-  gap:15px;
-  margin-bottom:15px;
-}
-
-.section-label{
-  font-size:11px;
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  color:#9c815b;
-}
-
 .card{
-  position:relative;
   overflow:hidden;
-  padding:20px;
-  border-radius:25px;
+  position:relative;
+  padding:19px;
   border:1px solid var(--line);
-  background:var(--paper);
-  box-shadow:0 12px 30px rgba(96,72,41,.055);
-  backdrop-filter:blur(12px);
+  border-radius:24px;
+  background:var(--glass);
+  box-shadow:0 14px 36px rgba(83,65,40,.065);
+  backdrop-filter:blur(14px);
 }
-
 .card+.card{margin-top:12px}
-
-.gold-card{
+.gold{
   background:
-    radial-gradient(circle at 100% 0,rgba(241,204,139,.42),transparent 40%),
-    rgba(255,255,255,.8);
+    radial-gradient(circle at 90% 10%,rgba(236,195,120,.35),transparent 35%),
+    rgba(255,255,255,.78);
 }
-
-.card-kicker{
-  margin-bottom:8px;
-  font-size:10px;
-  letter-spacing:.15em;
+.label{
+  font-size:9px;
+  letter-spacing:.17em;
+  color:#9b7d52;
   text-transform:uppercase;
-  color:#a28254;
 }
-
 .card p{
   margin-top:8px;
-  color:#716b64;
-  font-size:14px;
+  color:#716c65;
+  font-size:13px;
 }
-
-.row{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.icon{
-  width:48px;
-  height:48px;
-  flex:0 0 48px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  border:1px solid rgba(196,150,82,.36);
-  color:#b78643;
-  background:rgba(255,252,245,.72);
-  font-family:Georgia,serif;
-  font-size:21px;
-}
-
 .btn{
-  width:100%;
   border:0;
   border-radius:999px;
-  margin-top:18px;
-  padding:15px 20px;
-  color:#493b29;
-  background:
-    linear-gradient(105deg,#e2bd77,#f6dfad 48%,#d9aa60);
-  box-shadow:
-    0 8px 24px rgba(188,137,63,.22),
-    inset 0 1px 0 rgba(255,255,255,.75);
-  font-size:13px;
+  padding:13px 18px;
+  margin-top:16px;
+  color:#4d3c26;
+  background:linear-gradient(100deg,#dda954,#f4d798 48%,#d49b45);
+  box-shadow:0 8px 20px rgba(187,133,53,.2);
+  font-size:11px;
   font-weight:600;
-  letter-spacing:.07em;
+  letter-spacing:.08em;
   text-transform:uppercase;
-  cursor:pointer;
 }
-
 .btn-soft{
-  color:#6d5a3f;
-  background:rgba(255,255,255,.72);
-  border:1px solid rgba(195,151,86,.28);
+  border:1px solid rgba(186,142,76,.25);
+  background:rgba(255,255,255,.7);
   box-shadow:none;
 }
-
-.link{
-  border:0;
-  background:none;
-  padding:0;
-  color:#9a7543;
-  cursor:pointer;
-  font-size:13px;
+.cycle-title{
+  margin-top:7px;
+  font-size:27px;
+  font-weight:300;
 }
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
-.mini{
-  min-height:142px;
-  cursor:pointer;
-}
-
-.mini .icon{
-  width:40px;
-  height:40px;
-  margin-bottom:18px;
-  font-size:18px;
-}
-
-.mini h3{
-  font-size:15px;
-}
-
-.mini p{
-  font-size:12px;
-}
-
-.cycle{
-  margin-top:18px;
-}
-
 .person{
   display:flex;
+  gap:10px;
   align-items:center;
-  gap:12px;
-  margin:17px 0 6px;
+  margin:14px 0;
 }
-
 .avatar{
-  width:46px;
-  height:46px;
+  width:43px;
+  height:43px;
+  flex:0 0 43px;
   border-radius:50%;
   display:grid;
   place-items:center;
-  background:linear-gradient(145deg,#f6dfb5,#fff);
-  border:1px solid rgba(194,148,78,.3);
-  color:#9a7543;
+  border:1px solid rgba(185,140,75,.28);
+  background:linear-gradient(145deg,#f1d8aa,#fff);
+  color:#9e7844;
   font-family:Georgia,serif;
-  font-size:18px;
 }
-
-.small{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.path-card{
+.small{font-size:11px;color:#898078}
+.grid3{
   display:grid;
-  grid-template-columns:48px 1fr;
-  gap:14px;
-  align-items:start;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
 }
-
-.number{
-  width:44px;
-  height:44px;
+.mini{
+  min-height:175px;
+  padding:12px;
+}
+.image{
+  position:relative;
+  height:80px;
+  margin:-12px -12px 12px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 70% 25%,rgba(255,218,148,.7),transparent 22%),
+    linear-gradient(145deg,#f1e8da,#d8c5a8);
+}
+.image:after{
+  content:"";
+  position:absolute;
+  width:72px;
+  height:72px;
   border-radius:50%;
-  display:grid;
-  place-items:center;
-  border:1px solid rgba(194,148,78,.34);
-  color:#ae8144;
-  font-family:Georgia,serif;
-  font-size:15px;
+  border:1px solid rgba(255,255,255,.8);
+  right:9px;
+  top:10px;
 }
-
-.status{
-  display:inline-block;
-  margin-top:12px;
-  padding:7px 10px;
-  border-radius:999px;
-  background:#f5ede1;
-  color:#927148;
+.mini .label{font-size:7px}
+.mini h3{
+  margin-top:9px;
+  font-size:13px;
+}
+.mini p{font-size:10px}
+.arrow{
+  float:right;
+  margin-top:8px;
+  color:#a27a43;
+}
+.banner{
+  min-height:130px;
+  background:
+    radial-gradient(circle at 82% 35%,rgba(242,203,129,.6),transparent 20%),
+    linear-gradient(120deg,rgba(255,255,255,.85),rgba(231,218,198,.75));
+}
+.banner-side{
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  text-align:right;
+  font-size:8px;
+  line-height:1.45;
+  letter-spacing:.15em;
+  color:#9c8058;
+}
+.space-hero{
+  min-height:280px;
+}
+.space-hero .headline{
+  font-size:36px;
+  max-width:300px;
+}
+.space-hero .tagline{
+  margin-top:15px;
   font-size:11px;
+  line-height:1.55;
+  letter-spacing:.12em;
 }
-
-.doors{
+.feature{
+  min-height:180px;
+}
+.feature h2{
+  margin-top:9px;
+  max-width:240px;
+}
+.feature .btn{
+  margin-top:20px;
+}
+.ritual-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:15px;
+  gap:9px;
 }
-
-.door{
+.ritual{
   min-height:120px;
-  padding:15px;
-  border-radius:22px;
-  border:1px solid rgba(194,148,78,.22);
-  background:rgba(255,255,255,.6);
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  background:
+    radial-gradient(circle at 65% 25%,rgba(240,202,133,.5),transparent 25%),
+    rgba(255,255,255,.68);
 }
-
-.door b{
-  display:block;
-  margin-bottom:9px;
-  color:#b18449;
+.ritual h3{
+  font-size:12px;
+  letter-spacing:.08em;
+}
+.path-intro{
+  margin-bottom:27px;
+}
+.path-block{
+  padding:20px 0;
+  border-bottom:1px solid var(--line);
+}
+.path-number{
+  color:#b1854a;
   font-family:Georgia,serif;
+  font-size:12px;
+  margin-bottom:8px;
+}
+.path-block h2{
+  text-transform:uppercase;
+  font-size:22px;
+}
+.path-block p{
+  margin-top:8px;
+  color:#777068;
+  font-size:13px;
+}
+.portal{
+  height:150px;
+  margin:15px 0;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+.portal i{
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(188,144,79,.25);
+}
+.portal i:nth-child(1){width:145px;height:145px}
+.portal i:nth-child(2){width:120px;height:120px}
+.portal i:nth-child(3){width:95px;height:95px}
+.portal i:nth-child(4){width:70px;height:70px}
+.portal i:nth-child(5){width:45px;height:45px}
+.portal i:nth-child(6){width:20px;height:20px;background:#e4bd79}
+.tabs{
+  display:flex;
+  gap:19px;
+  overflow:auto;
+  margin:25px 0 17px;
+  border-bottom:1px solid var(--line);
+}
+.tab{
+  padding:0 0 10px;
+  white-space:nowrap;
+  font-size:9px;
+  letter-spacing:.13em;
+  border:0;
+  color:#948b81;
+  background:none;
+}
+.tab.active{
+  color:#9b733d;
+  border-bottom:1px solid #b68a4d;
+}
+.event{
+  display:grid;
+  grid-template-columns:58px 1fr;
+  gap:13px;
+}
+.date{
+  text-align:center;
+  color:#9b7543;
+}
+.date b{
+  display:block;
+  font-family:Georgia,serif;
+  font-size:26px;
   font-weight:400;
 }
-
-.door span{
-  font-size:12px;
-  line-height:1.4;
+.date span{
+  font-size:8px;
+  letter-spacing:.08em;
 }
-
-.price{
-  margin-top:12px;
-  font-family:Georgia,serif;
-  font-size:28px;
-  color:#9d7540;
+.event-photo{
+  height:115px;
+  border-radius:18px;
+  margin-bottom:13px;
+  background:
+    radial-gradient(circle at 75% 20%,rgba(255,219,151,.7),transparent 20%),
+    linear-gradient(145deg,#eadfce,#cbb99e);
 }
-
-.meeting-date{
-  margin:13px 0 6px;
-  font-family:Georgia,serif;
-  font-size:28px;
-  color:#a97e44;
+.event h3{
+  font-size:18px;
 }
-
-.divider{
-  height:1px;
-  margin:18px 0;
-  background:var(--line);
+.event-info{
+  margin-top:5px;
+  color:#8e7a5f;
+  font-size:11px;
 }
-
-.quote{
-  padding:25px 20px;
-  text-align:center;
-  font-family:Georgia,serif;
-  font-size:19px;
-  line-height:1.5;
-  color:#695a48;
+.event-desc{
+  font-size:12px!important;
 }
-
-.profile{
-  text-align:center;
-  padding-top:8px;
-}
-
-.profile .avatar{
-  width:78px;
-  height:78px;
-  margin:0 auto 15px;
-  font-size:27px;
-}
-
-.list-row{
+.event-bottom{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap:14px;
-  padding:16px 0;
-  border-bottom:1px solid var(--line);
+  margin-top:12px;
 }
-
-.list-row:last-child{border-bottom:0}
-
-.back{
-  width:42px;
-  height:42px;
-  border:1px solid var(--line);
+.price{
+  font-family:Georgia,serif;
+  color:#9e7540;
+  font-size:19px;
+}
+.event-bottom .btn{
+  margin:0;
+  padding:10px 13px;
+  font-size:9px;
+}
+.profile-head{
+  padding-top:8px;
+}
+.profile-row{
+  display:flex;
+  gap:16px;
+  align-items:center;
+  margin-top:23px;
+}
+.profile-avatar{
+  width:90px;
+  height:90px;
+  flex:0 0 90px;
   border-radius:50%;
-  background:rgba(255,255,255,.72);
-  margin-bottom:22px;
-  color:#8e744f;
-  cursor:pointer;
-}
-
-.nav{
-  position:fixed;
-  z-index:30;
-  left:50%;
-  bottom:max(12px,env(safe-area-inset-bottom));
-  transform:translateX(-50%);
-  width:min(calc(100% - 24px),496px);
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  padding:8px 7px;
-  border-radius:28px;
-  border:1px solid rgba(198,161,105,.22);
-  background:rgba(255,255,255,.9);
-  box-shadow:0 15px 40px rgba(76,60,40,.14);
-  backdrop-filter:blur(20px);
-}
-
-.nav button{
-  min-width:0;
-  border:0;
-  background:transparent;
-  color:#8a837b;
-  padding:5px 2px 4px;
-  cursor:pointer;
-  font-size:10px;
-}
-
-.nav-i{
-  width:39px;
-  height:39px;
-  margin:0 auto 4px;
   display:grid;
   place-items:center;
-  border-radius:50%;
-  border:1px solid rgba(192,154,96,.22);
+  background:
+    radial-gradient(circle at 70% 30%,#f4cf8b,transparent 25%),
+    linear-gradient(145deg,#e4d2b7,#f9f5ed);
+  border:1px solid rgba(183,138,72,.3);
+  color:#9c7542;
   font-family:Georgia,serif;
-  font-size:17px;
+  font-size:28px;
 }
-
-.nav button.active{
-  color:#9c7138;
+.quote{
+  margin-top:20px;
+  font-family:Georgia,serif;
+  font-size:20px;
+  line-height:1.4;
+  color:#655847;
 }
-
-.nav button.active .nav-i{
-  background:linear-gradient(145deg,#e4bd76,#f7e3ba);
-  border-color:transparent;
-  color:#5e4729;
-  box-shadow:0 6px 15px rgba(180,129,55,.18);
+.about-copy{
+  font-family:Georgia,serif;
+  font-size:16px;
+  line-height:1.55;
+  color:#5e574f;
 }
-
-.ritual-list{
-  margin-top:15px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-
-.pill{
-  padding:9px 11px;
-  border-radius:999px;
-  border:1px solid rgba(196,151,84,.22);
-  background:rgba(255,255,255,.64);
-  color:#776958;
-  font-size:11px;
-}
-
-.questions{
-  counter-reset:q;
-  margin-top:16px;
-}
-
-.question{
-  counter-increment:q;
+.facets{
   display:grid;
-  grid-template-columns:32px 1fr;
-  gap:10px;
-  padding:14px 0;
-  border-bottom:1px solid var(--line);
+  grid-template-columns:repeat(4,1fr);
+  gap:13px 5px;
+  margin-top:15px;
 }
-
-.question:before{
-  content:counter(q,decimal-leading-zero);
-  color:#b38850;
+.facet{text-align:center;font-size:9px;color:#716a61}
+.facet-icon{
+  width:48px;
+  height:48px;
+  margin:0 auto 7px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(184,139,74,.3);
+  color:#aa8149;
   font-family:Georgia,serif;
-  font-size:13px;
+  font-size:18px;
 }
-
-@media(max-width:360px){
-  h1{font-size:31px}
-  .page{padding-left:16px;padding-right:16px}
+.two{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.two .card{
+  min-height:135px;
+  padding:15px;
+}
+.back{
+  width:40px;
+  height:40px;
+  margin-bottom:20px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.75);
+  color:#997446;
+}
+.nav{
+  position:fixed;
+  z-index:20;
+  bottom:max(10px,env(safe-area-inset-bottom));
+  left:50%;
+  transform:translateX(-50%);
+  width:min(calc(100% - 20px),500px);
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  padding:8px 5px;
+  border:1px solid rgba(183,145,89,.22);
+  border-radius:28px;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(18px);
+  box-shadow:0 12px 35px rgba(75,59,38,.13);
+}
+.nav button{
+  border:0;
+  background:none;
+  color:#817a72;
+  font-size:9px;
+}
+.nav-icon{
+  width:37px;
+  height:37px;
+  display:grid;
+  place-items:center;
+  margin:0 auto 4px;
+  border-radius:50%;
+  border:1px solid rgba(187,147,86,.2);
+  color:#9f7a46;
+  font-family:Georgia,serif;
+  font-size:16px;
+}
+.nav .active{
+  color:#9a713a;
+}
+.nav .active .nav-icon{
+  border-color:transparent;
+  background:linear-gradient(145deg,#e1b76f,#f5dbab);
+  color:#5b4427;
 }
 </style>
 </head>
@@ -518,121 +550,199 @@ p{
 
 <script>
 const app=document.getElementById("app");
+let current="home";
+let previous="home";
+let meetingTab="upcoming";
 
-const mainPages=["space","path","meetings","me"];
-let current="space";
-let previous="space";
-
-function navigate(page){
+function go(page){
   previous=current;
   current=page;
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo(0,0);
   render();
 }
-
 function back(){
-  current=previous||"space";
-  window.scrollTo({top:0,behavior:"smooth"});
+  current=previous||"home";
+  window.scrollTo(0,0);
   render();
 }
 
-function nav(){
-  if(!mainPages.includes(current)) return "";
+function navigation(){
+  const main=["home","space","path","meetings","about"];
+  if(!main.includes(current)) return "";
 
   const items=[
-    ["space","⌂","Пространство"],
-    ["path","○","Путь"],
-    ["meetings","◇","Встречи"],
-    ["me","◯","Я"]
+    ["space","✧","Пространство"],
+    ["path","◎","Путь"],
+    ["meetings","◌","Встречи"],
+    ["about","◐","Обо мне"]
   ];
 
-  return `
-  <nav class="nav">
-    ${items.map(([id,icon,label])=>`
-      <button class="${current===id?"active":""}" onclick="navigate('${id}')">
-        <span class="nav-i">${icon}</span>
-        ${label}
+  return `<nav class="nav">
+    ${items.map(x=>`
+      <button onclick="go('${x[0]}')" class="${current===x[0]?"active":""}">
+        <div class="nav-icon">${x[1]}</div>
+        ${x[2]}
       </button>
     `).join("")}
   </nav>`;
+}
+
+function home(){
+return `
+<main class="page">
+
+<section class="hero">
+  <div class="brand">
+    <div class="brand-name">к Женщине</div>
+    <div class="brand-sub">ЖЕНЩИНА ЖЕНЩИНЕ — ДОМ</div>
+  </div>
+
+  <div class="kicker">Сегодня</div>
+  <h1>В ПРОСТРАНСТВЕ<br>МНОГОМЕРНОСТИ</h1>
+
+  <div class="greeting">Доброе утро, Анна.</div>
+  <div class="hero-small">Ты — важная часть<br>этого пространства.</div>
+
+  <div class="side-words">
+    БОЛЬШЕ<br>ЧЕМ ТЫ<br>ДУМАЕШЬ
+  </div>
+</section>
+
+<section class="section">
+  <div class="card gold">
+    <div class="label">● &nbsp; ТЕКУЩИЙ ЦИКЛ</div>
+    <div class="cycle-title">Твоя новая пара</div>
+
+    <p>На эти две недели<br>ты в паре с</p>
+
+    <div class="person">
+      <div class="avatar">М</div>
+      <div>
+        <strong>Мария &nbsp;›</strong>
+      </div>
+    </div>
+
+    <div class="label">Ваш ритуал</div>
+    <h3 style="margin-top:7px;font-family:Georgia,serif;font-weight:400">
+      «Я вижу и признаю<br>твой объём»
+    </h3>
+
+    <button class="btn" onclick="go('ritual')">Открыть ритуал →</button>
+
+    <div style="position:absolute;right:17px;top:18px;text-align:right;font-size:7px;line-height:1.5;letter-spacing:.12em;color:#9b7e56">
+      ДВЕ ЖЕНЩИНЫ<br>СОЗДАЮТ БОЛЬШЕ
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="grid3">
+
+    <div class="card mini" onclick="go('meetings')">
+      <div class="label">БЛИЖАЙШАЯ ВСТРЕЧА</div>
+      <div class="image"></div>
+      <h3>Основы</h3>
+      <p>20 сентября · Москва</p>
+      <p>Встреча с Мастером многомерности</p>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="card mini">
+      <div class="label">КОЛЛАБОРАЦИИ<br>И ПАРТНЁРСТВА</div>
+      <div class="image"></div>
+      <h3>Какие ресурсы тебе нужны для роста?</h3>
+      <span class="arrow">›</span>
+    </div>
+
+    <div class="card mini" onclick="go('wholeness')">
+      <div class="label">ТВОЯ ЦЕЛОСТНОСТЬ</div>
+      <div class="image"></div>
+      <h3>Вернуться к материалам первого этапа</h3>
+      <span class="arrow">›</span>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="card banner">
+    <h3>Мы создаём это вместе</h3>
+    <p>Города. Встречи. Женщины. Возможности.</p>
+    <span class="arrow">›</span>
+
+    <div class="banner-side">
+      ОДНО<br>ПРОСТРАНСТВО<br>МНОГО МИРОВ
+    </div>
+  </div>
+</section>
+
+</main>`;
 }
 
 function space(){
 return `
 <main class="page">
 
-  <p class="eyebrow">Сегодня · Пространство многомерности</p>
-
-  <section class="hero">
-    <div class="hero-copy">
-      <h1>Доброе утро,<br>Анна.</h1>
-      <p class="hero-small">Ты — важная часть этого пространства.</p>
-    </div>
-  </section>
-
-  <section class="section cycle">
-    <div class="section-head">
-      <div>
-        <div class="section-label">Твой текущий цикл</div>
-        <h2>Твоя новая пара</h2>
-      </div>
-    </div>
-
-    <div class="card gold-card">
-      <div class="card-kicker">Две недели проживания</div>
-      <h3>«Я вижу и признаю твой объём»</h3>
-
-      <div class="person">
-        <div class="avatar">М</div>
-        <div>
-          <strong>Мария</strong>
-          <div class="small">твоя пара на этот цикл</div>
-        </div>
-      </div>
-
-      <p>Встреча с другой женщиной помогает увидеть больше собственного объёма.</p>
-      <button class="btn" onclick="navigate('pairRitual')">Открыть ритуал</button>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head">
-      <div>
-        <div class="section-label">Сейчас в пространстве</div>
-        <h2>Что тебе доступно</h2>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card mini" onclick="navigate('meetingDetail')">
-        <div class="icon">◇</div>
-        <h3>Ближайшая встреча</h3>
-        <p>Основы · Москва</p>
-      </div>
-
-      <div class="card mini" onclick="navigate('collabs')">
-        <div class="icon">∞</div>
-        <h3>Коллаборации</h3>
-        <p>Найди ресурс для роста</p>
-      </div>
-
-      <div class="card mini" onclick="navigate('wholeness')">
-        <div class="icon">○</div>
-        <h3>Твоя целостность</h3>
-        <p>Первый этап многомерности</p>
-      </div>
-
-      <div class="card mini" onclick="navigate('visibility')">
-        <div class="icon">✧</div>
-        <h3>Ритуал видимости</h3>
-        <p>Проявиться настолько, насколько комфортно</p>
-      </div>
-    </div>
-  </section>
-
-  <div class="section quote">
-    Женщина женщине — дом.
+<section class="hero space-hero">
+  <div class="brand">
+    <div class="brand-name">к Женщине</div>
+    <div class="brand-sub">ЖЕНЩИНА ЖЕНЩИНЕ — ДОМ</div>
   </div>
+
+  <h1 class="headline">ПРОСТРАНСТВО</h1>
+  <div class="tagline">
+    ЖИВЫЕ ВСТРЕЧИ.<br>
+    РИТУАЛЫ. ПРАКТИКИ.<br>
+    ПУТЬ К БОЛЬШЕЙ ТЕБЕ.
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">КЛУБ</div>
+
+  <div class="card feature gold">
+    <div class="label">Я В КЛУБЕ</div>
+    <h2>ДО 8 ОКТЯБРЯ</h2>
+    <p>Живое пространство<br>для глубины, поддержки<br>и расширения.</p>
+    <button class="btn">Перейти в клуб →</button>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">МНОГОМЕРНОСТЬ</div>
+
+  <div class="card feature">
+    <div class="label">МОЙ ТЕКУЩИЙ ЦИКЛ</div>
+    <h2>ОПОРА И ОБЪЁМ</h2>
+    <p>Следующий ритуал:<br>22 сентября</p>
+    <button class="btn" onclick="go('ritual')">Перейти к ритуалу →</button>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">ДОСТУПНЫЕ РИТУАЛЫ</div>
+
+  <div class="ritual-grid">
+    <div class="card ritual">
+      <div class="label">▶</div>
+      <h3>ДЫХАНИЕ<br>ПРОСТРАНСТВА</h3>
+    </div>
+
+    <div class="card ritual">
+      <div class="label">▶</div>
+      <h3>АКТИВАЦИЯ<br>СЕРДЦА</h3>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">ТВОЯ ЦЕЛОСТНОСТЬ</div>
+
+  <div class="card">
+    <div class="label">Программа доступна</div>
+    <button class="btn btn-soft" onclick="go('wholeness')">Продолжить →</button>
+  </div>
+</section>
 
 </main>`;
 }
@@ -640,339 +750,249 @@ return `
 function path(){
 return `
 <main class="page">
-  <p class="eyebrow">Твой путь многомерности</p>
-  <h1>Путь раскрывается<br>в твоём ритме.</h1>
-  <p class="lead">Здесь нет правильной скорости. Это не лестница вверх — это пространство, которое постепенно раскрывается вокруг тебя.</p>
 
-  <section class="section">
+<div class="brand">
+  <div class="brand-name">к Женщине</div>
+  <div class="brand-sub">ЖЕНЩИНА ЖЕНЩИНЕ — ДОМ</div>
+</div>
 
-    <div class="card path-card" onclick="navigate('wholeness')">
-      <div class="number">01</div>
-      <div>
-        <h3>Твоя целостность</h3>
-        <p>Приведи себя в целостность и собери все части воедино.</p>
-        <span class="status">Открыто для тебя</span>
-      </div>
-    </div>
+<div class="path-intro">
+  <div class="kicker">Твой путь</div>
+  <h1>ТВОЙ ПУТЬ<br>МНОГОМЕРНОСТИ</h1>
+</div>
 
-    <div class="card path-card">
-      <div class="number">02</div>
-      <div>
-        <h3>Наполнение</h3>
-        <p>Женщина приходит в изобилие, когда она наполнена.</p>
-        <span class="status">Живое пространство клуба</span>
-      </div>
-    </div>
+<div class="path-block">
+  <div class="path-number">01</div>
+  <h2>ТВОЯ ЦЕЛОСТНОСТЬ</h2>
+  <p>Приведи себя в целостность и собери все части воедино.</p>
+</div>
 
-    <div class="card path-card">
-      <div class="number">03</div>
-      <div>
-        <h3>Раскрытие многомерного объёма</h3>
-        <p>Шесть живых встреч с Мастером многомерности. Их можно проходить в любом порядке.</p>
+<div class="path-block">
+  <div class="path-number">02</div>
+  <h2>НАПОЛНЕНИЕ</h2>
+  <p>Женщина приходит в изобилие, когда она наполнена.</p>
+</div>
 
-        <div class="doors">
-          <div class="door"><b>01</b><span>Основы</span></div>
-          <div class="door"><b>02</b><span>Целостность</span></div>
-          <div class="door"><b>03</b><span>Опора и объём</span></div>
-          <div class="door"><b>04</b><span>Источник и коллективное поле</span></div>
-          <div class="door"><b>05</b><span>Безусловная любовь и принятие</span></div>
-          <div class="door"><b>06</b><span>Исходный код</span></div>
-        </div>
-      </div>
-    </div>
+<div class="path-block">
+  <div class="path-number">03</div>
+  <h2>РАСКРЫТИЕ МНОГОМЕРНОГО ОБЪЁМА</h2>
 
-    <div class="card path-card">
-      <div class="number">04</div>
-      <div>
-        <h3>Проявление многомерности</h3>
-        <p>Создавать свою реальность, вести и передавать дальше.</p>
-        <span class="status">Путь Мастера · Путь Партнёра</span>
-      </div>
-    </div>
+  <div class="portal">
+    <i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
 
-  </section>
+  <p>
+    01 ОСНОВЫ<br><br>
+    02 ЦЕЛОСТНОСТЬ<br><br>
+    03 ОПОРА И ОБЪЁМ<br><br>
+    04 ИСТОЧНИК И КОЛЛЕКТИВНОЕ ПОЛЕ<br><br>
+    05 БЕЗУСЛОВНАЯ ЛЮБОВЬ И ПРИНЯТИЕ<br><br>
+    06 ИСХОДНЫЙ КОД
+  </p>
+</div>
+
+<div class="path-block">
+  <div class="path-number">04</div>
+  <h2>ПРОЯВЛЕНИЕ МНОГОМЕРНОСТИ</h2>
+</div>
+
 </main>`;
 }
+
+const events=[
+["20","СЕНТЯБРЯ","ОСНОВЫ","Москва · с Варварой Вебер","Первая грань. Точка опоры. Начало пути в многомерность."],
+["27","СЕНТЯБРЯ","ЦЕЛОСТНОСТЬ","Санкт-Петербург · с Варварой Вебер","Соединение всех частей. Возвращение к себе."],
+["4","ОКТЯБРЯ","ОПОРА И ОБЪЁМ","Москва · с Варварой Вебер","Внутренний стержень. Расширение возможностей."],
+["11","ОКТЯБРЯ","ИСТОЧНИК И ПОЛЕ","Москва · с Варварой Вебер","Соединение с потоком. Ты и мир."]
+];
 
 function meetings(){
 return `
 <main class="page">
-  <p class="eyebrow">Живые встречи</p>
-  <h1>Раскрытие<br>многомерного объёма</h1>
-  <p class="lead">Шесть самостоятельных дверей. Можно начинать с той встречи, которая доступна тебе сейчас.</p>
 
-  <section class="section">
-    <div class="card gold-card">
-      <div class="card-kicker">Москва · ближайшая встреча</div>
-      <div class="meeting-date">20 сентября</div>
-      <h3>Основы</h3>
-      <p>Встреча с Мастером многомерности</p>
+<div class="brand">
+  <div class="brand-name">к Женщине</div>
+  <div class="brand-sub">ЖЕНЩИНА ЖЕНЩИНЕ — ДОМ</div>
+</div>
 
-      <div class="person">
-        <div class="avatar">В</div>
-        <div>
-          <strong>Варвара Вебер</strong>
-          <div class="small">Мастер многомерности</div>
-        </div>
+<div class="kicker">Встречи</div>
+<h1>ПРОСТРАНСТВА,<br>КОТОРЫЕ РАСКРЫВАЮТ ТЕБЯ</h1>
+
+<div class="tabs">
+  <button class="tab ${meetingTab==="upcoming"?"active":""}" onclick="meetingTab='upcoming';render()">БЛИЖАЙШИЕ</button>
+  <button class="tab ${meetingTab==="all"?"active":""}" onclick="meetingTab='all';render()">ВСЕ ВСТРЕЧИ</button>
+  <button class="tab ${meetingTab==="mine"?"active":""}" onclick="meetingTab='mine';render()">МОИ ВСТРЕЧИ</button>
+</div>
+
+${meetingTab==="mine" ? `
+  <div class="card">
+    <div class="label">МОИ ВСТРЕЧИ</div>
+    <p>Здесь появятся встречи, которые ты выбрала.</p>
+  </div>
+` : events.map(e=>`
+  <section class="card event" style="margin-bottom:12px">
+    <div class="date">
+      <b>${e[0]}</b>
+      <span>${e[1]}</span>
+    </div>
+
+    <div>
+      <div class="event-photo"></div>
+      <h3>${e[2]}</h3>
+      <div class="event-info">${e[3]}</div>
+      <p class="event-desc">${e[4]}</p>
+
+      <div class="event-bottom">
+        <div class="price">5 555 ₽</div>
+        <button class="btn">Занять место →</button>
       </div>
-
-      <div class="price">5 555 ₽</div>
-      <button class="btn" onclick="navigate('meetingDetail')">Занять место</button>
-    </div>
-
-    <div class="card">
-      <div class="card-kicker">Все 6 встреч · Москва</div>
-      <h3>Вся серия</h3>
-      <div class="price">25 000 ₽</div>
-      <p>Отдельно: 33 330 ₽. Встречи можно проходить в любом порядке в рамках городской серии.</p>
-      <button class="btn btn-soft">Выбрать пакет</button>
     </div>
   </section>
+`).join("")}
 
-  <section class="section">
-    <div class="section-label">Шесть встреч</div>
-    <div class="doors">
-      <div class="door"><b>01</b><span>Основы</span></div>
-      <div class="door"><b>02</b><span>Целостность</span></div>
-      <div class="door"><b>03</b><span>Опора и объём</span></div>
-      <div class="door"><b>04</b><span>Источник и коллективное поле</span></div>
-      <div class="door"><b>05</b><span>Безусловная любовь и принятие</span></div>
-      <div class="door"><b>06</b><span>Исходный код</span></div>
-    </div>
-  </section>
 </main>`;
 }
 
-function me(){
+function about(){
 return `
 <main class="page">
-  <section class="profile">
-    <div class="avatar">А</div>
-    <p class="eyebrow">Я</p>
-    <h1>Анна</h1>
-    <p class="lead" style="margin-left:auto;margin-right:auto">Здесь собирается то, что ты сама рассказала о себе и реально прожила в пространстве.</p>
-  </section>
 
-  <section class="section">
+<div class="profile-head">
+  <div class="kicker">Обо мне</div>
+  <h1>Я РАСКРЫВАЮСЬ.<br>Я МЕНЯЮСЬ.<br>Я ОСТАЮСЬ СОБОЙ.</h1>
+
+  <div class="profile-row">
+    <div class="profile-avatar">В</div>
+    <div>
+      <h2>Варвара</h2>
+      <p class="sub">В пространстве<br>с сентября 2026</p>
+    </div>
+  </div>
+
+  <div class="quote">
+    «Больше, чем я думала.<br>
+    Ближе, чем казалось»
+  </div>
+
+  <button class="btn btn-soft">Редактировать →</button>
+</div>
+
+<section class="section">
+  <div class="section-title">КАК Я ВИЖУ СЕБЯ СЕГОДНЯ</div>
+
+  <div class="card">
+    <div class="about-copy">
+      Я женщина, которая создаёт, вдохновляет и объединяет.
+      Мама. Предприниматель. Исследователь.
+      Стремлюсь к гармонии, свободе и жизни в потоке.
+      Открыта новому и верю в большие возможности.
+    </div>
+
+    <p>Обновлено: 17 сентября 2026</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">МОИ ГРАНИ</div>
+  <h2>Я МОГУ БЫТЬ РАЗНОЙ</h2>
+
+  <div class="facets">
+    ${[
+      ["♀","Женщина"],
+      ["○","Мама"],
+      ["◇","Предприниматель"],
+      ["✧","Творец"],
+      ["⌁","Путешественница"],
+      ["∞","Партнёр"],
+      ["◎","Исследователь"],
+      ["+","Добавить грань"]
+    ].map(x=>`
+      <div class="facet">
+        <div class="facet-icon">${x[0]}</div>
+        ${x[1]}
+      </div>
+    `).join("")}
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">МОЁ ПРОСТРАНСТВО СЕЙЧАС</div>
+
+  <div class="two">
+    <div class="card gold">
+      <div class="label">Я В КЛУБЕ</div>
+      <h3 style="margin-top:7px">ДО 8 ОКТЯБРЯ</h3>
+      <p>Перейти →</p>
+    </div>
+
     <div class="card">
-      <div class="list-row">
-        <div>
-          <div class="card-kicker">Мой путь</div>
-          <h3>Твоя целостность</h3>
-        </div>
-        <span>›</span>
-      </div>
-
-      <div class="list-row">
-        <div>
-          <div class="card-kicker">Мои встречи</div>
-          <h3>История встреч</h3>
-        </div>
-        <span>›</span>
-      </div>
-
-      <div class="list-row">
-        <div>
-          <div class="card-kicker">Моё наполнение</div>
-          <h3>Клуб «к Женщине»</h3>
-        </div>
-        <span>›</span>
-      </div>
+      <div class="label">Я В</div>
+      <h3 style="margin-top:7px">МНОГОМЕРНОСТИ</h3>
+      <p>Текущий ритуал:<br>22 сентября</p>
+      <p>Перейти →</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="section">
-    <div class="card gold-card">
-      <div class="card-kicker">Пространство</div>
-      <h3>Ты здесь с сентября 2026</h3>
-      <p>Твой путь и история остаются с тобой независимо от текущих доступов.</p>
-    </div>
-  </section>
 </main>`;
 }
 
-function pairRitual(){
+function ritual(){
 return `
 <main class="page">
-  <button class="back" onclick="back()">←</button>
-  <p class="eyebrow">Ритуал пары</p>
-  <h1>Я вижу и признаю<br>твой объём</h1>
+<button class="back" onclick="back()">←</button>
 
-  <div class="card gold-card section">
+<div class="kicker">Текущий цикл</div>
+<h1>Я ВИЖУ И ПРИЗНАЮ<br>ТВОЙ ОБЪЁМ</h1>
+
+<section class="section">
+  <div class="card gold">
+    <div class="label">ТВОЯ ПАРА</div>
+
     <div class="person">
       <div class="avatar">М</div>
-      <div>
-        <strong>Мария</strong>
-        <div class="small">твоя пара на эти две недели</div>
-      </div>
+      <strong>Мария</strong>
     </div>
-    <p>Другая женщина не определяет тебя. Через встречу с другой женщиной ты можешь увидеть больше собственного объёма.</p>
+
+    <p>На эти две недели ты в паре с Марией.</p>
   </div>
+</section>
 
-  <section class="section">
-    <div class="section-label">Система ритуалов</div>
-    <div class="ritual-list">
-      <span class="pill">Я хочу</span>
-      <span class="pill">Я говорю ДА</span>
-      <span class="pill">Я принимаю</span>
-      <span class="pill">Я вижу и признаю твой объём</span>
-      <span class="pill">Я проявляю свою грань</span>
-      <span class="pill">Я воплощаю</span>
-      <span class="pill">Я признаю созданное мной</span>
-      <span class="pill">Мне есть чем поделиться</span>
-    </div>
-  </section>
-
-  <div class="section quote">
-    Ритуалы работают на твою целостность и многомерность.
-  </div>
-</main>`;
-}
-
-function visibility(){
-const qs=[
-"Кто ты?",
-"Что сейчас живёт в тебе?",
-"Что ты умеешь и создаёшь?",
-"Что тебя наполняет?",
-"С чем ты пришла в это пространство?",
-"Что ты можешь дать другой женщине?",
-"Что тебе самой сейчас хочется получить?"
-];
-
-return `
-<main class="page">
-  <button class="back" onclick="back()">←</button>
-  <p class="eyebrow">Культурная практика пространства</p>
-  <h1>Ритуал<br>видимости</h1>
-
-  <p class="lead">«к Женщине» начинается с того, что мы видим друг друга.</p>
-
-  <div class="card section">
-    <p>Ритуал видимости помогает сделать шаг из невидимости в проявленность: показать себя настолько, насколько тебе сейчас комфортно, и получить живой отклик другой женщины.</p>
-  </div>
-
-  <section class="section">
-    <div class="section-label">Как пройти ритуал</div>
-    <div class="questions">
-      ${qs.map(q=>`<div class="question"><span>${q}</span></div>`).join("")}
-    </div>
-  </section>
-
-  <button class="btn">Пройти ритуал в Telegram</button>
-</main>`;
-}
-
-function collabs(){
-return `
-<main class="page">
-  <button class="back" onclick="back()">←</button>
-  <p class="eyebrow">Клуб · Коллаборации и партнёрства</p>
-  <h1>Какие ресурсы<br>тебе нужны для роста?</h1>
-
-  <section class="section">
-    <div class="card gold-card">
-      <div class="card-kicker">Авторская серия Варвары</div>
-      <h3>Как создавать изобильную реальность вокруг себя</h3>
-
-      <div class="divider"></div>
-      <p>01 · Как получать подарки от пространства</p>
-      <p>02 · Как получать подарки от мужчин</p>
-      <p>03 · Как притягивать нужные ресурсы в любом объёме</p>
-      <p>04 · Нюансы создания желаемой реальности</p>
-    </div>
-
-    <div class="card">
-      <div class="card-kicker">Следующее действие</div>
-      <h3>Создать коллаборацию</h3>
-      <p>Определи нужный ресурс, найди женщину с подходящей возможностью и выйди на конкретную договорённость.</p>
-      <button class="btn">Перейти к визиткам в Telegram</button>
-    </div>
-
-    <div class="card">
-      <div class="card-kicker">День коллабораций</div>
-      <h3>Результат — состоявшаяся договорённость</h3>
-      <p>Не количество опубликованных визиток, а то, что женщины реально создали вместе.</p>
-    </div>
-  </section>
 </main>`;
 }
 
 function wholeness(){
 return `
 <main class="page">
-  <button class="back" onclick="back()">←</button>
-  <p class="eyebrow">Твой первый этап многомерности</p>
-  <h1>Твоя<br>целостность</h1>
-  <p class="lead">Приведи себя в целостность и собери все части воедино.</p>
+<button class="back" onclick="back()">←</button>
 
-  <div class="hero section">
-    <div class="hero-copy">
-      <div class="card-kicker">Открыто для тебя</div>
-      <h2>Ты можешь возвращаться сюда в своём ритме.</h2>
-    </div>
+<div class="kicker">Твой первый этап многомерности</div>
+<h1>ТВОЯ<br>ЦЕЛОСТНОСТЬ</h1>
+
+<section class="section">
+  <div class="card gold">
+    <div class="label">ПРОГРАММА ДОСТУПНА</div>
+    <h2 style="margin-top:9px">Приведи себя в целостность и собери все части воедино</h2>
+    <button class="btn">Продолжить →</button>
   </div>
+</section>
 
-  <div class="card section">
-    <h3>Это пространство остаётся частью твоего пути.</h3>
-    <p>Здесь нет процентов прохождения и обязательной скорости. Ты сама выбираешь, когда возвращаться к материалам.</p>
-    <button class="btn">Открыть материалы в Telegram</button>
-  </div>
-</main>`;
-}
-
-function meetingDetail(){
-return `
-<main class="page">
-  <button class="back" onclick="back()">←</button>
-  <p class="eyebrow">Москва · 20 сентября</p>
-  <h1>Основы</h1>
-
-  <div class="card gold-card section">
-    <div class="card-kicker">Встреча с Мастером многомерности</div>
-
-    <div class="person">
-      <div class="avatar">В</div>
-      <div>
-        <strong>Варвара Вебер</strong>
-        <div class="small">Мастер многомерности</div>
-      </div>
-    </div>
-
-    <p>Теория о природе женщины, женских энергиях и ежедневных блоках. Затем — практика очищения и разблокировки на уровне тела.</p>
-
-    <div class="divider"></div>
-    <p><strong>Формат:</strong> около 2 часов встречи с Мастером и женский круг после встречи. Участие в круге добровольное.</p>
-
-    <div class="price">5 555 ₽</div>
-    <button class="btn">Занять место</button>
-  </div>
-
-  <div class="card section">
-    <div class="card-kicker">Подарок после встречи</div>
-    <h3>7 дней клуба «к Женщине»</h3>
-    <p>Доступ открывается после фактического участия во встрече.</p>
-  </div>
 </main>`;
 }
 
 function render(){
   let html="";
 
-  switch(current){
-    case "space": html=space(); break;
-    case "path": html=path(); break;
-    case "meetings": html=meetings(); break;
-    case "me": html=me(); break;
-    case "pairRitual": html=pairRitual(); break;
-    case "visibility": html=visibility(); break;
-    case "collabs": html=collabs(); break;
-    case "wholeness": html=wholeness(); break;
-    case "meetingDetail": html=meetingDetail(); break;
-    default: current="space"; html=space();
-  }
+  if(current==="home") html=home();
+  else if(current==="space") html=space();
+  else if(current==="path") html=path();
+  else if(current==="meetings") html=meetings();
+  else if(current==="about") html=about();
+  else if(current==="ritual") html=ritual();
+  else if(current==="wholeness") html=wholeness();
+  else html=home();
 
-  app.innerHTML=html+nav();
+  app.innerHTML=html+navigation();
 }
 
 render();
