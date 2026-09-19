@@ -37,7 +37,7 @@ module.exports = async function handler(req, res) {
         reply_markup: {
           inline_keyboard: [[{
             text: "\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435",
-            web_app: {url: appUrl}
+            web_app: {url: `${appUrl.replace(/\/$/, "")}/welcome-personal-telegram-ready.html`}
           }]]
         }
       });
