@@ -100,17 +100,47 @@ img{display:block;max-width:100%}a{color:inherit}.shell{width:min(100%,760px);mi
   </section>
 </main>
 
+
+
+
 <script>
 (function () {
   var tg = window.Telegram && window.Telegram.WebApp;
   var nameNode = document.getElementById("telegram-first-name");
-  if (!tg || !nameNode) return;
+
+  function showDiagnostic(text) {
+    var box = document.createElement("div");
+    box.id = "telegram-diagnostic";
+    box.textContent = text;
+    box.style.position = "fixed";
+    box.style.left = "10px";
+    box.style.right = "10px";
+    box.style.bottom = "10px";
+    box.style.zIndex = "2147483647";
+    box.style.padding = "10px 12px";
+    box.style.borderRadius = "10px";
+    box.style.background = "rgba(0,0,0,.82)";
+    box.style.color = "#fff";
+    box.style.font = "12px/1.4 monospace";
+    box.style.textAlign = "left";
+    box.style.wordBreak = "break-word";
+    box.style.pointerEvents = "none";
+    document.body.appendChild(box);
+  }
+
+  if (!tg) {
+    showDiagnostic("SDK: NO | INITDATA: NO | AUTH: NOT SENT | FIRST_NAME: NO");
+    return;
+  }
 
   tg.ready();
   tg.expand();
 
   var initData = tg.initData || "";
-  if (!initData) return;
+  if (!initData) {
+    showDiagnostic("SDK: YES | INITDATA: NO | AUTH: NOT SENT | FIRST_NAME: NO");
+    return;
+  }
 
   fetch("/api/auth/telegram", {
     method: "POST",
@@ -118,18 +148,27 @@ img{display:block;max-width:100%}a{color:inherit}.shell{width:min(100%,760px);mi
     body: JSON.stringify({initData: initData})
   })
   .then(function (response) {
-    if (!response.ok) throw new Error("telegram_auth_failed");
-    return response.json();
-  })
-  .then(function (data) {
-    var firstName =
-      (data && data.first_name) ||
-      (data && data.user && data.user.first_name) ||
-      "";
-    if (firstName) nameNode.textContent = firstName + ",";
+    var status = response.status;
+    return response.json()
+      .catch(function () { return {}; })
+      .then(function (data) {
+        var firstName =
+          (data && data.first_name) ||
+          (data && data.user && data.user.first_name) ||
+          "";
+
+        if (response.ok && firstName && nameNode) {
+          nameNode.textContent = firstName + ",";
+        }
+
+        showDiagnostic(
+          "SDK: YES | INITDATA: YES | AUTH: " + status +
+          " | FIRST_NAME: " + (firstName ? "YES" : "NO")
+        );
+      });
   })
   .catch(function () {
-    /* Безопасный fallback: утвержденный текст страницы остается без изменений. */
+    showDiagnostic("SDK: YES | INITDATA: YES | AUTH: NETWORK ERROR | FIRST_NAME: NO");
   });
 })();
 </script>
