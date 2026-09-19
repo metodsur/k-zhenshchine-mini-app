@@ -1,0 +1,14 @@
+Загрузить в корень GitHub с сохранением папок:
+api/auth/telegram.js
+api/telegram/webhook.js
+api/telegram/setup.js
+
+Не изменяет HTML/CSS/фотографии.
+
+После загрузки в Vercel добавить Production Environment Variables:
+TELEGRAM_WEBHOOK_SECRET = новый случайный секрет
+TELEGRAM_SETUP_SECRET = другой новый случайный секрет
+APP_BASE_URL = https://k-zhenshchine-mini-app.vercel.app
+
+TELEGRAM_BOT_TOKEN уже должен оставаться существующим Secret.
+Никакие значения секретов не присылать в чат.

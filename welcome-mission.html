@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Наша миссия — к Женщине</title>
+<style>:root{--ink:#303438;--muted:#6f777c;--gold:#b77a2b;--paper:#fbfaf7;--radius:30px}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);font-family:"Helvetica Neue",Arial,sans-serif;font-weight:300;background:radial-gradient(circle at 94% 4%,rgba(226,194,137,.2),transparent 340px),linear-gradient(180deg,#fbfdfe,#f3f8f9)}
+
+img{display:block;max-width:100%}
+a{color:inherit}
+.shell{width:min(100%,760px);min-height:100vh;margin:auto;padding:18px 18px 54px}
+.brand{text-align:center;margin:10px 0 22px}
+.brand strong{display:block;font-size:clamp(2rem,8vw,3.7rem);line-height:1;font-weight:200;letter-spacing:.12em;text-transform:uppercase}
+.brand span{display:block;margin-top:10px;font-size:.76rem;letter-spacing:.28em;text-transform:uppercase;color:#5d6569}
+
+.hero{position:relative;min-height:600px;border-radius:34px;overflow:hidden;background:#eaf0f2;box-shadow:0 20px 55px rgba(76,87,92,.12)}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(251,253,254,.06),rgba(251,253,254,.04) 42%,rgba(251,253,254,.88) 78%,rgba(251,253,254,.98))}
+.hero-copy{position:absolute;z-index:2;left:28px;right:28px;bottom:28px;text-align:center}
+.hero-copy h1{margin:0;font-size:clamp(2.35rem,8vw,4rem);line-height:1.03;font-weight:200;letter-spacing:.02em}
+.hero-copy p{max-width:560px;margin:18px auto 25px;font-size:1.02rem;line-height:1.6;color:#535b60}
+
+.surface{border:1px solid rgba(255,255,255,.9);border-radius:var(--radius);background:rgba(255,255,255,.82);box-shadow:0 14px 38px rgba(74,85,90,.09);backdrop-filter:blur(15px)}
+.section{margin-top:18px;padding:26px}
+.eyebrow{font-size:.76rem;line-height:1.4;letter-spacing:.22em;text-transform:uppercase;color:#81898d}
+.title{margin:7px 0 14px;font-size:clamp(1.65rem,5vw,2.6rem);line-height:1.04;font-weight:250}
+.body{margin:0;font-size:1rem;line-height:1.65;color:#555e63}
+.gold-button{position:relative;overflow:hidden;min-height:58px;padding:0 24px;border:1px solid rgba(255,235,186,.85);border-radius:999px;color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:18px;background:linear-gradient(125deg,#8f5818 0%,#c38831 22%,#f1d083 43%,#b87321 62%,#d5a14b 79%,#925818 100%);box-shadow:0 10px 26px rgba(128,78,20,.26),inset 0 1px 0 rgba(255,248,218,.84);font-size:1rem;letter-spacing:.04em}
+.gold-button:before{content:"";position:absolute;inset:-55% auto -55% 24%;width:10%;transform:rotate(16deg);background:linear-gradient(90deg,transparent,rgba(255,255,247,.9),transparent);filter:blur(1px)}
+.gold-button b{font-size:1.5rem;font-weight:200}
+.hero .gold-button{max-width:520px;margin:auto}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;margin:0 4px 15px}
+.back{width:45px;height:45px;border:1px solid rgba(190,154,94,.34);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.75);text-decoration:none;font-size:1.7rem;color:#a46d22}
+.step{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:#858d91}
+
+.video{position:relative;min-height:310px;overflow:hidden;border-radius:27px;background:#ddd}
+.video img{width:100%;height:310px;object-fit:cover;object-position:center 34%}
+.video:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(28,31,32,.55))}
+.play{position:absolute;z-index:2;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.9);border-radius:50%;display:grid;place-items:center;background:rgba(105,67,23,.45);color:#fff;font-size:1.6rem}
+.video-label{position:absolute;z-index:2;left:22px;bottom:19px;color:#fff;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+
+.mission{text-align:center}
+.mission .title{font-size:clamp(2rem,7vw,3.4rem)}
+.mission .eyebrow{color:#a06c2a}
+.mission .gold-button{max-width:530px;margin:24px auto 0}
+
+.welcome-name{text-align:left}
+.welcome-name h1{font-size:clamp(2.5rem,9vw,4.7rem);font-weight:200;line-height:.98;margin:0 0 8px}
+.welcome-name h1 em{display:block;color:#a56e26;font-family:Georgia,serif;font-weight:400}
+.welcome-name .body{max-width:390px}
+.ecosystem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0}
+.benefit{text-align:center}
+.benefit .orb{width:68px;height:68px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 32% 24%,#fff 0 22%,#faf6ed 58%,#eee5d7);box-shadow:0 8px 22px rgba(94,72,40,.13);color:#ad7325;font-size:1.55rem}
+.benefit span{font-size:.76rem;line-height:1.25;text-transform:uppercase;letter-spacing:.04em}
+
+.overview-hero{position:relative;min-height:520px;border-radius:34px;overflow:hidden}
+.overview-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.overview-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(251,253,254,.96),rgba(251,253,254,.82) 46%,rgba(251,253,254,.1) 78%)}
+.overview-copy{position:relative;z-index:2;width:55%;padding:42px 30px}
+.overview-copy h1{margin:8px 0 18px;font-size:clamp(2rem,6vw,3rem);font-weight:200;line-height:1.08}
+.overview-copy h1 span{display:block;margin:12px 0}
+.overview-copy p{font-size:.98rem;line-height:1.55}
+
+.ritual-list{display:grid;gap:14px;margin-top:18px}
+.ritual-card{display:grid;grid-template-columns:150px 1fr;overflow:hidden;text-decoration:none}
+.ritual-card>img{width:100%;height:100%;object-fit:cover}
+.ritual-card-copy{padding:22px}
+.ritual-card h2{margin:0 0 6px;font-size:1.45rem;font-weight:300}
+.ritual-card .tagline{margin:0 0 16px;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#7d8589}
+.mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.mini{padding:13px;border-radius:18px;background:rgba(249,247,241,.76)}
+.mini b{display:block;margin-bottom:5px;font-weight:400}
+.mini span{font-size:.78rem;line-height:1.35;color:#687075}
+
+.visibility-hero{position:relative;min-height:560px;border-radius:34px;overflow:hidden;background:#e8eff1}
+.visibility-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.visibility-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(251,253,254,.98),rgba(251,253,254,.86) 48%,rgba(251,253,254,.06) 74%)}
+.visibility-copy{position:relative;z-index:2;width:55%;padding:36px 30px}
+.visibility-copy h1{margin:12px 0 17px;font-size:clamp(2rem,6vw,3.1rem);font-weight:200}
+.visibility-copy p{font-size:1rem;line-height:1.55}
+.icon-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:22px}
+.icon-item{text-align:center}
+.icon-item i{width:58px;height:58px;margin:0 auto 9px;border-radius:50%;display:grid;place-items:center;background:#fff9f0;color:#ad7325;box-shadow:0 7px 18px rgba(93,70,37,.11);font-style:normal;font-size:1.45rem}
+.icon-item span{font-size:.69rem;line-height:1.25;text-transform:uppercase}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.flow-item{text-align:center;padding:16px 10px}
+.flow-item b{display:block;color:#ac7124;font-size:1.4rem;font-weight:300}
+.flow-item p{margin:8px 0 0;font-size:.82rem;line-height:1.35}
+.questions{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch}
+.questions ol{margin:0;padding:0;list-style:none;counter-reset:q}
+.questions li{counter-increment:q;display:flex;gap:12px;margin:0 0 10px;line-height:1.45}
+.questions li:before{content:counter(q);flex:0 0 28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#fff6e8;color:#a96e23}
+.questions img{width:100%;height:100%;min-height:250px;object-fit:cover;border-radius:22px}
+
+.footer-note{text-align:center;margin:20px 0 0;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:#8b9295}
+
+.welcome-page{background:#e9d6bc}
+.welcome-shell{position:relative;width:min(100%,760px);height:100svh;min-height:690px;margin:auto;overflow:hidden;background:#d9c0a0}
+.welcome-full{position:absolute;inset:0}
+.welcome-full>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center bottom}
+.welcome-full:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,transparent 51%,rgba(250,246,239,.02) 64%,rgba(250,246,239,.94) 100%)}
+.welcome-brand{position:absolute;z-index:2;top:max(28px,env(safe-area-inset-top));left:22px;right:22px;margin:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;text-shadow:0 2px 16px rgba(63,38,17,.72),0 1px 3px rgba(45,27,12,.88)}
+.welcome-brand strong{font-size:clamp(2rem,7vw,3.2rem);color:#fff;letter-spacing:.13em}
+.welcome-brand span{color:rgba(255,255,255,.96);font-weight:400;text-shadow:0 2px 12px rgba(56,33,14,.82),0 1px 2px rgba(41,24,10,.9)}
+.welcome-copy{position:absolute;z-index:2;left:24px;right:24px;bottom:max(24px,env(safe-area-inset-bottom));text-align:center}
+.welcome-copy h1{margin:0;font-size:clamp(1.95rem,6.4vw,3.05rem);line-height:1.08;font-weight:200;letter-spacing:.015em}
+.welcome-copy .heart{display:inline-block;margin-left:.08em;color:#ad7428;font-family:Georgia,serif;font-size:.78em;font-weight:400;transform:translateY(-.03em)}
+.welcome-copy .welcome-lines{display:flex;flex-direction:column;gap:1px;max-width:540px;margin:16px auto 22px;font-size:.82rem;line-height:1.58;letter-spacing:.055em;color:#555c60}
+.welcome-copy .welcome-lines span{display:block}
+.welcome-copy .gold-button{max-width:520px;margin:auto}
+
+@media(max-width:620px){.shell{padding:12px 12px 38px}
+.brand{margin-bottom:16px}
+.hero{min-height:680px}
+.hero-copy{left:18px;right:18px;bottom:18px}
+.hero-copy p{font-size:.94rem}
+.section{padding:21px 18px}
+.overview-hero,.visibility-hero{min-height:660px}
+.overview-copy,.visibility-copy{width:67%;padding:30px 20px}
+.ritual-card{grid-template-columns:108px 1fr}
+.ritual-card-copy{padding:18px 15px}
+.icon-row{grid-template-columns:repeat(3,1fr)}
+.flow{grid-template-columns:repeat(2,1fr)}
+.questions{grid-template-columns:1fr}
+.ecosystem-grid{gap:8px}
+.benefit .orb{width:60px;height:60px}
+.benefit span{font-size:.65rem}
+}
+
+@media(max-width:420px){.hero{min-height:650px}
+.overview-copy,.visibility-copy{width:74%}
+.overview-copy p,.visibility-copy p{font-size:.9rem}
+.ritual-card{grid-template-columns:1fr}
+.ritual-card>img{height:190px}
+.mini-grid{grid-template-columns:1fr}
+.gold-button{font-size:.88rem}
+.questions img{min-height:190px}
+}
+
+@media(max-width:420px){.welcome-shell{min-height:640px}
+.welcome-brand{top:max(22px,env(safe-area-inset-top));left:14px;right:14px;padding:0}
+.welcome-brand strong{font-size:1.9rem}
+.welcome-brand span{margin-top:7px;font-size:.62rem}
+.welcome-copy{left:18px;right:18px;bottom:max(18px,env(safe-area-inset-bottom))}
+.welcome-copy h1{font-size:2.02rem}
+.welcome-copy .welcome-lines{font-size:.74rem;line-height:1.55;margin:13px auto 18px;letter-spacing:.045em}
+.welcome-copy .gold-button{min-height:54px}
+}
+
+/* Keep the welcome copy entirely below the woman's dress */
+.welcome-copy{bottom:max(4px,env(safe-area-inset-bottom))}
+.welcome-copy .welcome-lines{margin:8px auto 12px}
+.welcome-copy .gold-button{min-height:52px}
+@media(max-width:420px){
+.welcome-copy{bottom:max(2px,env(safe-area-inset-bottom))}
+.welcome-copy .welcome-lines{margin:7px auto 10px}
+.welcome-copy .gold-button{min-height:50px}
+}
+
+/* Refined spacing and scale for the lower welcome copy */
+.welcome-copy .welcome-lines{gap:3px;margin:19px auto 27px;font-size:.7rem;line-height:1.55;letter-spacing:.065em}
+.welcome-copy .gold-button{width:min(100%,450px);min-height:47px;padding:0 20px;font-size:.86rem}
+@media(max-width:420px){
+.welcome-copy .welcome-lines{gap:3px;margin:16px auto 23px;font-size:.64rem;line-height:1.55;letter-spacing:.055em}
+.welcome-copy .gold-button{width:min(100%,315px);min-height:44px;padding:0 17px;font-size:.78rem}
+.welcome-copy .gold-button b{font-size:1.25rem}
+}
+
+/* Final airy scale and elevated CTA for the welcome screen */
+.welcome-copy{bottom:calc(58px + env(safe-area-inset-bottom))}
+.welcome-copy h1{font-size:clamp(1.55rem,5vw,2.45rem);line-height:1.12}
+.welcome-copy .heart{font-size:.72em}
+.welcome-copy .welcome-lines{gap:4px;margin:20px auto 26px;font-size:.62rem;line-height:1.58;letter-spacing:.07em}
+.welcome-copy .gold-button{width:min(100%,400px);min-height:44px;font-size:.78rem}
+@media(max-width:420px){
+.welcome-copy{bottom:calc(42px + env(safe-area-inset-bottom))}
+.welcome-copy h1{font-size:1.68rem;line-height:1.13}
+.welcome-copy .welcome-lines{gap:4px;margin:18px auto 24px;font-size:.58rem;line-height:1.6;letter-spacing:.065em}
+.welcome-copy .gold-button{width:min(100%,280px);min-height:42px;font-size:.7rem}
+}
+
+/* 2026 onboarding system — aligned with the approved white-and-gold pages */
+.onboarding-page{padding-top:max(18px,env(safe-area-inset-top));padding-bottom:48px}
+.onboarding-page .topbar{margin-bottom:18px}
+.compact-brand{text-align:center;margin:0 0 20px}
+.compact-brand strong{display:block;font-size:clamp(1.65rem,5.5vw,2.45rem);font-weight:250;line-height:1;letter-spacing:.14em;text-transform:uppercase}
+.compact-brand span{display:block;margin-top:9px;font-size:.66rem;letter-spacing:.25em;text-transform:uppercase;color:#777f83}
+.editorial-card{margin-top:16px;padding:28px;border:1px solid rgba(255,255,255,.95);border-radius:30px;background:rgba(255,255,255,.86);box-shadow:0 14px 38px rgba(74,85,90,.08);backdrop-filter:blur(16px)}
+.editorial-card h1,.editorial-card h2{margin:8px 0 14px;font-weight:250;line-height:1.08;letter-spacing:-.025em}
+.editorial-card h1{font-size:clamp(2rem,5.8vw,2.85rem)}
+.editorial-card h2{font-size:clamp(1.65rem,4.5vw,2.25rem)}
+.editorial-card p{max-width:620px;margin:0 0 12px;color:#596166;font-size:.98rem;line-height:1.62}
+.editorial-card .gold-button{margin-top:24px}
+.gold{color:#aa7127}
+
+.video-card{position:relative;display:block;width:100%;height:clamp(300px,55vw,390px);padding:0;border:0;border-radius:30px;overflow:hidden;background:#d9d4cd;box-shadow:0 18px 46px rgba(64,56,44,.15);cursor:pointer;text-align:left}
+.video-card>img{width:100%;height:100%;object-fit:cover;object-position:center 42%;transform:scale(1.02)}
+.video-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(23,25,26,.62))}
+.play-mark{position:absolute;left:50%;top:50%;width:68px;height:68px;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.92);border-radius:50%;display:grid;place-items:center;padding-left:4px;color:white;background:rgba(111,76,35,.48);box-shadow:0 8px 30px rgba(0,0,0,.18);font-size:1.35rem}
+.video-caption,.video-duration{position:absolute;bottom:20px;color:white;font-size:.76rem;letter-spacing:.13em;text-transform:uppercase}
+.video-caption{left:24px}.video-duration{right:24px}
+.mission-card{text-align:left}.mission-card .gold-button{max-width:520px}
+.video-modal[hidden]{display:none}
+.video-modal{position:fixed;z-index:100;inset:0;padding:20px;display:grid;place-items:center;background:rgba(24,28,29,.58);backdrop-filter:blur(14px)}
+.video-dialog{position:relative;width:min(100%,650px);padding:22px;border-radius:30px;background:#fbfaf7;box-shadow:0 28px 80px rgba(0,0,0,.28)}
+.video-close{position:absolute;z-index:2;top:12px;right:12px;width:42px;height:42px;border:0;border-radius:50%;background:rgba(255,255,255,.9);color:#4e5254;font-size:1.65rem;cursor:pointer}
+.player-frame{height:min(50vh,370px);margin-bottom:20px;border-radius:22px;overflow:hidden;background:#1f2224}
+.player-frame img,.player-frame video{width:100%;height:100%;object-fit:cover}
+.video-dialog h2{margin:7px 0 8px;font-size:1.8rem;font-weight:300}.video-dialog p{margin:0 0 18px;color:#626a6e;line-height:1.55}
+.outline-button{display:flex;min-height:50px;align-items:center;justify-content:center;border:1px solid #b88033;border-radius:999px;color:#98621f;cursor:pointer}.outline-button input{position:absolute;width:1px;height:1px;opacity:0}.modal-open{overflow:hidden}
+
+.personal-photo,.ritual-hero-photo,.visibility-photo{position:relative;overflow:hidden;border-radius:30px;background:#e8ecec;box-shadow:0 18px 46px rgba(69,80,84,.11)}
+.personal-photo{height:clamp(330px,58vw,430px)}
+.personal-photo img{width:100%;height:100%;object-fit:cover;object-position:center 48%}
+.personal-greeting{margin-top:-38px;position:relative;z-index:2;width:calc(100% - 32px);margin-left:auto;margin-right:auto}
+.personal-greeting h1 em{display:block;color:#a56e26;font-family:Georgia,serif;font-weight:400;font-style:italic}
+.personal-greeting p{font-size:1.05rem}
+.ecosystem-card{margin-top:18px}
+.benefit-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0 6px}
+.benefit-list div{min-height:114px;padding:16px 10px;border-radius:23px;background:linear-gradient(145deg,#fff,#f7f1e7);box-shadow:0 8px 24px rgba(100,75,40,.1);text-align:center}
+.benefit-list i{width:46px;height:46px;margin:0 auto 9px;border:1px solid rgba(181,124,48,.25);border-radius:50%;display:grid;place-items:center;color:#ac7327;font-size:1.25rem;font-style:normal}
+.benefit-list span{font-size:.76rem;line-height:1.3;text-transform:uppercase;letter-spacing:.045em}
+
+.ritual-hero-photo{height:clamp(380px,68vw,500px)}
+.ritual-hero-photo img{width:100%;height:100%;object-fit:cover;object-position:center 43%}
+.ideology-card{position:relative;z-index:2;width:calc(100% - 32px);margin:-46px auto 0}
+.ideology-card h1{margin-bottom:5px}.manifesto-lines{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:16px;color:#a76d23;font-family:Georgia,serif;font-size:clamp(1.25rem,3.7vw,1.75rem);font-style:italic}
+.path-card{background:linear-gradient(130deg,#95601c,#d89d3d 37%,#f0cf82 52%,#b66f1d 76%,#8d5619);color:#fff}.path-card .eyebrow,.path-card p{color:rgba(255,255,255,.87)}
+.ritual-gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px}
+.photo-story{position:relative;min-height:440px;overflow:hidden;border-radius:30px;color:#fff;text-decoration:none;box-shadow:0 16px 38px rgba(58,66,69,.13)}
+.photo-story img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.photo-story:first-child img{object-position:center 62%}.photo-story:last-child img{object-position:center}
+.photo-story-gradient{position:absolute;inset:0;background:linear-gradient(180deg,transparent 34%,rgba(22,25,26,.76) 100%)}
+.photo-story>div{position:absolute;z-index:2;left:22px;right:22px;bottom:24px}.photo-story small{letter-spacing:.13em;text-transform:uppercase;font-size:.62rem}.photo-story h2{margin:7px 0;font-size:1.55rem;font-weight:300}.photo-story p{margin:0 0 18px;font-size:.86rem;line-height:1.4}.photo-story b{font-size:.8rem;font-weight:400;letter-spacing:.06em}
+
+.visibility-photo{height:clamp(390px,70vw,530px)}
+.visibility-photo img{width:100%;height:100%;object-fit:cover;object-position:center 62%}
+.visibility-intro{position:relative;z-index:2;width:calc(100% - 32px);margin:-46px auto 0}.visibility-intro .lead{color:#a56d25;font-size:1.08rem}
+.ritual-symbols{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.ritual-symbols div{text-align:center;padding:14px 8px;border-radius:20px;background:#fbf7ef}.ritual-symbols i{width:46px;height:46px;margin:0 auto 8px;border-radius:50%;display:grid;place-items:center;background:white;color:#ad7325;box-shadow:0 6px 17px rgba(94,69,34,.1);font-style:normal;font-size:1.25rem}.ritual-symbols span{display:block;font-size:.7rem;line-height:1.25;text-transform:uppercase;letter-spacing:.035em}
+.result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}.result-grid div{padding:17px 10px;border-top:1px solid rgba(177,116,36,.3);text-align:center}.result-grid b{display:block;margin-bottom:8px;color:#ab7127;font-size:1.25rem;font-weight:300}.result-grid span{font-size:.77rem;line-height:1.35}
+.questions-v2{display:grid;grid-template-columns:1.15fr .85fr;gap:20px;align-items:stretch;margin-top:18px}.questions-v2 ol{margin:0;padding:0;list-style:none;counter-reset:q}.questions-v2 li{counter-increment:q;display:flex;align-items:flex-start;gap:11px;margin-bottom:10px;color:#525a5f;line-height:1.42}.questions-v2 li:before{content:counter(q);flex:0 0 27px;height:27px;border-radius:50%;display:grid;place-items:center;background:#fff3df;color:#a96e23}.questions-v2 img{width:100%;height:100%;min-height:300px;border-radius:22px;object-fit:cover;object-position:center}
+
+@media(max-width:620px){
+  .editorial-card{padding:23px 20px}
+  .video-card{height:320px}.video-card>img{object-position:center 40%}
+  .video-caption{left:18px}.video-duration{right:18px}
+  .personal-photo{height:340px}.personal-photo img{object-position:62% center}
+  .ritual-hero-photo{height:420px}.ritual-hero-photo img{object-position:center 40%}
+  .ritual-gallery{grid-template-columns:1fr}.photo-story{min-height:390px}
+  .visibility-photo{height:430px}.visibility-photo img{object-position:center 66%}
+  .result-grid{grid-template-columns:repeat(2,1fr)}
+  .questions-v2{grid-template-columns:1fr}.questions-v2 img{min-height:250px;max-height:330px}
+}
+@media(max-width:420px){
+  .compact-brand strong{font-size:1.55rem}.compact-brand span{font-size:.57rem}
+  .editorial-card h1{font-size:1.85rem}.editorial-card h2{font-size:1.55rem}.editorial-card p{font-size:.91rem}
+  .video-card{height:270px}.play-mark{width:58px;height:58px}.video-caption,.video-duration{font-size:.62rem}
+  .personal-photo{height:300px}.personal-greeting,.ideology-card,.visibility-intro{width:calc(100% - 20px)}
+  .benefit-list{grid-template-columns:1fr}.benefit-list div{min-height:72px;display:flex;align-items:center;text-align:left;gap:12px}.benefit-list i{margin:0}
+  .ritual-hero-photo{height:350px}.manifesto-lines{display:grid}
+  .ritual-symbols{grid-template-columns:repeat(2,1fr)}
+  .visibility-photo{height:350px}
+}
+
+/* Mission screen rebuilt from the approved Earth-and-lights reference */
+.mission-reference-body{margin:0;background:#edf4f7;color:#303438}
+.mission-reference-page{position:relative;width:min(100%,760px);min-height:1350px;margin:0 auto;overflow:hidden;padding:340px 54px 72px}
+.mission-reference-bg{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.mission-reference-page:after{content:"";position:absolute;z-index:0;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 43%,rgba(255,255,255,.05))}
+.mission-reference-topbar{position:absolute;z-index:4;top:max(18px,env(safe-area-inset-top));left:20px;right:20px;display:flex;align-items:center;justify-content:space-between}
+.mission-reference-topbar .step{color:rgba(73,79,82,.72);text-shadow:0 1px 10px rgba(255,255,255,.7)}
+.mission-back{background:rgba(255,255,255,.62);backdrop-filter:blur(8px)}
+.mission-reference-brand{position:absolute;z-index:2;top:56px;left:28px;right:28px;text-align:center}
+.mission-reference-brand strong{display:block;font-size:clamp(2.25rem,7vw,3.35rem);line-height:1;font-weight:200;letter-spacing:.12em;text-transform:uppercase}
+.mission-reference-brand span{display:block;margin-top:12px;font-size:.73rem;letter-spacing:.29em;text-transform:uppercase;color:#555d61}
+.mission-reference-video{position:relative;z-index:2;display:block;width:100%;height:320px;padding:0;border:1px solid rgba(255,235,190,.92);border-radius:27px;overflow:hidden;background:#cdbca7;box-shadow:0 0 0 1px rgba(174,110,30,.25),0 15px 46px rgba(73,56,34,.2),0 0 22px rgba(255,218,137,.52);cursor:pointer;text-align:left}
+.mission-reference-video>img{width:100%;height:100%;object-fit:cover;object-position:center 38%}
+.mission-video-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 47%,rgba(24,27,28,.48))}
+.mission-play{position:absolute;left:50%;top:50%;width:72px;height:72px;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.95);border-radius:50%;display:grid;place-items:center;padding-left:4px;background:rgba(91,62,35,.42);color:#fff;font-size:1.45rem;box-shadow:0 0 18px rgba(255,218,145,.45)}
+.mission-video-label,.mission-video-time{position:absolute;z-index:2;bottom:18px;color:#fff;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.34)}
+.mission-video-label{left:24px;font-size:.74rem;line-height:1.18;letter-spacing:.05em}.mission-video-time{right:24px;font-size:.72rem;letter-spacing:.08em}
+.mission-reference-copy{position:relative;z-index:2;text-align:center;padding-top:28px}
+.mission-reference-copy h1{margin:0;font-size:clamp(2rem,5.4vw,2.75rem);line-height:1.08;font-weight:250;letter-spacing:.015em;text-transform:uppercase}
+.mission-reference-eyebrow{display:block;margin-top:26px;color:#a56b23;font-size:.75rem;letter-spacing:.28em;text-transform:uppercase}
+.mission-reference-copy p{margin:17px auto 0;color:#50585c;font-size:.9rem;line-height:1.55}
+.mission-divider{display:block;width:70px;height:1px;margin:25px auto 21px;background:#a66c25}
+.mission-wait{display:block;color:#a56b23;font-size:.84rem;font-weight:300;letter-spacing:.3em;text-transform:uppercase}
+.mission-heart{display:block;margin:16px auto 21px;color:#ba7b2b;font-family:Georgia,serif;font-size:2.3rem;line-height:1}
+.mission-reference-button{width:min(100%,530px);margin:0 auto;min-height:64px;font-size:.92rem;text-transform:uppercase;letter-spacing:.04em}
+
+@media(max-width:620px){
+  .mission-reference-page{min-height:1250px;padding:305px 28px 54px}
+  .mission-reference-brand{top:62px}.mission-reference-brand strong{font-size:2.15rem}.mission-reference-brand span{font-size:.62rem}
+  .mission-reference-video{height:290px;border-radius:24px}
+  .mission-reference-copy{padding-top:25px}.mission-reference-copy h1{font-size:2rem}.mission-reference-copy p{font-size:.82rem}
+  .mission-reference-button{min-height:58px}
+}
+@media(max-width:420px){
+  .mission-reference-page{min-height:100svh;padding:250px 18px 42px}
+  .mission-reference-brand{top:63px;left:18px;right:18px}.mission-reference-brand strong{font-size:1.65rem}.mission-reference-brand span{margin-top:9px;font-size:.5rem;letter-spacing:.24em}
+  .mission-reference-video{height:225px;border-radius:21px}.mission-play{width:58px;height:58px;font-size:1.15rem}.mission-video-label{left:17px;font-size:.59rem}.mission-video-time{right:17px;font-size:.59rem}
+  .mission-reference-copy{padding-top:22px}.mission-reference-copy h1{font-size:1.5rem;line-height:1.1}.mission-reference-eyebrow{margin-top:20px;font-size:.61rem}
+  .mission-reference-copy p{margin-top:13px;font-size:.73rem;line-height:1.5}.wide-only{display:none}
+  .mission-divider{margin:19px auto 17px}.mission-wait{font-size:.64rem;letter-spacing:.24em}.mission-heart{margin:13px auto 18px;font-size:1.9rem}
+  .mission-reference-button{min-height:50px;font-size:.69rem}
+}
+
+@media(max-width:620px){.welcome-full>img,.mission-reference-bg{object-position:center top!important}}
+</style>
+</head>
+<body class="mission-reference-body">
+<main class="mission-reference-page">
+  <img class="mission-reference-bg" src="welcome-mission-1.webp" alt="Земля, объединённая золотой сетью света" decoding="async" fetchpriority="high">
+
+  <div class="mission-reference-topbar">
+    <a class="back mission-back" href="welcome-personal-telegram-ready.html" aria-label="Назад">‹</a>
+    <span class="step">02 / 05</span>
+  </div>
+
+  <header class="mission-reference-brand">
+    <strong>к Женщине</strong>
+    <span>Женщина женщине — дом</span>
+  </header>
+
+  <button class="mission-reference-video" id="open-video" type="button" aria-label="Открыть приветствие основателя">
+    <img src="welcome-mission-2.webp" alt="Приветствие основателя" loading="lazy" decoding="async">
+    <span class="mission-video-shade"></span>
+    <span class="mission-play">▶</span>
+    <span class="mission-video-label">Приветствие<br>основателя</span>
+    <span class="mission-video-time">02:18</span>
+  </button>
+
+  <section class="mission-reference-copy">
+    <h1>Вы вместе с нами<br>становитесь создателем<br>экосистемы</h1>
+    <span class="mission-reference-eyebrow">Наша миссия</span>
+    <p>Мы создаём мир, в котором каждая женщина<br class="wide-only"> может быть собой, раскрывать свой многомерный объём,<br class="wide-only"> реализовывать свои идеи, объединяться с другими женщинами<br class="wide-only"> и вместе создавать больше — для себя, для других женщин<br class="wide-only"> и для мира.</p>
+    <i class="mission-divider" aria-hidden="true"></i>
+    <strong class="mission-wait">Мы ждём именно тебя</strong>
+    <span class="mission-heart" aria-label="Сердце">♡</span>
+    <a class="gold-button mission-reference-button" href="welcome-rituals.html">Стать частью экосистемы <b>→</b></a>
+  </section>
+</main>
+
+<div class="video-modal" id="video-modal" hidden>
+  <div class="video-dialog" role="dialog" aria-modal="true" aria-labelledby="video-title">
+    <button class="video-close" id="close-video" type="button" aria-label="Закрыть">×</button>
+    <div class="player-frame"><img id="video-poster" src="welcome-mission-3.webp" alt="" loading="lazy" decoding="async"><video id="founder-video" controls playsinline hidden></video></div>
+    <span class="eyebrow gold">Приветствие основателя</span>
+    <h2 id="video-title">Добавьте видео</h2>
+    <p>Видеофайла в проекте пока нет. Выберите его на устройстве — после загрузки он откроется в плеере.</p>
+    <label class="outline-button">Выбрать видео<input id="video-file" type="file" accept="video/*"></label>
+  </div>
+</div>
+<script>
+const modal=document.getElementById('video-modal'),video=document.getElementById('founder-video'),poster=document.getElementById('video-poster');
+document.getElementById('open-video').addEventListener('click',()=>{modal.hidden=false;document.body.classList.add('modal-open')});
+document.getElementById('close-video').addEventListener('click',closeVideo);
+modal.addEventListener('click',e=>{if(e.target===modal)closeVideo()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeVideo()});
+document.getElementById('video-file').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;video.src=URL.createObjectURL(file);poster.hidden=true;video.hidden=false;video.play()});
+function closeVideo(){video.pause();modal.hidden=true;document.body.classList.remove('modal-open')}
+</script>
+</body>
+</html>
