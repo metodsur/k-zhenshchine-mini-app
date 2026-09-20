@@ -37,11 +37,16 @@ module.exports = async function handler(req, res) {
     const message = update.message;
     if (message?.chat && typeof message.text === "string" && message.text.startsWith("/start")) {
       const userId = message.from.id;
-      if (await isChannelMember(userId)) await sendJoined(message.chat.id);
-      else {
-        await telegram("sendMessage", { chat_id: message.chat.id, text: "\u041f\u0440\u0438\u0441\u043e\u0435\u0434\u0438\u043d\u0438\u0441\u044c \u043a \u043d\u0430\u0448\u0435\u043c\u0443 \u043f\u0440\u043e\u0441\u0442\u0440\u0430\u043d\u0441\u0442\u0432\u0443 \u2014 \u043f\u043e\u0441\u043b\u0435 \u043f\u043e\u0434\u043f\u0438\u0441\u043a\u0438 \u043e\u0442\u043a\u0440\u043e\u0435\u0442\u0441\u044f \u043f\u043e\u043b\u043d\u044b\u0439 \u0444\u0443\u043d\u043a\u0446\u0438\u043e\u043d\u0430\u043b \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u044f.", reply_markup: channelKeyboard() });
-        try { await scheduleReminder(message.chat.id, userId); } catch (error) { console.error("Reminder scheduling failed"); }
-      }
+      const appUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
+      await telegram("sendMessage", {
+        chat_id: message.chat.id,
+        text: "\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c \u0432 \u00ab\u043a \u0416\u0435\u043d\u0449\u0438\u043d\u0435\u00bb.",
+        reply_markup: { inline_keyboard: [[{
+          text: "\u041e\u0442\u043a\u0440\u044b\u0442\u044c \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435",
+          web_app: { url: appUrl }
+        }]] }
+      });
+      try { await scheduleReminder(message.chat.id, userId); } catch (error) { console.error("Reminder scheduling failed"); }
     }
     const change = update.chat_member;
     const configuredChannel = String(process.env.TELEGRAM_CHANNEL_ID || "").toLowerCase();
