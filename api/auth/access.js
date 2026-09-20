@@ -9,9 +9,17 @@ function send(res, status, body) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { ok: false });
+
+  let body;
+  let user;
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
-    const user = verifyInitData(body.initData);
+    body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    user = verifyInitData(body.initData);
+  } catch {
+    return send(res, 401, { ok: false, error: "Invalid Telegram authorization" });
+  }
+
+  try {
     const subscribed = await isChannelMember(user.id);
     return send(res, 200, {
       ok: true,
@@ -20,6 +28,6 @@ module.exports = async function handler(req, res) {
       entitlements: subscribed ? ["channel_member"] : []
     });
   } catch {
-    return send(res, 401, { ok: false, error: "Invalid Telegram authorization" });
+    return send(res, 503, { ok: false, error: "Membership check unavailable" });
   }
 };
