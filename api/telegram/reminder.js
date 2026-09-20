@@ -10,9 +10,9 @@ module.exports = async function handler(req, res) {
   try {
     if (await isChannelMember(userId)) {
       const appUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
-      await telegram("sendMessage", { chat_id: chatId, text: "Видим, что ты присоединилась к пространству 🤍\nОткрой приложение", reply_markup: { inline_keyboard: [[{ text: "Открыть приложение", web_app: { url: appUrl } }]] } });
+      await telegram("sendMessage", { chat_id: chatId, text: "Р’РёРґРёРј, С‡С‚Рѕ С‚С‹ РїСЂРёСЃРѕРµРґРёРЅРёР»Р°СЃСЊ Рє РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІСѓ рџ¤Ќ\nРћС‚РєСЂРѕР№ РїСЂРёР»РѕР¶РµРЅРёРµ", reply_markup: { inline_keyboard: [[{ text: "РћС‚РєСЂС‹С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ", web_app: { url: `${appUrl}/welcome-personal-telegram-ready.html` } }]] } });
     } else {
-      await telegram("sendMessage", { chat_id: chatId, text: "Мы очень хотим видеть тебя в нашем пространстве 😍\nПосле подписки тебе откроется полный функционал приложения", reply_markup: { inline_keyboard: [[{ text: "Присоединиться к пространству", url: process.env.TELEGRAM_CHANNEL_URL }]] } });
+      await telegram("sendMessage", { chat_id: chatId, text: "РњС‹ РѕС‡РµРЅСЊ С…РѕС‚РёРј РІРёРґРµС‚СЊ С‚РµР±СЏ РІ РЅР°С€РµРј РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ рџЌ\nРџРѕСЃР»Рµ РїРѕРґРїРёСЃРєРё С‚РµР±Рµ РѕС‚РєСЂРѕРµС‚СЃСЏ РїРѕР»РЅС‹Р№ С„СѓРЅРєС†РёРѕРЅР°Р» РїСЂРёР»РѕР¶РµРЅРёСЏ", reply_markup: { inline_keyboard: [[{ text: "РџСЂРёСЃРѕРµРґРёРЅРёС‚СЊСЃСЏ Рє РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІСѓ", url: process.env.TELEGRAM_CHANNEL_URL }]] } });
     }
     return send(res, 200, { ok: true });
   } catch { return send(res, 500, { ok: false }); }
