@@ -5,13 +5,13 @@ function send(res, status, body) {
 }
 function appKeyboard() {
   const appUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
-  return { inline_keyboard: [[{ text: "Открыть приложение", web_app: { url: appUrl } }]] };
+  return { inline_keyboard: [[{ text: "РћС‚РєСЂС‹С‚СЊ РїСЂРёР»РѕР¶РµРЅРёРµ", web_app: { url: `${appUrl}/welcome-personal-telegram-ready.html` } }]] };
 }
 function channelKeyboard() {
-  return { inline_keyboard: [[{ text: "Присоединиться к пространству", url: process.env.TELEGRAM_CHANNEL_URL }]] };
+  return { inline_keyboard: [[{ text: "РџСЂРёСЃРѕРµРґРёРЅРёС‚СЊСЃСЏ Рє РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІСѓ", url: process.env.TELEGRAM_CHANNEL_URL }]] };
 }
 async function sendJoined(chatId) {
-  await telegram("sendMessage", { chat_id: chatId, text: "Видим, что ты присоединилась к пространству 🤍\nОткрой приложение", reply_markup: appKeyboard() });
+  await telegram("sendMessage", { chat_id: chatId, text: "Р’РёРґРёРј, С‡С‚Рѕ С‚С‹ РїСЂРёСЃРѕРµРґРёРЅРёР»Р°СЃСЊ Рє РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІСѓ рџ¤Ќ\nРћС‚РєСЂРѕР№ РїСЂРёР»РѕР¶РµРЅРёРµ", reply_markup: appKeyboard() });
 }
 async function scheduleReminder(chatId, userId) {
   const token = process.env.QSTASH_TOKEN;
@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
       const userId = message.from.id;
       if (await isChannelMember(userId)) await sendJoined(message.chat.id);
       else {
-        await telegram("sendMessage", { chat_id: message.chat.id, text: "Присоединись к нашему пространству — после подписки откроется полный функционал приложения.", reply_markup: channelKeyboard() });
+        await telegram("sendMessage", { chat_id: message.chat.id, text: "РџСЂРёСЃРѕРµРґРёРЅРёСЃСЊ Рє РЅР°С€РµРјСѓ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІСѓ вЂ” РїРѕСЃР»Рµ РїРѕРґРїРёСЃРєРё РѕС‚РєСЂРѕРµС‚СЃСЏ РїРѕР»РЅС‹Р№ С„СѓРЅРєС†РёРѕРЅР°Р» РїСЂРёР»РѕР¶РµРЅРёСЏ.", reply_markup: channelKeyboard() });
         await scheduleReminder(message.chat.id, userId);
       }
     }
