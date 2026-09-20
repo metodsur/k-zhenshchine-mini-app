@@ -17,31 +17,21 @@
     return "";
   }
 
-  async function checkAccess(initData) {
+  try {
+    const initData = await getTelegramInitData();
+    if (!initData) return;
+
     const response = await fetch("/api/auth/access", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
       body: JSON.stringify({ initData })
     });
-    const body = await response.json();
-    return { response, body };
-  }
 
-  try {
-    const initData = await getTelegramInitData();
-    if (!initData) return redirect("authorization_required");
-
-    let result = await checkAccess(initData);
-    if (!result.response.ok) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      result = await checkAccess(initData);
-    }
-
-    if (result.response.status === 503) return;
-    if (!result.response.ok) return redirect("authorization_required");
-    if (result.body.full_access !== true) return redirect("subscription_required");
+    if (!response.ok) return;
+    const access = await response.json();
+    if (access.full_access === false) redirect("subscription_required");
   } catch (error) {
-    redirect("server_unavailable");
+    /* A temporary check failure must not revoke an existing UI session. */
   }
 })();
