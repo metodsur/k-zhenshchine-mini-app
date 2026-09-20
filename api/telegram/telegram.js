@@ -6,7 +6,7 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-function verifyInitData(initData, botToken, maxAgeSeconds = 3600) {
+function verifyInitData(initData, botToken, maxAgeSeconds = 86400) {
   const params = new URLSearchParams(initData);
   const receivedHash = params.get("hash");
   if (!receivedHash) throw new Error("Missing hash");
