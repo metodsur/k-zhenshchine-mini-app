@@ -38,6 +38,7 @@
       result = await checkAccess(initData);
     }
 
+    if (result.response.status === 503) return;
     if (!result.response.ok) return redirect("authorization_required");
     if (result.body.full_access !== true) return redirect("subscription_required");
   } catch (error) {
