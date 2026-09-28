@@ -18,7 +18,7 @@ function verifyInitData(initData, botToken, maxAgeSeconds = 86400) {
 
   const pairs = [];
   for (const [key, value] of params.entries()) {
-    if (key !== "hash" && key !== "signature") pairs.push(`${key}=${value}`);
+    if (key !== "hash") pairs.push(`${key}=${value}`);
   }
   pairs.sort();
   const dataCheckString = pairs.join("\n");
