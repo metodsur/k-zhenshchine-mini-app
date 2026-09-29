@@ -48,6 +48,14 @@ module.exports = async function handler(req, res) {
       });
       try { await scheduleReminder(message.chat.id, userId); } catch (error) { console.error("Reminder scheduling failed"); }
     }
+    if (message?.chat && typeof message.text === "string" && /^\/chatid(@\w+)?(\s|$)/.test(message.text)
+        && (message.chat.type === "group" || message.chat.type === "supergroup")) {
+      // Only group admins can ask the bot for the group ID (needed for TELEGRAM_CLUB_CHAT_ID).
+      const sender = await telegram("getChatMember", { chat_id: message.chat.id, user_id: message.from.id });
+      if (sender.status === "creator" || sender.status === "administrator") {
+        await telegram("sendMessage", { chat_id: message.chat.id, text: `ID \u044d\u0442\u043e\u0439 \u0433\u0440\u0443\u043f\u043f\u044b: ${message.chat.id}` });
+      }
+    }
     const change = update.chat_member;
     const configuredChannel = String(process.env.TELEGRAM_CHANNEL_ID || "").toLowerCase();
     const updateUsername = change?.chat?.username ? `@${change.chat.username}`.toLowerCase() : "";
