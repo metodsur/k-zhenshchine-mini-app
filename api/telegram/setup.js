@@ -1,3 +1,5 @@
+const { safeEqualString } = require("../../lib/telegram");
+
 function send(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -41,7 +43,7 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
   if (req.method !== "POST") return send(res, 405, { ok: false });
   const body = getBody(req);
   const supplied = req.headers["x-setup-secret"] || body.setup_secret;
-  if (supplied !== setupSecret) return send(res, 403, { ok: false });
+  if (!safeEqualString(supplied, setupSecret)) return send(res, 403, { ok: false });
 
   const response = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: "POST", headers: { "Content-Type": "application/json" },

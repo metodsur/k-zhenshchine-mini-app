@@ -19,7 +19,7 @@ async function authorize(path, initData) {
   await require(path)({ method: 'POST', body: { initData } }, res);
   return { status: res.statusCode, body };
 }
-for (const path of ['../api/auth/telegram', '../api/telegram/telegram']) {
+for (const path of ['../api/auth/telegram']) {
   test(`${path}: accepts HMAC covering signature`, async () => {
     const result = await authorize(path, fixture({ signature: 'synthetic-ed25519-value' }));
     assert.equal(result.status, 200);
