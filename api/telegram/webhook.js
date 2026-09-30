@@ -20,12 +20,16 @@ function spaceKeyboard() {
   const appUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
   return { inline_keyboard: [[{ text: "Открыть пространство", web_app: { url: `${appUrl}/space.html` } }]] };
 }
-// Channel members go straight to the app; the start pages are only for the first visit.
+// Members continue where they stopped: ritual button pressed → "Пространство";
+// ritual page reached → back to the ritual page; otherwise the start pages.
 async function sendMemberEntry(chatId, userId) {
-  let onboarded = false;
-  try { onboarded = await store.isOnboarded(userId); } catch { onboarded = false; }
-  if (onboarded) {
+  let state = { rituals_seen: false, ritual_done: false };
+  try { state = await store.onboardingState(userId); } catch { /* start pages by default */ }
+  const appUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
+  if (state.ritual_done) {
     await telegram("sendMessage", { chat_id: chatId, text: "С возвращением в «к Женщине» 🤍\nПространство, путь, встречи и твоя страница — по кнопке ниже.", reply_markup: spaceKeyboard() });
+  } else if (state.rituals_seen) {
+    await telegram("sendMessage", { chat_id: chatId, text: "Рады, что ты вернулась 🤍\nОсталось пройти ритуал видимости — и пространство откроется полностью.", reply_markup: { inline_keyboard: [[{ text: "Продолжить", web_app: { url: `${appUrl}/rituals.html` } }]] } });
   } else {
     await telegram("sendMessage", { chat_id: chatId, text: "Добро пожаловать в «к Женщине» 🤍\nНачнём знакомство с пространством.", reply_markup: appKeyboard() });
   }
@@ -33,18 +37,24 @@ async function sendMemberEntry(chatId, userId) {
 async function isMemberSafe(userId) {
   try { return await isChannelMember(userId); } catch { return false; }
 }
+// Visitors who have not joined the channel get two reminders: after 10 minutes and after a day.
+// One pair per person per 2 days, however many times /start is pressed.
+const JOIN_REMINDERS = [{ stage: "10m", delay: "10m" }, { stage: "24h", delay: "24h" }];
 async function scheduleReminder(chatId, userId) {
   const token = process.env.QSTASH_TOKEN;
   const secret = process.env.TELEGRAM_REMINDER_SECRET;
   const baseUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
   if (!token || !secret || !baseUrl) throw new Error("Reminder service is not configured");
+  if (!(await store.claimOnce(`join-reminders:${userId}`, 2 * 24 * 60 * 60))) return;
   const destination = `${baseUrl}/api/telegram/reminder`;
-  const response = await fetch(`https://qstash.upstash.io/v2/publish/${encodeURIComponent(destination)}`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", "Upstash-Delay": "5m", "Upstash-Forward-X-Reminder-Secret": secret },
-    body: JSON.stringify({ chatId, userId })
-  });
-  if (!response.ok) throw new Error("Could not schedule reminder");
+  for (const { stage, delay } of JOIN_REMINDERS) {
+    const response = await fetch(`https://qstash.upstash.io/v2/publish/${encodeURIComponent(destination)}`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", "Upstash-Delay": delay, "Upstash-Forward-X-Reminder-Secret": secret },
+      body: JSON.stringify({ chatId, userId, stage })
+    });
+    if (!response.ok) throw new Error("Could not schedule reminder");
+  }
 }
 
 module.exports = async function handler(req, res) {

@@ -132,7 +132,7 @@ test('analytics: funnel, joins, club and meeting revenue', async () => {
   world.members.add(String(CLIENT.id));
   await deliver({ message: { chat: { id: CLIENT.id, type: 'private' }, from: CLIENT, text: '/start' } });
   await deliver({ message: { chat: { id: 7002, type: 'private' }, from: { id: 7002, first_name: 'Ольга' }, text: '/start' } });
-  await call(access, { method: 'POST', body: { initData: initData(CLIENT), mark: 'onboarded' } });
+  await call(access, { method: 'POST', body: { initData: initData(CLIENT), mark: 'ritual_done' } });
   await deliver({ chat_member: { chat: { id: -100555, username: 'test_channel' }, date: Math.floor(Date.now() / 1000),
     old_chat_member: { status: 'left', user: { id: 7003 } }, new_chat_member: { status: 'member', user: { id: 7003 } } } });
   await setDate(OWNER, 1, '1', inDays(8));

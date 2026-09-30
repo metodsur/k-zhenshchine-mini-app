@@ -1,11 +1,13 @@
 (async function enforceChannelAccess() {
   var path = window.location.pathname.replace(/\.html$/, "").replace(/\/+$/, "") || "/";
-  // Public entry page and the one-time start (onboarding) pages.
+  // Start flow: entry page → start pages → ritual page → (button "Пройти ритуал в Telegram") → app.
   var ENTRY = ["/", "/index"];
-  var ONBOARDING = ["/welcome-personal-telegram-ready", "/welcome-mission", "/rituals", "/welcome-rituals"];
-  var kind = ENTRY.indexOf(path) !== -1 ? "entry" : ONBOARDING.indexOf(path) !== -1 ? "onboarding" : "app";
+  var START_PAGES = ["/welcome-personal-telegram-ready", "/welcome-mission", "/welcome-rituals"];
+  var RITUAL_PAGE = "/rituals";
+  var kind = ENTRY.indexOf(path) !== -1 ? "entry" : START_PAGES.indexOf(path) !== -1 ? "start" : path === RITUAL_PAGE ? "ritual" : "app";
   var MAIN_PAGE = "/space.html";
   var FIRST_START_PAGE = "/welcome-personal-telegram-ready.html";
+  var RITUAL_URL = "/rituals.html";
 
   function go(url) { if (window.location.pathname !== url) window.location.replace(url); }
 
@@ -29,7 +31,7 @@
       method: "POST",
       headers: { "Content-Type": "application/json" },
       cache: "no-store",
-      body: JSON.stringify({ initData: initData, mark: kind === "app" ? "onboarded" : undefined })
+      body: JSON.stringify({ initData: initData, mark: kind === "ritual" ? "rituals_seen" : undefined })
     });
 
     if (!response.ok) return;
@@ -38,11 +40,13 @@
       if (kind !== "entry") go("/index.html?access=subscription_required");
       return;
     }
-    if (access.full_access !== true) return;
-    // Returning members skip the start pages and land in "Пространство".
-    if (kind !== "app" && access.onboarded) go(MAIN_PAGE);
-    // A member who has not seen the start pages yet begins with them.
-    else if (kind === "entry" && !access.onboarded) go(FIRST_START_PAGE);
+    if (access.full_access !== true || kind === "app") return;
+    // Ritual button pressed: every entry opens "Пространство".
+    if (access.onboarded) return go(MAIN_PAGE);
+    // Reached the ritual page but has not pressed the button yet: back to the ritual page.
+    if (access.rituals_seen && kind !== "ritual") return go(RITUAL_URL);
+    // First visit as a member: the start pages from the beginning.
+    if (kind === "entry") go(FIRST_START_PAGE);
   } catch (error) {
     /* A temporary check failure must not revoke an existing UI session. */
   }

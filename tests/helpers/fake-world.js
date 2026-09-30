@@ -35,18 +35,20 @@ function createWorld() {
       case 'INCR': { const v = (Number(kv.get(key)) || 0) + 1; kv.set(key, String(v)); return v; }
       case 'SCARD': return (sets.get(key) || new Set()).size;
       case 'MGET': return [key, ...rest].map((k) => (kv.has(k) ? kv.get(k) : null));
+      case 'HMGET': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; return rest.map((f) => h[f] ?? null); }
       case 'HGET': { const h = kv.get(key); return h ? (JSON.parse(h)[rest[0]] ?? null) : null; }
       case 'HSETNX': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; if (h[rest[0]]) return 0; h[rest[0]] = rest[1]; kv.set(key, JSON.stringify(h)); return 1; }
       default: throw new Error(`Fake Redis: unsupported ${cmd}`);
     }
   };
   const blockedChats = new Set();
-  const world = { members: new Set(), memberCounts: {}, tributeSubscribers: null };
+  const world = { members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [] };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });
     if (href.startsWith('https://redis.example.test')) return ok({ result: redis(JSON.parse(options.body)) });
     if (href.startsWith('https://tribute.tg/') && world.tributeSubscribers) return ok(world.tributeSubscribers);
+    if (href.startsWith('https://qstash.upstash.io/')) { world.qstash.push({ url: href, headers: options.headers, body: JSON.parse(options.body) }); return ok({ messageId: 'm' + world.qstash.length }); }
     const tg = href.match(/api\.telegram\.org\/bot[^/]+\/(\w+)$/);
     if (tg) {
       const payload = JSON.parse(options.body);

@@ -2,64 +2,96 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { setupEnv, createWorld, initData, call } = require('./helpers/fake-world');
 
-setupEnv();
+setupEnv({ QSTASH_TOKEN: 'test-qstash', TELEGRAM_REMINDER_SECRET: 'test-reminder-secret' });
 const access = require('../api/auth/access');
 const webhook = require('../api/telegram/webhook');
+const reminder = require('../api/telegram/reminder');
 
 const MARIA = { id: 301, first_name: 'Мария' };
 
 const deliver = (message) => call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
   body: { message: { chat: { id: message.from.id, type: 'private' }, ...message } } });
-const lastButtonUrl = (world) => world.sent('sendMessage').at(-1).reply_markup.inline_keyboard[0][0];
+const lastButton = (world) => world.sent('sendMessage').at(-1).reply_markup.inline_keyboard[0][0];
+const check = (mark) => call(access, { method: 'POST', body: { initData: initData(MARIA), mark } });
 
-test('access: onboarding is remembered once a member reaches the main pages', async () => {
+test('start flow: nothing → ritual page seen → ritual button pressed', async () => {
   const world = createWorld();
   world.members.add('301');
-  const check = (mark) => call(access, { method: 'POST', body: { initData: initData(MARIA), mark } });
-  assert.equal((await check()).body.onboarded, false);
-  const marked = await check('onboarded');
-  assert.equal(marked.body.full_access, true);
-  assert.equal(marked.body.onboarded, true);
-  assert.equal((await check()).body.onboarded, true);
+  let r = await check();
+  assert.deepEqual([r.body.rituals_seen, r.body.onboarded], [false, false]);
+  r = await check('rituals_seen');
+  assert.deepEqual([r.body.rituals_seen, r.body.onboarded], [true, false]);
+  r = await check();
+  assert.deepEqual([r.body.rituals_seen, r.body.onboarded], [true, false], 'visiting other pages does not complete the flow');
+  r = await check('ritual_done');
+  assert.deepEqual([r.body.rituals_seen, r.body.onboarded], [true, true]);
 });
 
-test('access: non-members are never marked as onboarded', async () => {
+test('non-members are never marked', async () => {
   createWorld();
-  const res = await call(access, { method: 'POST', body: { initData: initData(MARIA), mark: 'onboarded' } });
-  assert.equal(res.body.full_access, false);
-  assert.equal(res.body.onboarded, false);
-  assert.equal((await call(access, { method: 'POST', body: { initData: initData(MARIA) } })).body.onboarded, false);
+  const r = await check('ritual_done');
+  assert.equal(r.body.full_access, false);
+  assert.equal(r.body.onboarded, false);
+  assert.equal((await check()).body.onboarded, false);
 });
 
-test('/start: a new visitor gets the usual start flow', async () => {
+test('/start for a new visitor: start flow and two reminders (10 min, 24 h), scheduled once', async () => {
   const world = createWorld();
   await deliver({ from: MARIA, text: '/start' });
   assert.match(world.sent('sendMessage').at(-1).text, /Добро пожаловать/);
-  assert.equal(lastButtonUrl(world).web_app.url, 'https://app.example.test');
+  assert.equal(lastButton(world).web_app.url, 'https://app.example.test');
+  assert.deepEqual(world.qstash.map((q) => [q.headers['Upstash-Delay'], q.body.stage]), [['10m', '10m'], ['24h', '24h']]);
+  assert.match(world.qstash[0].url, /api%2Ftelegram%2Freminder/);
+  await deliver({ from: MARIA, text: '/start' });
+  assert.equal(world.qstash.length, 2, 'pressing /start again does not add more reminders');
 });
 
-test('/start: a member who has not seen the start pages begins with them', async () => {
+test('reminders go only to people who still have not joined', async () => {
+  const world = createWorld();
+  const fire = (stage) => call(reminder, { method: 'POST', headers: { 'x-reminder-secret': 'test-reminder-secret' }, body: { chatId: 301, userId: 301, stage } });
+  assert.equal((await call(reminder, { method: 'POST', headers: {}, body: { chatId: 301, userId: 301 } })).status, 403);
+  await fire('10m');
+  assert.match(world.sent('sendMessage').at(-1).text, /очень хотим видеть тебя/);
+  await fire('24h');
+  assert.match(world.sent('sendMessage').at(-1).text, /всё ещё ждём тебя/);
+  assert.equal(lastButton(world).url, 'https://t.me/test_channel');
+  world.members.add('301');
+  const before = world.sent('sendMessage').length;
+  const res = await fire('24h');
+  assert.equal(res.body.skipped, 'member');
+  assert.equal(world.sent('sendMessage').length, before);
+});
+
+test('/start for a member who has not reached the ritual page: start pages', async () => {
   const world = createWorld();
   world.members.add('301');
   await deliver({ from: MARIA, text: '/start' });
-  assert.equal(lastButtonUrl(world).web_app.url, 'https://app.example.test/welcome-personal-telegram-ready.html');
+  assert.equal(lastButton(world).web_app.url, 'https://app.example.test/welcome-personal-telegram-ready.html');
+  assert.equal(world.qstash.length, 0, 'members get no join reminders');
 });
 
-test('/start: a returning member goes straight to the space page', async () => {
+test('/start for a member who saw the ritual page but did not press the button: ritual page', async () => {
   const world = createWorld();
   world.members.add('301');
-  await call(access, { method: 'POST', body: { initData: initData(MARIA), mark: 'onboarded' } });
+  await check('rituals_seen');
+  await deliver({ from: MARIA, text: '/start' });
+  assert.equal(lastButton(world).web_app.url, 'https://app.example.test/rituals.html');
+});
+
+test('/start after the ritual button: straight to the space page', async () => {
+  const world = createWorld();
+  world.members.add('301');
+  await check('ritual_done');
   await deliver({ from: MARIA, text: '/start' });
   assert.match(world.sent('sendMessage').at(-1).text, /С возвращением/);
-  assert.equal(lastButtonUrl(world).web_app.url, 'https://app.example.test/space.html');
-  assert.equal(world.sent('sendMessage').length, 1, 'no "join the channel" reminder for members');
+  assert.equal(lastButton(world).web_app.url, 'https://app.example.test/space.html');
 });
 
 test('/space opens the space for members and invites others to the channel', async () => {
   const world = createWorld();
   await deliver({ from: MARIA, text: '/space' });
-  assert.equal(lastButtonUrl(world).url, 'https://t.me/test_channel');
+  assert.equal(lastButton(world).url, 'https://t.me/test_channel');
   world.members.add('301');
   await deliver({ from: MARIA, text: '/space' });
-  assert.equal(lastButtonUrl(world).web_app.url, 'https://app.example.test/space.html');
+  assert.equal(lastButton(world).web_app.url, 'https://app.example.test/space.html');
 });

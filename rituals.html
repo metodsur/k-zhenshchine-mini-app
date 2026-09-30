@@ -151,12 +151,20 @@
             <li>Что тебе самой сейчас хочется получить?</li>
           </ol>
         </div>
-        <a class="gold-button" href="#" aria-disabled="true" data-pending-link="telegram-ritual"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M42.8 6.2 35.9 40c-.5 2.4-1.8 3-3.7 1.9l-10.6-7.8-5.1 4.9c-.6.6-1 .9-2.1.9l.8-10.8L34.8 11.4c.9-.8-.2-1.2-1.3-.5L9.3 26.1-1.1 22.8c-2.3-.7-2.3-2.3.5-3.4L40 3.8c1.9-.7 3.6.5 2.8 2.4Z"/></svg><span>Пройти ритуал в Telegram</span><strong>→</strong></a>
+        <a class="gold-button" href="#" data-pending-link="telegram-ritual"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M42.8 6.2 35.9 40c-.5 2.4-1.8 3-3.7 1.9l-10.6-7.8-5.1 4.9c-.6.6-1 .9-2.1.9l.8-10.8L34.8 11.4c.9-.8-.2-1.2-1.3-.5L9.3 26.1-1.1 22.8c-2.3-.7-2.3-2.3.5-3.4L40 3.8c1.9-.7 3.6.5 2.8 2.4Z"/></svg><span>Пройти ритуал в Telegram</span><strong>→</strong></a>
         <a class="space-button" href="space.html"><span>Перейти в пространство многомерности</span><strong>→</strong></a>
       </section>
 
     </div>
   </main>
-<script>document.querySelectorAll('[data-pending-link="telegram-ritual"]').forEach(function(el){el.addEventListener('click',function(e){e.preventDefault();});});</script>
+<script>document.querySelectorAll('[data-pending-link="telegram-ritual"]').forEach(function(el){el.addEventListener('click',function(e){
+  e.preventDefault();
+  var webApp=window.Telegram&&window.Telegram.WebApp;var initData=webApp&&webApp.initData||'';
+  // Pressing the button completes the start flow: next time the app opens straight to "Пространство".
+  if(initData){try{fetch('/api/auth/access',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({initData:initData,mark:'ritual_done'})})}catch(err){}}
+  var url=el.getAttribute('href');
+  if(!url||url==='#')return;
+  if(webApp&&webApp.openTelegramLink&&/^https:\/\/t\.me\//.test(url))webApp.openTelegramLink(url);else window.open(url,'_blank','noopener');
+});});</script>
 </body>
 </html>

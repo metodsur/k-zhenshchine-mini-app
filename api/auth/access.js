@@ -29,21 +29,20 @@ module.exports = async function handler(req, res) {
     return send(res, 503, { ok: false, error: "Membership check unavailable" });
   }
 
-  // Storage problems must never block access: they only mean the start pages are shown again.
-  let onboarded = false;
+  // Storage problems must never block access: at worst the start pages are shown again.
+  let state = { rituals_seen: false, ritual_done: false };
   try {
-    if (subscribed && body.mark === "onboarded") {
-      if (Number(await store.markOnboarded(user.id)) === 1) await stats.trackOnboarded(user.id);
-      onboarded = true;
-    }
-    else if (subscribed) onboarded = await store.isOnboarded(user.id);
-  } catch { onboarded = false; }
+    if (subscribed && body.mark === "rituals_seen") await store.markRitualsSeen(user.id);
+    if (subscribed && body.mark === "ritual_done" && Number(await store.markRitualDone(user.id)) === 1) await stats.trackOnboarded(user.id);
+    if (subscribed) state = await store.onboardingState(user.id);
+  } catch { state = { rituals_seen: false, ritual_done: false }; }
 
   return send(res, 200, {
     ok: true,
     subscribed,
     full_access: subscribed,
-    onboarded,
+    onboarded: state.ritual_done,
+    rituals_seen: state.rituals_seen,
     entitlements: subscribed ? ["channel_member"] : []
   });
 };
