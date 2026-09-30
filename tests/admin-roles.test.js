@@ -49,7 +49,7 @@ test('each role sees only its sections', async () => {
   const expect = {
     [OWNER.id]: { me: 200, schedule: 200, analytics: 200, events: 200, team: 200 },
     [VALERIA.id]: { me: 200, schedule: 200, analytics: 200, events: 403, team: 403 },
-    [MANAGER.id]: { me: 200, schedule: 200, analytics: 403, events: 403, team: 403 }
+    [MANAGER.id]: { me: 200, schedule: 200, analytics: 403, events: 200, team: 403 }
   };
   for (const user of [OWNER, VALERIA, MANAGER]) {
     for (const [section, status] of Object.entries(expect[user.id])) {
@@ -167,5 +167,6 @@ test('club events: owner edits, the public schedule shows only upcoming ones', a
   const pub = await call(scheduleApi, { method: 'GET' });
   assert.deepEqual(pub.body.events.map((e) => e.title), ['Новый ритуал пары', 'День дружбы']);
   assert.ok(pub.body.events[0].date_label);
-  assert.equal((await admin(MANAGER, 'events', { action: 'save', events: [] })).status, 403);
+  assert.equal((await admin(MANAGER, 'events', { action: 'save', events: [{ date: inDays(9), title: 'Встреча всего пространства' }] })).status, 200);
+  assert.equal((await admin(VALERIA, 'events', { action: 'save', events: [] })).status, 403);
 });
