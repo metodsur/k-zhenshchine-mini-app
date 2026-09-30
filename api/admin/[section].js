@@ -1,5 +1,6 @@
 const team = require("../../lib/team");
 const events = require("../../lib/events");
+const settings = require("../../lib/settings");
 const { buildAnalytics } = require("../../lib/analytics");
 const adminSchedule = require("../../lib/handlers/admin-schedule");
 const { send, readBody, telegramUser } = require("../../lib/http");
@@ -22,6 +23,13 @@ const sections = {
     const { errors, events: list } = events.normalizeEvents(body.events);
     if (errors.length) return { status: 400, body: { ok: false, errors } };
     return { status: 200, body: { ok: true, events: await events.saveEvents(list) } };
+  },
+  async settings(member, body) {
+    if (!team.can(member, "settings.edit")) return deny("ссылки");
+    if (body.action !== "save") return { status: 200, body: { ok: true, settings: await settings.loadSettings(), fields: settings.FIELDS } };
+    const { errors, settings: next } = settings.normalizeSettings(body.settings);
+    if (errors.length) return { status: 400, body: { ok: false, errors } };
+    return { status: 200, body: { ok: true, settings: await settings.saveSettings(next), fields: settings.FIELDS } };
   },
   async team(member, body) {
     if (!team.can(member, "team.manage")) return deny("команда");

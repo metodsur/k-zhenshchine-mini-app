@@ -24,7 +24,7 @@ input,select,textarea{width:100%;min-height:44px;padding:10px 12px;border:1px so
 textarea{min-height:76px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);outline-offset:1px}
 .sections{position:sticky;top:0;z-index:5;display:flex;gap:2px;margin:0 -16px;padding:10px 16px;overflow-x:auto;background:rgba(246,248,248,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
-.section-btn{flex:1 0 auto;border:0;border-radius:999px;padding:10px 12px;background:transparent;color:#555d61;font:300 .92rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
+.section-btn{flex:1 0 auto;border:0;border-radius:999px;padding:10px 10px;background:transparent;color:#555d61;font:300 .92rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
 .section-btn.active{background:#fff;color:#2e3234;box-shadow:0 4px 14px rgba(78,68,53,.12)}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-top:14px}
 .tab{flex:0 0 auto;border:1px solid rgba(183,122,43,.28);border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.75);color:#555d61;font:300 .9rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
@@ -143,6 +143,12 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
     <button class="add-btn" id="add-event" type="button">+ Событие</button>
   </div>
 
+  <!-- ========== Ссылки ========== -->
+  <div id="panel-settings" class="panel" hidden>
+    <p class="lead">Куда ведут кнопки в приложении. Пока ссылки нет, кнопка показывает «Скоро».</p>
+    <section class="card" id="settings-fields"></section>
+  </div>
+
   <!-- ========== Команда ========== -->
   <div id="panel-team" class="panel" hidden>
     <p class="lead">Кто может открыть админку и что видит. Telegram ID человек узнаёт сам: пусть отправит боту команду /admin.</p>
@@ -164,7 +170,7 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   const TITLES={1:'Основы',2:'Целостность',3:'Опора и объём',4:'Источник и коллективное поле',5:'Безусловная любовь и принятие',6:'Исходный код'};
   const ABOUT={1:'Лекция о природе женщины и женских энергиях, затем телесная практика чистки и разблокировки.',2:'Собираем тело, душу и дух в целостность — внутреннюю опору в нестабильном мире.',3:'Прикасаемся к своему истинному объёму и чувствуем опору на истину внутри себя.',4:'Учимся чувствовать коллективное поле и различать, что ваше, а что к вам не относится.',5:'Поднимаемся к энергиям безусловной любви и принятия, работаем с кристаллической решёткой Земли.',6:'Соединяемся со своей многомерной структурой и первородными кодами женщины.'};
   const ZONES=[['Europe/Kaliningrad','Калининград (UTC+2)'],['Europe/Moscow','Москва (UTC+3)'],['Europe/Samara','Самара (UTC+4)'],['Asia/Yekaterinburg','Екатеринбург (UTC+5)'],['Asia/Omsk','Омск (UTC+6)'],['Asia/Novosibirsk','Новосибирск (UTC+7)'],['Asia/Krasnoyarsk','Красноярск (UTC+7)'],['Asia/Irkutsk','Иркутск (UTC+8)'],['Asia/Yakutsk','Якутск (UTC+9)'],['Asia/Vladivostok','Владивосток (UTC+10)'],['Asia/Dubai','Дубай (UTC+4)'],['Asia/Tbilisi','Тбилиси (UTC+4)'],['Asia/Almaty','Алматы (UTC+5)'],['Europe/Istanbul','Стамбул (UTC+3)'],['Asia/Bangkok','Бангкок (UTC+7)'],['Asia/Makassar','Бали (UTC+8)'],['Europe/Berlin','Берлин (CET)'],['Europe/London','Лондон (GMT)']];
-  const SECTIONS=[['schedule','Встречи','schedule.edit'],['analytics','Аналитика','analytics.view'],['events','События','events.edit'],['team','Команда','team.manage']];
+  const SECTIONS=[['schedule','Встречи','schedule.edit'],['analytics','Аналитика','analytics.view'],['events','События','events.edit'],['settings','Ссылки','settings.edit'],['team','Команда','team.manage']];
   const $=id=>document.getElementById(id);
   const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const num=n=>n==null?'—':Number(n).toLocaleString('ru-RU').replace(/ /g,' ');
@@ -315,6 +321,12 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
   $('add-event').addEventListener('click',()=>{events.push({date:'',title:'',text:''});markDirty();renderEvents()});
   loaders.events=async()=>{const r=await post('events');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}events=r.body.events;renderEvents()};
   savers.events=async()=>{const r=await post('events',{action:'save',events});if(!r.body.ok)return failed(r);events=r.body.events;renderEvents();saved('Сохранено. «Пространство» обновлено.')};
+
+  // ---------- Ссылки ----------
+  let links={},linkFields={};
+  function renderSettings(){const box=$('settings-fields');box.innerHTML='';Object.entries(linkFields).forEach(([k,label])=>{const f=field(label,links[k],'url',v=>links[k]=v.trim(),{placeholder:'https://…'});f.style.marginTop='10px';box.appendChild(f)})}
+  loaders.settings=async()=>{const r=await post('settings');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}links=r.body.settings;linkFields=r.body.fields;renderSettings()};
+  savers.settings=async()=>{const r=await post('settings',{action:'save',settings:links});if(!r.body.ok)return failed(r);links=r.body.settings;renderSettings();saved('Сохранено. Кнопки обновлены.')};
 
   // ---------- Команда ----------
   let members=[],roles={};

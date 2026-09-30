@@ -1,6 +1,10 @@
 const { verifyInitData, isChannelMember, isClubMember } = require("../../lib/telegram");
 const store = require("../../lib/store");
 const tribute = require("../../lib/tribute");
+const profile = require("../../lib/profile");
+const settings = require("../../lib/settings");
+const orders = require("../../lib/orders");
+const schedule = require("../../lib/schedule");
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -46,22 +50,66 @@ async function clubInfo(userId) {
   };
 }
 
+// Paid tickets as one row per meeting (a package gives six rows), upcoming first.
+async function ticketsInfo(userId, now = Date.now()) {
+  const paid = await orders.userOrders(userId);
+  if (!paid.length) return { items: [], passed: 0 };
+  const doc = await schedule.loadSchedule();
+  const items = [];
+  for (const order of paid) {
+    const city = schedule.findCity(doc, order.city_id);
+    for (const mid of orders.meetingsOf(order)) {
+      const m = city ? city.meetings[mid] : null;
+      const start = m ? schedule.meetingStart(m, city.timezone) : null;
+      items.push({
+        meeting: mid,
+        title: schedule.MEETINGS[mid].title,
+        city: city ? city.name : order.city_name,
+        kind: order.kind,
+        date_label: m ? schedule.formatMeetingDate(m, city.timezone) : "Дата скоро появится",
+        starts_at: start ? new Date(start).toISOString() : null,
+        venue: m && m.venue || null,
+        address: m && m.address || null,
+        status: start === null ? "soon" : now > start + 3 * 60 * 60 * 1000 ? "past" : "upcoming"
+      });
+    }
+  }
+  const rank = { upcoming: 0, soon: 1, past: 2 };
+  items.sort((a, b) => rank[a.status] - rank[b.status] || (a.status === "past" ? -1 : 1) * (new Date(a.starts_at || 0) - new Date(b.starts_at || 0)));
+  const passed = new Set(items.filter((t) => t.status === "past").map((t) => t.meeting)).size;
+  return { items, passed };
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { ok: false });
 
   let user;
+  let body;
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     user = verifyInitData(body.initData);
   } catch {
     return send(res, 401, { ok: false, error: "Invalid Telegram authorization" });
   }
 
-  const [space, club] = await Promise.all([spaceInfo(user.id), clubInfo(user.id)]);
+  if (body.action === "save_profile") {
+    try { return send(res, 200, { ok: true, profile: await profile.saveProfile(user.id, body.profile || {}) }); }
+    catch { return send(res, 500, { ok: false, error: "Не получилось сохранить. Попробуйте ещё раз." }); }
+  }
+
+  const [space, club, tickets, saved, links, progress] = await Promise.all([
+    spaceInfo(user.id), clubInfo(user.id),
+    safely(() => ticketsInfo(user.id)), safely(() => profile.loadProfile(user.id)),
+    safely(() => settings.loadSettings()), safely(() => store.onboardingState(user.id))
+  ]);
   return send(res, 200, {
     ok: true,
-    user: { first_name: user.first_name || null, last_name: user.last_name || null },
+    user: { first_name: user.first_name || null, last_name: user.last_name || null, photo_url: user.photo_url || null },
     space,
-    club
+    club,
+    tickets: tickets || { items: [], passed: 0 },
+    profile: saved || null,
+    links: links || { materials_url: "", ritual_url: "" },
+    start_flow: progress || null
   });
 };

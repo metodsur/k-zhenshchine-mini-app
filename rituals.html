@@ -166,5 +166,12 @@
   if(!url||url==='#')return;
   if(webApp&&webApp.openTelegramLink&&/^https:\/\/t\.me\//.test(url))webApp.openTelegramLink(url);else window.open(url,'_blank','noopener');
 });});</script>
+<script>
+// The ritual button link is set on the admin page ("Ссылки").
+fetch('/api/schedule',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+  var url=d&&d.links&&d.links.ritual_url;if(!url)return;
+  document.querySelectorAll('[data-pending-link="telegram-ritual"]').forEach(function(el){el.setAttribute('href',url)});
+}).catch(function(){});
+</script>
 </body>
 </html>

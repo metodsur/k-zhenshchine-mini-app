@@ -64,6 +64,41 @@
 @media(max-width:680px) and (min-width:521px){.hero .profile{gap:16px}.hero .profile h1{margin-bottom:17px}.identity-copy .hero-lead{margin-top:23px}}
 @media(max-width:520px){.hero .profile{gap:20px;padding:22px 20px 24px}.hero .profile h1{margin-bottom:19px}.identity-copy .hero-lead{margin-top:25px;line-height:1.7}}
 .identity-copy .club-membership{margin:14px 0 0 4px;color:#a9793c;font-size:.74rem;font-weight:400;letter-spacing:.06em;line-height:1.65;white-space:pre-line}.identity-copy .club-membership[hidden]{display:none}
+
+/* ---- Мой путь / Мои встречи ---- */
+.steps{display:grid;gap:10px}
+.step-card{position:relative;min-height:150px;overflow:hidden;border-radius:22px;box-shadow:0 10px 28px rgba(77,89,94,.08)}
+.step-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.step-card:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.82) 58%,rgba(255,255,255,.25) 100%)}
+.step-card.is-soon{opacity:.72}
+.step-copy{position:relative;z-index:2;width:78%;padding:17px 18px}
+.step-top{display:flex;align-items:center;gap:10px}
+.step-num{color:#a36b24;font-size:.8rem;letter-spacing:.08em}
+.step-state{padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.85);border:1px solid rgba(183,122,43,.25);color:#6f777b;font-size:.7rem}
+.step-state.is-open{color:#8a5b1f}
+.step-state.is-done{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}
+.step-card h3{margin:9px 0 5px;font-size:1.12rem;font-weight:300;letter-spacing:.03em}
+.step-card p{margin:0;color:#50575b;font-size:.84rem;line-height:1.45}
+.step-link{display:inline-flex;margin-top:10px;color:#9d651e;font-size:.84rem;text-decoration:none}
+.step-link.is-soon{color:#9aa1a5;pointer-events:none}
+.tickets{padding:18px}
+.tickets-empty{margin:0 0 4px;color:#6f777b;font-size:.88rem;line-height:1.5}
+.ticket{display:grid;grid-template-columns:58px 1fr;gap:14px;align-items:center;padding:12px 2px;border-bottom:1px solid rgba(183,122,43,.14)}
+.ticket:last-of-type{border-bottom:0}
+.ticket-date{text-align:center;padding:8px 4px;border-radius:14px;background:#fbf6ec;color:#8a5b1f;line-height:1.1}
+.ticket-date b{display:block;font-size:1.3rem;font-weight:300}
+.ticket-date small{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em}
+.ticket h3{margin:0 0 3px;font-size:.98rem;font-weight:300}
+.ticket p{margin:0;color:#6f777b;font-size:.78rem;line-height:1.4}
+.ticket.is-past{opacity:.6}
+.ticket-tag{display:inline-block;margin-top:5px;padding:2px 9px;border-radius:999px;background:#f3efe6;color:#6f777b;font-size:.68rem}
+.tickets .cta{margin-top:14px}
+#vision-text.is-empty{color:#9aa1a5;font-style:italic}
+.facet-add-form{grid-column:1/-1;display:flex;gap:8px;margin-bottom:6px}.facet-add-form[hidden]{display:none}
+.facet-add-form input{flex:1;min-height:44px;padding:10px 14px;border:1px solid rgba(183,122,43,.28);border-radius:14px;font:300 .95rem "Helvetica Neue",Arial,sans-serif}
+.facet-add-form button{border:0;border-radius:14px;padding:0 16px;background:#b77a2b;color:#fff;font:300 .9rem "Helvetica Neue",Arial,sans-serif}
+.facet.custom{position:relative}
+.facet .facet-remove{position:absolute;top:-4px;right:calc(50% - 38px);width:22px;height:22px;border-radius:50%;border:0;background:#fff;color:#a0522d;box-shadow:0 2px 8px rgba(0,0,0,.12);font-size:.8rem;line-height:22px;padding:0}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 <script src="/access-guard.js"></script>
@@ -71,33 +106,168 @@
 </head>
 <body>
 <main class="page">
-  <section class="hero" aria-labelledby="about-title"><img class="hero-art" src="/img/about-03-0979d275e9.webp" alt="Женщина в белом платье среди золотых световых сфер и снежных гор"><div class="profile"><div class="portrait-wrap"><img class="portrait" id="profile-avatar" src="/img/about-04-4a85d5dfb3.webp" alt="Варвара"><label class="avatar-upload" title="Загрузить своё фото" aria-label="Загрузить своё фото">↥<input id="avatar-input" type="file" accept="image/*"></label></div><div class="identity-copy"><h1 id="about-title">Варвара</h1><p class="membership-badge"><span id="space-since">В пространстве с сентября 2026</span></p><p class="club-membership" id="club-membership" hidden></p><p class="hero-lead">Я раскрываюсь. Я меняюсь. Я остаюсь собой.</p></div></div></section>
-  <section class="vision surface" id="vision"><div class="vision-head"><h2>КАК Я ВИЖУ СЕБЯ СЕГОДНЯ</h2><span class="rule"></span><time datetime="2026-09-17">Обновлено: 17 сентября 2026</time><button class="edit-button" id="edit-vision" aria-label="Редактировать описание">✎</button></div><p id="vision-text">Я женщина, которая создаёт, вдохновляет и объединяет. Мама. Предприниматель. Исследователь. Стремлюсь к гармонии, свободе и жизни в потоке. Открыта новому и верю в большие возможности.</p><textarea id="vision-editor" aria-label="Описание себя">Я женщина, которая создаёт, вдохновляет и объединяет. Мама. Предприниматель. Исследователь. Стремлюсь к гармонии, свободе и жизни в потоке. Открыта новому и верю в большие возможности.</textarea></section>
-  <div class="section-title"><h2>МОИ РЕСУРСЫ</h2><small>Отметьте золотым то, что нужно сейчас</small></div>
+  <section class="hero" aria-labelledby="about-title"><img class="hero-art" src="/img/about-03-0979d275e9.webp" alt="Женщина в белом платье среди золотых световых сфер и снежных гор"><div class="profile"><div class="portrait-wrap"><img class="portrait" id="profile-avatar" src="/img/about-04-4a85d5dfb3.webp" alt="Моё фото"><label class="avatar-upload" title="Загрузить своё фото" aria-label="Загрузить своё фото">↥<input id="avatar-input" type="file" accept="image/*"></label></div><div class="identity-copy"><h1 id="about-title">Моя страница</h1><p class="membership-badge"><span id="space-since">В пространстве с сентября 2026</span></p><p class="club-membership" id="club-membership" hidden></p><p class="hero-lead">Я раскрываюсь. Я меняюсь. Я остаюсь собой.</p></div></div></section>
+  <div class="section-title"><h2>МОЙ ПУТЬ</h2><small>Где я сейчас и что дальше</small></div>
+    <section class="steps" id="my-path">
+      <article class="step-card" data-step="1"><img src="/img/about-07-80f5cb2eba.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">01</span><span class="step-state is-open" id="step1-state">Доступно всегда</span></div><h3>МОЯ ЦЕЛОСТНОСТЬ</h3><p id="step1-text">Бесплатные материалы и практики — изучай в любое время.</p><a class="step-link" id="step1-link" href="#">Открыть материалы →</a></div></article>
+      <article class="step-card" data-step="2"><img src="/img/about-05-2f341cc01f.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">02</span><span class="step-state" id="step2-state">Клуб</span></div><h3>НАПОЛНЕНИЕ</h3><p id="step2-text">Каждый день — ритуалы наполнения ресурса в клубе «к Женщине».</p><a class="step-link" id="step2-link" href="#">Вступить в клуб →</a></div></article>
+      <article class="step-card" data-step="3"><img src="/img/about-11-c5e767910a.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">03</span><span class="step-state" id="step3-state">0 из 6</span></div><h3>РАСКРЫТИЕ ОБЪЁМА</h3><p id="step3-text">6 живых встреч. Раскрывай объём поэтапно в своём ритме.</p><a class="step-link" id="step3-link" href="meetings.html">Выбрать встречу →</a></div></article>
+      <article class="step-card is-soon" data-step="4"><img src="/img/about-06-050e46803e.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">04</span><span class="step-state">Скоро откроется</span></div><h3>ПРОЯВЛЕНИЕ</h3><p>Два пути, одна миссия: Партнёр и Мастер.</p></div></article>
+    </section>
+    <div class="section-title"><h2>МОИ ВСТРЕЧИ</h2><small>Мои билеты и пройденные встречи</small></div>
+    <section class="tickets surface" id="my-tickets"><p class="tickets-empty">Здесь появятся встречи, на которые вы записались.</p><a class="cta" href="meetings.html">Выбрать встречу <span>→</span></a></section>
+    <section class="vision surface" id="vision"><div class="vision-head"><h2>КАК Я ВИЖУ СЕБЯ СЕГОДНЯ</h2><span class="rule"></span><time id="vision-updated" hidden></time><button class="edit-button" id="edit-vision" aria-label="Редактировать описание">✎</button></div><p id="vision-text" class="is-empty">Напишите пару строк о себе: какая вы сегодня, что для вас важно, куда идёте.</p><textarea id="vision-editor" aria-label="Описание себя" placeholder="Какая я сегодня…"></textarea></section>
+    <div class="section-title"><h2>МОИ ГРАНИ</h2><small>Я могу быть разной. И вся эта я — настоящая</small></div>
+  <section class="facets" id="facets" aria-label="Мои грани">
+    <button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M31 8A16 16 0 1 0 39 35 17 17 0 0 1 31 8Z"/></svg></span><span>Женщина</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 39S8 29 8 17c0-8 10-11 16-3 6-8 16-5 16 3 0 12-16 22-16 22Z"/></svg></span><span>Мама</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 4v40M4 24h40M10 10l28 28M38 10 10 38M17 6l14 36M6 17l36 14M31 6 17 42M42 17 6 31"/></svg></span><span>Предприниматель</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 40c-12-7-17-17-15-28 7 2 12 6 15 12 3-6 8-10 15-12 2 11-3 21-15 28Z"/><path d="M24 24v16M9 20c6 0 11 3 15 8M39 20c-6 0-11 3-15 8"/></svg></span><span>Творец</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(-10 24 24)"/></svg></span><span>Путешественница</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M9 31c8-16 22-16 30 0M9 17c8 16 22 16 30 0"/></svg></span><span>Партнёр</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 5 28 20 43 24 28 28 24 43 20 28 5 24 20 20Z"/></svg></span><span>Исследователь</span></button><form class="facet-add-form" id="facet-form" hidden><input id="facet-input" maxlength="40" placeholder="Новая грань"><button type="submit">Добавить</button></form><button class="facet add" id="add-facet"><span class="facet-orb"><b>+</b></span><span>Добавить грань</span></button>
+  </section>
+    <div class="section-title"><h2>МОИ РЕСУРСЫ</h2><small>Отметьте золотым то, что нужно сейчас</small></div>
   <section class="resources surface" aria-label="Выбор нужных ресурсов"><p class="resource-intro">Выберите один или несколько ресурсов — клуб поможет найти женщин, опыт и возможности для следующего шага.</p><div class="resource-options" id="resource-options">
     <button class="resource-chip" type="button">Поддержка</button><button class="resource-chip" type="button">Окружение</button><button class="resource-chip" type="button">Подруги</button><button class="resource-chip" type="button">Наставничество</button><button class="resource-chip" type="button">Партнёрство</button><button class="resource-chip" type="button">Команда</button><button class="resource-chip" type="button">Инвестиции</button><button class="resource-chip" type="button">Клиенты</button><button class="resource-chip" type="button">Экспертиза</button><button class="resource-chip" type="button">Продвижение</button><button class="resource-chip" type="button">Продажи</button><button class="resource-chip" type="button">Дизайн</button><button class="resource-chip" type="button">Маркетинг</button><button class="resource-chip" type="button">Финансы</button><button class="resource-chip" type="button">Юридическая помощь</button><button class="resource-chip" type="button">Пространство</button><button class="resource-chip" type="button">Нетворкинг</button><button class="resource-chip" type="button">Идеи</button><button class="resource-chip" type="button">Время</button><button class="resource-chip" type="button">Энергия</button><button class="resource-chip" type="button">Вдохновение</button>
   </div><button class="cta resource-action" id="find-resources" type="button">Найти ресурсы в клубе <span>→</span></button><p class="resource-status" id="resource-status" aria-live="polite"></p></section>
-  <div class="section-title"><h2>МОИ ГРАНИ</h2><small>Я могу быть разной. И вся эта я — настоящая</small></div>
-  <section class="facets" id="facets" aria-label="Мои грани">
-    <button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M31 8A16 16 0 1 0 39 35 17 17 0 0 1 31 8Z"/></svg></span><span>Женщина</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 39S8 29 8 17c0-8 10-11 16-3 6-8 16-5 16 3 0 12-16 22-16 22Z"/></svg></span><span>Мама</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 4v40M4 24h40M10 10l28 28M38 10 10 38M17 6l14 36M6 17l36 14M31 6 17 42M42 17 6 31"/></svg></span><span>Предприниматель</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 40c-12-7-17-17-15-28 7 2 12 6 15 12 3-6 8-10 15-12 2 11-3 21-15 28Z"/><path d="M24 24v16M9 20c6 0 11 3 15 8M39 20c-6 0-11 3-15 8"/></svg></span><span>Творец</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><ellipse cx="24" cy="24" rx="20" ry="8" transform="rotate(-10 24 24)"/></svg></span><span>Путешественница</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M9 31c8-16 22-16 30 0M9 17c8 16 22 16 30 0"/></svg></span><span>Партнёр</span></button><button class="facet"><span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 5 28 20 43 24 28 28 24 43 20 28 5 24 20 20Z"/></svg></span><span>Исследователь</span></button><button class="facet add" id="add-facet"><span class="facet-orb"><b>+</b></span><span>Добавить грань</span></button>
-  </section>
-  <div class="section-title"><h2>МОЁ ПРОСТРАНСТВО СЕЙЧАС</h2><small>Всё, что доступно мне здесь и сейчас</small></div>
-  <section class="now-grid"><article class="now-card"><img src="/img/about-05-2f341cc01f.webp" alt="Женщины пространства" loading="lazy" decoding="async"><div class="now-copy"><h3>Я В КЛУБЕ<br>ДО 8 ОКТЯБРЯ</h3><p>Живое пространство для глубины, поддержки и расширения.</p><a class="cta" href="index.html">Перейти в клуб <span>→</span></a></div></article><div class="side-stack"><article class="side-card"><img src="/img/about-06-050e46803e.webp" alt="Путь многомерности" loading="lazy" decoding="async"><div class="side-copy"><h3>Я В МНОГОМЕРНОСТИ</h3><p>Текущий цикл: ОПОРА И ОБЪЁМ<br>Следующий ритуал: 22 сентября</p><a class="mini-link" href="path.html">Перейти к ритуалу →</a></div></article><article class="side-card"><img src="/img/about-07-80f5cb2eba.webp" alt="Программа целостности" loading="lazy" decoding="async"><div class="side-copy"><h3>ТВОЯ ЦЕЛОСТНОСТЬ</h3><p>Программа доступна</p><a class="mini-link" href="path.html">Продолжить →</a></div></article><article class="side-card"><img src="/img/about-08-301c227afb.webp" alt="Ближайшая встреча" loading="lazy" decoding="async"><div class="side-copy"><h3>МОЯ СЛЕДУЮЩАЯ ВСТРЕЧА</h3><p>Москва · 20 сентября<br>с Варварой Вебер</p><a class="mini-link" href="meetings.html">Детали встречи →</a></div></article></div></section>
-  <div class="section-title"><h2>МОЙ ПУТЬ В ПРОСТРАНСТВЕ</h2><small>Реальный опыт. Живые встречи. Моё расширение</small></div>
-  <section class="journey"><a class="journey-card" href="meetings.html"><img src="/img/about-09-468bc44df3.webp" alt="Основы" loading="lazy" decoding="async"><div class="journey-copy"><h3>ОСНОВЫ</h3><time>20 сентября 2026</time></div><b>→</b></a><a class="journey-card" href="meetings.html"><img src="/img/about-10-d831f2273c.webp" alt="Целостность" loading="lazy" decoding="async"><div class="journey-copy"><h3>ЦЕЛОСТНОСТЬ</h3><time>27 сентября 2026</time></div><b>→</b></a><a class="journey-card" href="meetings.html"><img src="/img/about-11-c5e767910a.webp" alt="Опора и объём" loading="lazy" decoding="async"><div class="journey-copy"><h3>ОПОРА<br>И ОБЪЁМ</h3><time>4 октября 2026</time></div><b>→</b></a><a class="journey-card" href="meetings.html"><img src="/img/about-12-41f1a0febb.webp" alt="Источник и поле" loading="lazy" decoding="async"><div class="journey-copy"><h3>ИСТОЧНИК<br>И ПОЛЕ</h3><time>11 октября 2026</time></div><b>→</b></a></section><div class="closing">— ТЫ УЖЕ ДОСТАТОЧНА, ЧТОБЫ БЫТЬ ЗДЕСЬ —</div>
+    <div class="closing">— ТЫ УЖЕ ДОСТАТОЧНА, ЧТОБЫ БЫТЬ ЗДЕСЬ —</div>
 </main>
 <nav class="app-nav" aria-label="Основная навигация"><a href="space.html"><span class="icon"><svg class="line-icon" viewBox="-4 -4 56 56" aria-hidden="true"><g transform="translate(24 24)"><path d="M0-27 1.5-8 0-4.8-1.5-8ZM0 27-1.5 8 0 4.8 1.5 8ZM-27 0-8-1.5-4.8 0-8 1.5ZM27 0 8 1.5 4.8 0 8-1.5ZM-19.1-19.1-5.8-7.8-4.1-4.1-7.8-5.8ZM19.1 19.1 5.8 7.8 4.1 4.1 7.8 5.8ZM19.1-19.1 7.8-5.8 4.1-4.1 5.8-7.8ZM-19.1 19.1-7.8 5.8-4.1 4.1-5.8 7.8Z" fill="currentColor" stroke="none"/><path d="M-10.3-24.8-3.1-9.1M10.3 24.8 3.1 9.1M10.3-24.8 3.1-9.1M-10.3 24.8-3.1 9.1M-24.8-10.3-9.1-3.1M24.8 10.3 9.1 3.1M24.8-10.3 9.1-3.1M-24.8 10.3-9.1 3.1" stroke-width="1.15"/><circle r="3.2" stroke-width="1.35"/><circle r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Пространство</span></a><a href="path.html"><span class="icon"><svg class="line-icon" viewBox="-2 -2 52 52" aria-hidden="true"><g transform="translate(24 24)"><ellipse rx="24" ry="10.4" transform="rotate(-13)" stroke-width="1.35"/><ellipse rx="21.5" ry="9" transform="rotate(48)" stroke-width="1.05"/><path d="M-18.5 12.5C-9.5 19.6 7.8 19 18.7 8.3" stroke-width="1.05"/><circle r="6.7" stroke-width="1.25"/><circle cx="21.5" cy="-5.5" r="1.55" fill="currentColor" stroke="none"/><circle cx="-15.8" cy="13.2" r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Путь</span></a><a href="meetings.html"><span class="icon"><svg class="line-icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(24 24)"><path d="M-6 16C-10.3 11.6-20.5 4.4-20.5-4.6-20.5-13.3-10.5-17-5.2-9.7-.1-17 10-13.3 10-4.6 10 4.2.2 11.6-6 16Z" stroke-width="1.35"/><path d="M6 16C1.7 11.6-8.5 4.4-8.5-4.6-8.5-13.3 1.5-17 6.8-9.7 11.9-17 22-13.3 22-4.6 22 4.2 12.2 11.6 6 16Z" stroke-width="1.35"/><circle cx="-6" cy="16" r=".95" fill="currentColor" stroke="none"/><circle cx="6" cy="16" r=".95" fill="currentColor" stroke="none"/></g></svg></span><span>Встречи</span></a><a href="about.html" class="active" aria-current="page"><span class="icon"><svg class="fill-icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M241.251 145.056c-39.203-17.423-91.472 17.423-104.54 60.982-13.068 43.558 8.712 117.608 65.337 143.742 56.626 26.135 108.896-8.712 87.117-39.202-74.049-8.712-121.963-87.117-100.184-126.319s91.472-21.78 52.27-39.203zM337.079 271.375c47.914-39.202 21.779-126.319-17.423-135.031-39.202-8.712-56.626 13.068-26.135 39.202 39.203 30.491-8.712 91.472-39.202 87.117 0 0 34.847 47.914 82.76 8.712zM254.318 119.788c43.558-17.423 74.049-9.579 100.184 16.556 13.068-39.202-30.491-104.54-108.896-113.252S93.153 118.921 127.999 171.191c8.712-17.424 60.982-64.47 126.319-51.403zM110.576 245.24C36.527 262.663 28.87 335.248 45.239 380.27c17.423 47.914 4.356 82.761 26.135 91.472 20.622 8.253 91.472 13.068 152.454 17.423 60.982 4.356 108.896-47.914 91.472-108.896-174.233 30.492-204.724-95.827-204.724-135.029zM93.883 235.796s2.178-28.313 10.89-43.558c-4.356-4.356-8.712-21.779-8.712-21.779s-4.356-19.601-4.356-34.846c-32.669-6.534-89.295 34.846-91.472 41.38-2.178 6.534 10.889 80.583 39.202 82.761 30.492-23.958 54.448-23.958 54.448-23.958zM489.533 175.546c-39.202-82.761-113.252-65.337-113.252-65.337s4.356 21.779-4.356 34.846c43.558 47.914 13.067 146.643-24.681 158.265 130.675 56.626 159.712-58.081 164.068-75.504 4.356-17.423-13.067-30.49-21.779-52.27zM454.108 332.076c-22.359 15.841-85.663 11.613-121.964-7.265 1.446 14.514-13.067 37.756-20.325 39.202 27.59 11.621 53.725 62.436 7.265 116.161 18.878 18.87 95.828 4.356 140.842-24.689 7.325-4.722 18.869-52.27 21.779-79.851 3.855-36.531 7.258-68.247-27.597-43.558zM257.227 213.294c-18.928 5.164-30.439-6.27-23.234-18.869 5.811-10.167 5.266-20.69-8.712-13.068-29.044 17.423-11.612 66.784 24.689 62.428 49.36-17.423 27.581-62.428 14.514-60.982-13.067 1.446 8.712 26.135-7.257 30.491z"/></svg></span><span>Обо мне</span></a></nav>
 <script>
-const vision=document.getElementById('vision'),text=document.getElementById('vision-text'),editor=document.getElementById('vision-editor'),edit=document.getElementById('edit-vision');
-edit.addEventListener('click',()=>{if(vision.classList.toggle('editing')){editor.focus();edit.textContent='✓';edit.setAttribute('aria-label','Сохранить описание')}else{text.textContent=editor.value.trim()||text.textContent;edit.textContent='✎';edit.setAttribute('aria-label','Редактировать описание')}});
-document.getElementById('add-facet').addEventListener('click',()=>{const value=prompt('Какую грань добавить?');if(!value?.trim())return;const button=document.createElement('button');button.className='facet';button.innerHTML='<span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 7 28 20 41 24 28 28 24 41 20 28 7 24 20 20Z"/></svg></span><span></span>';button.lastElementChild.textContent=value.trim();document.getElementById('facets').insertBefore(button,document.getElementById('add-facet'))});
-const avatarInput=document.getElementById('avatar-input'),avatar=document.getElementById('profile-avatar');
-avatarInput.addEventListener('change',()=>{const file=avatarInput.files&&avatarInput.files[0];if(!file)return;if(!file.type.startsWith('image/'))return;const reader=new FileReader();reader.onload=()=>{avatar.src=reader.result;try{localStorage.setItem('profileAvatar',reader.result)}catch(e){}};reader.readAsDataURL(file)});
-try{const savedAvatar=localStorage.getItem('profileAvatar');if(savedAvatar)avatar.src=savedAvatar}catch(e){}
-const resourceChips=[...document.querySelectorAll('.resource-chip')],resourceStatus=document.getElementById('resource-status');
-resourceChips.forEach(chip=>chip.addEventListener('click',()=>{chip.classList.toggle('active');chip.setAttribute('aria-pressed',chip.classList.contains('active')?'true':'false');resourceStatus.textContent=''}));
-const CLUB_PAYMENT_URL='https://t.me/tribute/app?startapp=s17IJ';const MONTHS_GEN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];function monthYear(iso){const d=new Date(iso);return MONTHS_GEN[d.getMonth()]+' '+d.getFullYear()}function fullDate(iso){const d=new Date(iso);return d.getDate()+' '+MONTHS_GEN[d.getMonth()]+' '+d.getFullYear()}function setName(name){if(!name)return;document.getElementById('about-title').textContent=name;const img=document.getElementById('profile-avatar');if(img)img.alt=name}function renderProfile(p){if(!p||!p.ok)return;setName(p.user&&p.user.first_name);const since=document.getElementById('space-since');if(p.space&&p.space.joined_at){since.textContent='В пространстве с '+monthYear(p.space.joined_at)}else{since.textContent='В пространстве'}const club=p.club||{},line=document.getElementById('club-membership');const inClub=club.member===true||club.status==='active'||club.status==='pre_cancelled';if(!inClub){line.hidden=true;return}const parts=[];if(club.activated_at)parts.push('В клубе с '+fullDate(club.activated_at));else parts.push('Участница клуба');if(club.expires_at)parts.push((club.status==='pre_cancelled'?'доступ до ':'оплачено до ')+fullDate(club.expires_at));parts[1]&&(parts[1]=parts[1][0].toUpperCase()+parts[1].slice(1));line.textContent=parts.join('\n');line.hidden=false}const profileData=(async()=>{try{let initData='';for(let i=0;i<20&&!initData;i++){const webApp=window.Telegram&&window.Telegram.WebApp;initData=webApp&&webApp.initData||'';if(!initData)await new Promise(r=>setTimeout(r,250))}if(!initData)return null;const unsafe=window.Telegram.WebApp.initDataUnsafe;setName(unsafe&&unsafe.user&&unsafe.user.first_name);const response=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData})});return response.ok?await response.json():null}catch(e){return null}})();profileData.then(renderProfile);const clubStatus=profileData.then(p=>({club_member:Boolean(p&&p.club&&p.club.member===true),club_url:p&&p.club?p.club.url:null}));function openClubLink(url){const webApp=window.Telegram&&window.Telegram.WebApp;if(webApp&&webApp.initData&&webApp.openTelegramLink){webApp.openTelegramLink(url)}else{window.open(url,'_blank','noopener')}}
-document.getElementById('find-resources').addEventListener('click',()=>{const selected=resourceChips.filter(chip=>chip.classList.contains('active')).map(chip=>chip.textContent.trim());if(!selected.length){resourceStatus.textContent='Сначала отметьте хотя бы один нужный ресурс.';return}try{sessionStorage.setItem('clubResources',JSON.stringify(selected))}catch(e){}resourceStatus.textContent='Выбрано: '+selected.join(', ')+'. Переходим в клуб…';clubStatus.then(status=>{openClubLink(status.club_member&&status.club_url?status.club_url:CLUB_PAYMENT_URL)})});
+(function aboutPage(){
+const webApp=window.Telegram&&window.Telegram.WebApp;
+const CLUB_PAYMENT_URL='https://t.me/tribute/app?startapp=s17IJ';
+const MONTHS_GEN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const MONTHS_SHORT=['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+const $=id=>document.getElementById(id);
+const monthYear=iso=>{const d=new Date(iso);return MONTHS_GEN[d.getMonth()]+' '+d.getFullYear()};
+const fullDate=iso=>{const d=new Date(iso);return d.getDate()+' '+MONTHS_GEN[d.getMonth()]+' '+d.getFullYear()};
+const dayMonth=iso=>{const d=new Date(iso);return d.getDate()+' '+MONTHS_GEN[d.getMonth()]};
+let initData='';
+
+function openLink(url){
+  if(!url)return;
+  if(webApp&&webApp.initData){if(/^https:\/\/t\.me\//.test(url)&&webApp.openTelegramLink)webApp.openTelegramLink(url);else if(webApp.openLink)webApp.openLink(url);else window.open(url,'_blank')}
+  else window.open(url,'_blank','noopener');
+}
+async function api(body){
+  const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData,...body})});
+  return r.ok?r.json():null;
+}
+let saveTimer=null,pending={};
+function saveProfile(patch){ // small debounce so quick taps are sent together
+  Object.assign(pending,patch);clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{const body=pending;pending={};if(initData)api({action:'save_profile',profile:body}).catch(()=>{})},600);
+}
+
+// ---------- Как я вижу себя ----------
+const vision=$('vision'),text=$('vision-text'),editor=$('vision-editor'),edit=$('edit-vision'),updated=$('vision-updated');
+const EMPTY_VISION=text.textContent;
+function showVision(value,updatedAt){
+  text.textContent=value||EMPTY_VISION;text.classList.toggle('is-empty',!value);editor.value=value||'';
+  if(updatedAt){updated.hidden=false;updated.textContent='Обновлено: '+fullDate(updatedAt)}else updated.hidden=true;
+}
+edit.addEventListener('click',()=>{
+  if(vision.classList.toggle('editing')){editor.focus();edit.textContent='✓';edit.setAttribute('aria-label','Сохранить описание')}
+  else{const value=editor.value.trim();showVision(value,value?new Date().toISOString():null);edit.textContent='✎';edit.setAttribute('aria-label','Редактировать описание');saveProfile({vision:value})}
+});
+
+// ---------- Мои грани ----------
+const facetsBox=$('facets'),addFacet=$('add-facet'),facetForm=$('facet-form'),facetInput=$('facet-input');
+const defaultFacets=[...facetsBox.querySelectorAll('.facet:not(.add)')].map(b=>b.lastElementChild.textContent.trim());
+const STAR='<span class="facet-orb"><svg viewBox="0 0 48 48"><path d="M24 7 28 20 41 24 28 28 24 41 20 28 7 24 20 20Z"/></svg></span><span></span>';
+let customFacets=[];
+function renderCustomFacets(){
+  facetsBox.querySelectorAll('.facet.custom').forEach(b=>b.remove());
+  customFacets.forEach((name,i)=>{
+    const b=document.createElement('div');b.className='facet custom';b.innerHTML=STAR;b.lastElementChild.textContent=name;
+    const x=document.createElement('button');x.type='button';x.className='facet-remove';x.setAttribute('aria-label','Убрать грань '+name);x.textContent='×';
+    x.addEventListener('click',()=>{customFacets.splice(i,1);renderCustomFacets();saveProfile({facets:defaultFacets.concat(customFacets)})});
+    b.appendChild(x);facetsBox.insertBefore(b,facetForm);
+  });
+}
+addFacet.addEventListener('click',()=>{facetForm.hidden=!facetForm.hidden;if(!facetForm.hidden)facetInput.focus()});
+facetForm.addEventListener('submit',e=>{e.preventDefault();const v=facetInput.value.trim();if(!v)return;if(!customFacets.includes(v)&&!defaultFacets.includes(v))customFacets.push(v);facetInput.value='';facetForm.hidden=true;renderCustomFacets();saveProfile({facets:defaultFacets.concat(customFacets)})});
+
+// ---------- Фото ----------
+const avatarInput=$('avatar-input'),avatar=$('profile-avatar');let customAvatar=false;
+avatarInput.addEventListener('change',()=>{const file=avatarInput.files&&avatarInput.files[0];if(!file||!file.type.startsWith('image/'))return;const reader=new FileReader();reader.onload=()=>{avatar.src=reader.result;customAvatar=true;try{localStorage.setItem('profileAvatar',reader.result)}catch(e){}};reader.readAsDataURL(file)});
+try{const savedAvatar=localStorage.getItem('profileAvatar');if(savedAvatar){avatar.src=savedAvatar;customAvatar=true}}catch(e){}
+
+// ---------- Мои ресурсы ----------
+const resourceChips=[...document.querySelectorAll('.resource-chip')],resourceStatus=$('resource-status');
+const selectedResources=()=>resourceChips.filter(c=>c.classList.contains('active')).map(c=>c.textContent.trim());
+resourceChips.forEach(chip=>chip.addEventListener('click',()=>{chip.classList.toggle('active');chip.setAttribute('aria-pressed',chip.classList.contains('active')?'true':'false');resourceStatus.textContent='';saveProfile({resources:selectedResources()})}));
+
+// ---------- Мой путь ----------
+function setStep(n,{state,stateClass,text:t,link,linkText,href,soon}){
+  const st=$('step'+n+'-state'),p=$('step'+n+'-text'),a=$('step'+n+'-link');
+  if(state!==undefined){st.textContent=state;st.className='step-state'+(stateClass?' '+stateClass:'')}
+  if(t!==undefined)p.textContent=t;
+  if(a){if(linkText)a.textContent=linkText+' →';a.classList.toggle('is-soon',Boolean(soon));a.onclick=null;
+    if(href){a.setAttribute('href',href)}else{a.setAttribute('href','#');if(link)a.onclick=e=>{e.preventDefault();openLink(link)}}}
+}
+function renderPath(p){
+  const links=p.links||{};
+  if(links.materials_url)setStep(1,{link:links.materials_url,linkText:'Открыть материалы'});
+  else setStep(1,{linkText:'Материалы скоро появятся',soon:true});
+  const club=p.club||{};const inClub=club.member===true||club.status==='active'||club.status==='pre_cancelled';
+  if(inClub){
+    const until=club.expires_at?(club.status==='pre_cancelled'?'Доступ до ':'Оплачено до ')+dayMonth(club.expires_at):'Я в клубе';
+    setStep(2,{state:'Я в клубе',stateClass:'is-done',text:until+'. Ритуалы наполнения — каждый день.',link:club.url||CLUB_PAYMENT_URL,linkText:club.url?'Перейти в клуб':'Управлять подпиской'});
+  }else setStep(2,{state:'Клуб',text:'Каждый день — ритуалы наполнения ресурса в клубе «к Женщине».',link:CLUB_PAYMENT_URL,linkText:'Вступить в клуб'});
+  const t=p.tickets||{items:[],passed:0};const next=t.items.find(x=>x.status==='upcoming');
+  const passed=t.passed||0;
+  setStep(3,{state:passed+' из 6',stateClass:passed>=6?'is-done':passed?'is-open':'',
+    text:next?'Следующая: «'+next.title+'» — '+next.date_label+', '+next.city+'.':passed>=6?'Все 6 встреч пройдены.':'6 живых встреч. Раскрывай объём поэтапно в своём ритме.',
+    href:next?'#my-tickets':'meetings.html',linkText:next?'Мой билет':'Выбрать встречу'});
+}
+
+// ---------- Мои встречи ----------
+function renderTickets(t){
+  const box=$('my-tickets');if(!t||!t.items.length)return;
+  box.innerHTML='';
+  t.items.forEach(x=>{
+    const row=document.createElement('article');row.className='ticket'+(x.status==='past'?' is-past':'');
+    const d=document.createElement('div');d.className='ticket-date';
+    if(x.starts_at){const dt=new Date(x.starts_at);d.innerHTML='<b></b><small></small>';d.querySelector('b').textContent=dt.getDate();d.querySelector('small').textContent=MONTHS_SHORT[dt.getMonth()]}else{d.innerHTML='<small>дата скоро</small>'}
+    const c=document.createElement('div');const h=document.createElement('h3');h.textContent=x.title;
+    const meta=document.createElement('p');meta.textContent=[x.city,x.starts_at?x.date_label:null,x.venue].filter(Boolean).join(' · ');
+    const tag=document.createElement('span');tag.className='ticket-tag';tag.textContent=x.status==='past'?'Пройдена':x.status==='soon'?'Дату сообщим в боте':x.kind==='package'?'Пакет · билет в боте':'Билет в боте';
+    c.append(h,meta);if(x.address&&x.status==='upcoming'){const a=document.createElement('p');a.textContent=x.address;c.appendChild(a)}c.appendChild(tag);
+    row.append(d,c);box.appendChild(row);
+  });
+  const more=document.createElement('a');more.className='cta';more.href='meetings.html';more.innerHTML='Все встречи и расписание <span>→</span>';box.appendChild(more);
+}
+
+// ---------- Шапка ----------
+function setName(name){if(!name)return;$('about-title').textContent=name;if(avatar)avatar.alt=name}
+function renderHeader(p){
+  setName(p.user&&p.user.first_name);
+  if(!customAvatar&&p.user&&p.user.photo_url)avatar.src=p.user.photo_url;
+  $('space-since').textContent=p.space&&p.space.joined_at?'В пространстве с '+monthYear(p.space.joined_at):'В пространстве';
+  const club=p.club||{},line=$('club-membership');const inClub=club.member===true||club.status==='active'||club.status==='pre_cancelled';
+  if(!inClub){line.hidden=true;return}
+  const parts=[club.activated_at?'В клубе с '+fullDate(club.activated_at):'Участница клуба'];
+  if(club.expires_at)parts.push((club.status==='pre_cancelled'?'Доступ до ':'Оплачено до ')+fullDate(club.expires_at));
+  line.textContent=parts.join('\n');line.hidden=false;
+}
+function renderProfile(p){
+  if(!p||!p.ok)return;
+  renderHeader(p);renderPath(p);renderTickets(p.tickets);
+  if(p.profile){
+    showVision(p.profile.vision,p.profile.vision_updated_at);
+    customFacets=(p.profile.facets||[]).filter(f=>!defaultFacets.includes(f));renderCustomFacets();
+    resourceChips.forEach(c=>{const on=(p.profile.resources||[]).includes(c.textContent.trim());c.classList.toggle('active',on);c.setAttribute('aria-pressed',on?'true':'false')});
+  }
+}
+const profileData=(async()=>{try{
+  for(let i=0;i<20&&!initData;i++){initData=webApp&&webApp.initData||'';if(!initData)await new Promise(r=>setTimeout(r,250))}
+  if(!initData)return null;
+  const unsafe=webApp.initDataUnsafe;setName(unsafe&&unsafe.user&&unsafe.user.first_name);
+  return await api({});
+}catch(e){return null}})();
+profileData.then(renderProfile);
+
+// "Найти ресурсы в клубе": club members go to the club group, others to the club payment.
+const clubStatus=profileData.then(p=>({club_member:Boolean(p&&p.club&&p.club.member===true),club_url:p&&p.club?p.club.url:null}));
+$('find-resources').addEventListener('click',()=>{const selected=selectedResources();if(!selected.length){resourceStatus.textContent='Сначала отметьте хотя бы один нужный ресурс.';return}resourceStatus.textContent='Выбрано: '+selected.join(', ')+'. Переходим в клуб…';clubStatus.then(s=>openLink(s.club_member&&s.club_url?s.club_url:CLUB_PAYMENT_URL))});
+})();
 </script>
 </body>
 </html>

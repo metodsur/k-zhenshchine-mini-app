@@ -1,5 +1,6 @@
 const schedule = require("../lib/schedule");
 const events = require("../lib/events");
+const settings = require("../lib/settings");
 const { send } = require("../lib/http");
 
 module.exports = async function handler(req, res) {
@@ -9,10 +10,12 @@ module.exports = async function handler(req, res) {
     const counts = await schedule.soldCounts(doc);
     let clubEvents = [];
     try { clubEvents = events.upcoming(await events.loadEvents()); } catch { clubEvents = []; }
-    return send(res, 200, { ok: true, ...schedule.publicView(doc, counts), events: clubEvents });
+    let links = { materials_url: "", ritual_url: "" };
+    try { links = await settings.loadSettings(); } catch { /* buttons show "скоро" */ }
+    return send(res, 200, { ok: true, ...schedule.publicView(doc, counts), events: clubEvents, links });
   } catch (error) {
     console.error("Schedule read failed", error.message);
     // Storage outage: still show the meetings, all as "date coming soon".
-    return send(res, 200, { ok: true, degraded: true, ...schedule.publicView(schedule.defaultSchedule(), {}), events: [] });
+    return send(res, 200, { ok: true, degraded: true, ...schedule.publicView(schedule.defaultSchedule(), {}), events: [], links: { materials_url: "", ritual_url: "" } });
   }
 };
