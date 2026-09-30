@@ -11,7 +11,7 @@
   try { if (typeof webApp.disableVerticalSwipes === "function") webApp.disableVerticalSwipes(); } catch (e) {}
 
   function repaintNav() {
-    var nav = document.querySelector(".nav");
+    var nav = document.querySelector(".app-nav, .nav");
     if (!nav) return;
     // Force WebKit to recompute the fixed layer against the new viewport.
     nav.style.transform = "translateX(-50%) translateZ(0)";
