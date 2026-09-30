@@ -190,8 +190,18 @@
   document.querySelectorAll('[data-book-meeting]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openBooking({kind:'single',meeting:a.dataset.bookMeeting})}));
   document.querySelectorAll('[data-book-package]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openBooking({kind:'package'})}));
 
+  // Links like meetings.html?book=1&meeting=2&city=moscow (from "Пространство") open the booking sheet.
+  let linkHandled=false;
+  function openFromLink(){
+    if(linkHandled)return;linkHandled=true;
+    const q=new URLSearchParams(location.search);if(!q.get('book'))return;
+    const c=q.get('city');if(c&&data.cities.some(x=>x.id===c))cityId=c;
+    const mid=q.get('meeting');
+    openBooking(q.get('package')?{kind:'package'}:{kind:'single',meeting:data.meetings.some(m=>m.id===mid)?mid:'1'});
+    history.replaceState(null,'',location.pathname);
+  }
   async function load(){
-    try{const r=await fetch('/api/schedule',{cache:'no-store'}).then(x=>x.json());if(!r.ok)return;data=r;if(!data.cities.some(c=>c.id===cityId))cityId=data.cities[0].id;renderSchedule();if(!modal.hidden)renderBooking()}catch(e){/* keep the static schedule */}
+    try{const r=await fetch('/api/schedule',{cache:'no-store'}).then(x=>x.json());if(!r.ok)return;data=r;if(!data.cities.some(c=>c.id===cityId))cityId=data.cities[0].id;renderSchedule();if(!modal.hidden)renderBooking();openFromLink()}catch(e){/* keep the static schedule */}
   }
   load();
 
