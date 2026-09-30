@@ -1,6 +1,7 @@
 const { telegram, isChannelMember, isMemberStatus, safeEqualString } = require("../../lib/telegram");
 const store = require("../../lib/store");
 const payments = require("../../lib/payments");
+const stats = require("../../lib/stats");
 
 function send(res, status, body) {
   res.statusCode = status; res.setHeader("Content-Type", "application/json; charset=utf-8"); res.end(JSON.stringify(body));
@@ -55,6 +56,7 @@ module.exports = async function handler(req, res) {
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     const message = update.message;
+    if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) await stats.trackStart(message.from.id);
     if (message?.chat?.type === "private" && typeof message.text === "string" && /^\/space(@\w+)?(\s|$)/.test(message.text)) {
       if (await isMemberSafe(message.from.id)) {
         await telegram("sendMessage", { chat_id: message.chat.id, text: "Твоё пространство «к Женщине» 🤍", reply_markup: spaceKeyboard() });
@@ -98,7 +100,9 @@ module.exports = async function handler(req, res) {
       if (!isMemberStatus(oldStatus) && isMemberStatus(newStatus)) {
         const joinedUserId = change.new_chat_member.user.id;
         const joinedAt = new Date((change.date || Math.floor(Date.now() / 1000)) * 1000).toISOString();
-        try { await store.rememberChannelJoin(joinedUserId, joinedAt); } catch (error) { console.error("Join date storage failed"); }
+        try {
+          if (Number(await store.rememberChannelJoin(joinedUserId, joinedAt)) === 1) await stats.trackChannelJoin(new Date(joinedAt));
+        } catch (error) { console.error("Join date storage failed"); }
         await sendJoined(joinedUserId);
       }
     }

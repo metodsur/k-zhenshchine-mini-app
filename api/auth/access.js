@@ -1,5 +1,6 @@
 const { verifyInitData, isChannelMember } = require("../../lib/telegram");
 const store = require("../../lib/store");
+const stats = require("../../lib/stats");
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -20,6 +21,7 @@ module.exports = async function handler(req, res) {
     return send(res, 401, { ok: false, error: "Invalid Telegram authorization" });
   }
 
+  await stats.trackAppUser(user.id);
   let subscribed;
   try {
     subscribed = await isChannelMember(user.id);
@@ -30,7 +32,10 @@ module.exports = async function handler(req, res) {
   // Storage problems must never block access: they only mean the start pages are shown again.
   let onboarded = false;
   try {
-    if (subscribed && body.mark === "onboarded") { await store.markOnboarded(user.id); onboarded = true; }
+    if (subscribed && body.mark === "onboarded") {
+      if (Number(await store.markOnboarded(user.id)) === 1) await stats.trackOnboarded(user.id);
+      onboarded = true;
+    }
     else if (subscribed) onboarded = await store.isOnboarded(user.id);
   } catch { onboarded = false; }
 

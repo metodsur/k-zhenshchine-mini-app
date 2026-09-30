@@ -4,16 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Управление встречами — к Женщине</title>
+<title>Админка — к Женщине</title>
 <style>
-:root{--gold:#b77a2b;--ink:#303438;--mute:#6f777b;--line:rgba(183,122,43,.22);--r:24px}
+:root{--gold:#b77a2b;--ink:#303438;--mute:#6f777b;--line:rgba(183,122,43,.22);--grid:#ebe7df;--r:24px}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;color:var(--ink);font-family:"Helvetica Neue","Arial Narrow",Arial,sans-serif;font-weight:300;background:radial-gradient(circle at 92% 4%,rgba(226,194,137,.18),transparent 340px),linear-gradient(180deg,#fbfdfe 0%,#f2f7f8 100%)}
-.app{width:min(100%,760px);margin:auto;padding:18px 16px calc(110px + env(safe-area-inset-bottom))}
-h1{margin:6px 0 4px;font-size:1.9rem;font-weight:200;letter-spacing:.01em}
+.app{width:min(100%,760px);margin:auto;padding:18px 16px calc(120px + env(safe-area-inset-bottom))}
+h1{margin:6px 0 2px;font-size:1.9rem;font-weight:200;letter-spacing:.01em}
 h2{margin:0;font-size:1.15rem;font-weight:300}
+h3{margin:0 0 10px;font-size:.98rem;font-weight:300}
 .eyebrow{font-size:.7rem;letter-spacing:.17em;text-transform:uppercase;color:#737b80}
-.lead{margin:0 0 18px;color:var(--mute);font-size:.86rem;line-height:1.5}
+.role{margin:0 0 14px;color:var(--mute);font-size:.82rem}
+.lead{margin:10px 0 0;color:var(--mute);font-size:.84rem;line-height:1.5}
 .card{margin-top:14px;padding:18px;border:1px solid rgba(255,255,255,.95);border-radius:var(--r);background:rgba(255,255,255,.72);box-shadow:0 10px 30px rgba(69,77,80,.07)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .full{grid-column:1/-1}
@@ -21,24 +23,29 @@ label{display:grid;gap:5px;font-size:.74rem;color:var(--mute);letter-spacing:.02
 input,select,textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font:300 .95rem/1.35 "Helvetica Neue",Arial,sans-serif;-webkit-appearance:none;appearance:none}
 textarea{min-height:76px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);outline-offset:1px}
+.sections{position:sticky;top:0;z-index:5;display:flex;gap:2px;margin:0 -16px;padding:10px 16px;overflow-x:auto;background:rgba(246,248,248,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.section-btn{flex:1 0 auto;border:0;border-radius:999px;padding:10px 12px;background:transparent;color:#555d61;font:300 .92rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
+.section-btn.active{background:#fff;color:#2e3234;box-shadow:0 4px 14px rgba(78,68,53,.12)}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-top:14px}
 .tab{flex:0 0 auto;border:1px solid rgba(183,122,43,.28);border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.75);color:#555d61;font:300 .9rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
 .tab.active{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}
 .tab.add{border-style:dashed;color:var(--gold)}
-.meeting{margin-top:12px;border:1px solid rgba(255,255,255,.95);border-radius:20px;background:rgba(255,255,255,.8);overflow:hidden}
+.meeting,.item{margin-top:12px;border:1px solid rgba(255,255,255,.95);border-radius:20px;background:rgba(255,255,255,.8);overflow:hidden}
 .meeting summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:14px 16px}
 .meeting summary::-webkit-details-marker{display:none}
 .num{color:#a36b24}
 .m-title{font-size:.95rem}
 .m-state{font-size:.74rem;color:var(--mute);text-align:right;line-height:1.35}
 .m-state b{font-weight:400;color:#8a5b1f}
-.m-body{padding:4px 16px 16px;display:grid;gap:10px}
+.m-body,.item{padding:4px 16px 16px;display:grid;gap:10px}
+.item{padding-top:14px}
 .people{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:6px}
 .people li{padding:9px 11px;border-radius:12px;background:#f7f4ee;font-size:.82rem;line-height:1.4}
 .people small{color:var(--mute)}
-.muted{color:var(--mute);font-size:.8rem}
+.muted{color:var(--mute);font-size:.8rem;line-height:1.45}
 .row-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
-.link-btn{border:0;background:none;color:#a0522d;font:300 .82rem "Helvetica Neue",Arial,sans-serif;padding:6px 0;cursor:pointer}
+.link-btn{border:0;background:none;color:#a0522d;font:300 .82rem "Helvetica Neue",Arial,sans-serif;padding:6px 0;cursor:pointer;text-align:left}
+.add-btn{margin-top:12px;width:100%;min-height:46px;border:1px dashed rgba(183,122,43,.45);border-radius:16px;background:rgba(255,255,255,.6);color:var(--gold);font:300 .92rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
 .savebar{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,760px);padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(250,249,246,.94);border-top:1px solid #fff;box-shadow:0 -12px 30px rgba(69,77,80,.08);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
 .cta{width:100%;min-height:50px;border:1px solid rgba(119,72,17,.2);border-radius:999px;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(112deg,#8f5818 0%,#bd7f29 16%,#e4bb67 34%,#f1d58c 43%,#bd7b24 59%,#d7a44c 76%,#955b19 100%);color:#fff;font:300 1rem "Helvetica Neue",Arial,sans-serif;box-shadow:0 10px 24px rgba(128,78,20,.22);cursor:pointer}
 .cta[disabled]{opacity:.55}
@@ -46,15 +53,44 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
 .status.error{color:#a33a2a}
 .gate{margin-top:40px;text-align:center}
 .gate code{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:12px;background:#fff;font-size:1.1rem;user-select:all}
+/* analytics */
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi{padding:14px 15px;border-radius:18px;background:#fff;border:1px solid rgba(235,231,223,.9)}
+.kpi b{display:block;font-size:1.65rem;font-weight:200;line-height:1.1;color:var(--ink);font-variant-numeric:tabular-nums}
+.kpi span{display:block;margin-top:4px;font-size:.74rem;color:var(--mute);line-height:1.3}
+.funnel{display:grid;gap:10px}
+.f-row{display:grid;grid-template-columns:112px 1fr;gap:10px;align-items:center;font-size:.8rem;color:var(--mute)}
+.f-track{position:relative;height:22px}
+.f-bar{height:100%;min-width:2px;border-radius:0 4px 4px 0;background:var(--gold)}
+.f-val{position:absolute;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--ink);font-variant-numeric:tabular-nums;padding-left:6px;white-space:nowrap}
+.chart{position:relative}
+.cols{display:flex;align-items:flex-end;gap:2px;height:120px;border-bottom:1px solid var(--grid);padding-top:18px}
+.col{flex:1 1 0;display:flex;align-items:flex-end;justify-content:center;height:100%;cursor:default}
+.col i{display:block;width:100%;max-width:24px;border-radius:4px 4px 0 0;background:var(--gold);min-height:0}
+.col.zero i{height:1px!important;background:var(--grid);border-radius:0}
+.col:hover i,.col.hot i{background:#8f5818}
+.axis{display:flex;justify-content:space-between;margin-top:6px;font-size:.7rem;color:var(--mute)}
+.tip{position:absolute;top:-4px;padding:5px 9px;border-radius:9px;background:#2e3234;color:#fff;font-size:.74rem;white-space:nowrap;pointer-events:none;transform:translateX(-50%)}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th,td{padding:9px 6px;text-align:left;border-bottom:1px solid var(--grid)}
+th{font-weight:400;color:var(--mute);font-size:.74rem}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.note{margin-top:8px;font-size:.74rem;color:var(--mute)}
+/* team */
+.roles{display:grid;gap:8px;margin-top:10px}
+.role-card{padding:12px 14px;border-radius:16px;background:#f7f4ee;font-size:.8rem;line-height:1.45}
+.role-card b{display:block;font-weight:400;color:var(--ink);margin-bottom:2px}
+.member-fixed{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;margin-top:10px;border-radius:16px;background:#fff;font-size:.86rem}
 [hidden]{display:none!important}
+@media(max-width:380px){.f-row{grid-template-columns:96px 1fr}}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 </head>
 <body>
 <main class="app">
   <div class="eyebrow">к Женщине · админ</div>
-  <h1>Управление встречами</h1>
-  <p class="lead">Меняйте даты, места и детали — после сохранения всё сразу обновится в приложении. Пустая дата показывается как «Дата скоро появится». Когда вы впервые ставите дату, бот сам пишет всем из листа ожидания.</p>
+  <h1>Админка</h1>
+  <p class="role" id="role-line"></p>
 
   <section class="gate" id="gate" hidden>
     <h2 id="gate-title">Загрузка…</h2>
@@ -62,18 +98,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
     <code id="gate-id" hidden></code>
   </section>
 
-  <div id="editor" hidden>
-    <section class="card">
+  <nav class="sections" id="sections" hidden></nav>
+
+  <!-- ========== Встречи ========== -->
+  <div id="panel-schedule" class="panel" hidden>
+    <p class="lead">Меняйте даты, места и детали — после сохранения всё сразу обновится в приложении. Пустая дата показывается как «Дата скоро появится». Когда вы впервые ставите дату, бот сам пишет всем из листа ожидания.</p>
+    <section class="card" id="prices-card" hidden>
       <h2>Цены</h2>
       <div class="grid" style="margin-top:12px">
         <label>Одна встреча, ₽<input id="price-single" type="number" inputmode="numeric" min="1"></label>
         <label>Пакет 6 встреч, ₽<input id="price-package" type="number" inputmode="numeric" min="1"></label>
       </div>
     </section>
-
     <div class="tabs" id="city-tabs" role="tablist" aria-label="Города"></div>
-
-    <section class="card" id="city-card">
+    <section class="card">
       <div class="grid">
         <label>Город<input id="city-name" maxlength="60"></label>
         <label>Часовой пояс<select id="city-tz"></select></label>
@@ -81,15 +119,41 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
         <label>Контакт организатора<input id="org-contact" maxlength="200" placeholder="@username или телефон"></label>
       </div>
       <p class="muted" style="margin:10px 0 0">Организатор и полный адрес видны только тем, кто оплатил, — в сообщении от бота.</p>
-      <div class="row-actions"><span class="muted" id="waitlist-package"></span><button class="link-btn" id="remove-city" type="button">Удалить город</button></div>
+      <div class="row-actions"><span class="muted" id="waitlist-package"></span><button class="link-btn" id="remove-city" type="button" hidden>Удалить город</button></div>
     </section>
-
     <div id="meetings"></div>
+  </div>
+
+  <!-- ========== Аналитика ========== -->
+  <div id="panel-analytics" class="panel" hidden>
+    <p class="lead" id="an-updated"></p>
+    <section class="card"><h3>Сообщество</h3><div class="kpis" id="an-community"></div></section>
+    <section class="card"><h3>Путь участницы</h3><div class="funnel" id="an-funnel"></div><p class="note">Считается с 30 сентября 2026 — с момента, когда приложение начало это записывать.</p></section>
+    <section class="card"><h3>Новые в канале за 30 дней</h3><div class="chart" id="an-joins"></div><div class="kpis" id="an-growth" style="margin-top:14px"></div></section>
+    <section class="card"><h3>Клуб (Tribute)</h3><div class="kpis" id="an-club"></div></section>
+    <section class="card"><h3>Встречи</h3><div class="kpis" id="an-meetings"></div>
+      <h3 style="margin-top:16px">По городам</h3><table id="an-cities"></table>
+      <h3 style="margin-top:16px">Места по встречам</h3><div class="funnel" id="an-seats"></div></section>
+  </div>
+
+  <!-- ========== События клуба ========== -->
+  <div id="panel-events" class="panel" hidden>
+    <p class="lead">Блок «Дальше в пространстве» на странице «Пространство». Прошедшие события скрываются сами.</p>
+    <div id="events-list"></div>
+    <button class="add-btn" id="add-event" type="button">+ Событие</button>
+  </div>
+
+  <!-- ========== Команда ========== -->
+  <div id="panel-team" class="panel" hidden>
+    <p class="lead">Кто может открыть админку и что видит. Telegram ID человек узнаёт сам: пусть отправит боту команду /admin.</p>
+    <section class="card"><h3>Роли</h3><div class="roles" id="roles"></div></section>
+    <section class="card"><h3>Владелец</h3><div id="owners"></div></section>
+    <section class="card"><h3>Команда</h3><div id="team-list"></div><button class="add-btn" id="add-member" type="button">+ Человек</button></section>
   </div>
 </main>
 
 <div class="savebar" id="savebar" hidden>
-  <button class="cta" id="save" type="button">Сохранить и опубликовать <span>→</span></button>
+  <button class="cta" id="save" type="button">Сохранить <span>→</span></button>
   <p class="status" id="status" aria-live="polite"></p>
 </div>
 
@@ -100,44 +164,67 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
   const TITLES={1:'Основы',2:'Целостность',3:'Опора и объём',4:'Источник и коллективное поле',5:'Безусловная любовь и принятие',6:'Исходный код'};
   const ABOUT={1:'Лекция о природе женщины и женских энергиях, затем телесная практика чистки и разблокировки.',2:'Собираем тело, душу и дух в целостность — внутреннюю опору в нестабильном мире.',3:'Прикасаемся к своему истинному объёму и чувствуем опору на истину внутри себя.',4:'Учимся чувствовать коллективное поле и различать, что ваше, а что к вам не относится.',5:'Поднимаемся к энергиям безусловной любви и принятия, работаем с кристаллической решёткой Земли.',6:'Соединяемся со своей многомерной структурой и первородными кодами женщины.'};
   const ZONES=[['Europe/Kaliningrad','Калининград (UTC+2)'],['Europe/Moscow','Москва (UTC+3)'],['Europe/Samara','Самара (UTC+4)'],['Asia/Yekaterinburg','Екатеринбург (UTC+5)'],['Asia/Omsk','Омск (UTC+6)'],['Asia/Novosibirsk','Новосибирск (UTC+7)'],['Asia/Krasnoyarsk','Красноярск (UTC+7)'],['Asia/Irkutsk','Иркутск (UTC+8)'],['Asia/Yakutsk','Якутск (UTC+9)'],['Asia/Vladivostok','Владивосток (UTC+10)'],['Asia/Dubai','Дубай (UTC+4)'],['Asia/Tbilisi','Тбилиси (UTC+4)'],['Asia/Almaty','Алматы (UTC+5)'],['Europe/Istanbul','Стамбул (UTC+3)'],['Asia/Bangkok','Бангкок (UTC+7)'],['Asia/Makassar','Бали (UTC+8)'],['Europe/Berlin','Берлин (CET)'],['Europe/London','Лондон (GMT)']];
+  const SECTIONS=[['schedule','Встречи','schedule.edit'],['analytics','Аналитика','analytics.view'],['events','События','events.edit'],['team','Команда','team.manage']];
   const $=id=>document.getElementById(id);
-  let doc=null,extra={},current=0,dirty=false;
-
-  const post=body=>fetch('/api/admin/schedule',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData,...body})}).then(async r=>({status:r.status,body:await r.json().catch(()=>({}))}));
-  function gate(title,text,id){$('gate').hidden=false;$('editor').hidden=true;$('savebar').hidden=true;$('gate-title').textContent=title;$('gate-text').textContent=text;if(id){$('gate-id').hidden=false;$('gate-id').textContent=id}}
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const num=n=>n==null?'—':Number(n).toLocaleString('ru-RU').replace(/ /g,' ');
+  const rub=n=>n==null?'—':num(n)+' ₽';
+  let me=null,section=null,dirty=false;
+  const can=p=>Boolean(me&&me.perms.includes(p));
+  const post=(sec,body={})=>fetch('/api/admin/'+sec,{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData,...body})}).then(async r=>({status:r.status,body:await r.json().catch(()=>({}))}));
+  function gate(title,text,id){$('gate').hidden=false;document.querySelectorAll('.panel').forEach(p=>p.hidden=true);$('sections').hidden=true;$('savebar').hidden=true;$('gate-title').textContent=title;$('gate-text').textContent=text;if(id){$('gate-id').hidden=false;$('gate-id').textContent=id}}
   function setStatus(text,isError){$('status').textContent=text;$('status').classList.toggle('error',Boolean(isError))}
-  const translit=s=>s.toLowerCase().replace(/[а-яё]/g,c=>({а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}[c]||'')).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'city';
   const markDirty=()=>{if(!dirty){dirty=true;setStatus('Есть несохранённые изменения')}};
-
-  function renderTabs(){
-    const tabs=$('city-tabs');tabs.innerHTML='';
-    doc.cities.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.className='tab'+(i===current?' active':'');b.textContent=c.name||'Новый город';b.addEventListener('click',()=>{current=i;render()});tabs.appendChild(b)});
-    const add=document.createElement('button');add.type='button';add.className='tab add';add.textContent='+ Город';
-    add.addEventListener('click',()=>{const meetings={};for(let m=1;m<=6;m++)meetings[m]={date:'',time:'',venue:'',address:'',seats:null,bring:'',details:''};doc.cities.push({id:'',name:'',timezone:'Europe/Moscow',organizer:{name:'',contact:''},meetings,_new:true});current=doc.cities.length-1;markDirty();render();$('city-name').focus()});
-    tabs.appendChild(add);
+  function field(label,value,type,onInput,opts={}){
+    const l=document.createElement('label');if(opts.full)l.className='full';l.textContent=label;
+    const el=document.createElement(type==='textarea'?'textarea':type==='select'?'select':'input');
+    if(type==='select'){opts.options.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;o.selected=v===value;el.appendChild(o)})}
+    else{if(type!=='textarea')el.type=type;el.value=value==null?'':value}
+    if(opts.placeholder)el.placeholder=opts.placeholder;if(opts.min!==undefined)el.min=opts.min;if(type==='number')el.inputMode='numeric';if(opts.maxlength)el.maxLength=opts.maxlength;
+    el.addEventListener(type==='select'?'change':'input',()=>{onInput(el.value);markDirty();if(opts.onChange)opts.onChange()});l.appendChild(el);return l;
   }
 
+  // ---------- section switching ----------
+  const loaders={};const savers={};
+  function renderSections(){
+    const nav=$('sections');nav.innerHTML='';const visible=SECTIONS.filter(s=>can(s[2]));
+    nav.hidden=visible.length<2;
+    visible.forEach(([id,label])=>{const b=document.createElement('button');b.type='button';b.className='section-btn'+(id===section?' active':'');b.textContent=label;b.addEventListener('click',()=>openSection(id));nav.appendChild(b)});
+  }
+  async function openSection(id){
+    if(dirty&&section!==id){const ok=await new Promise(r=>webApp&&webApp.showConfirm?webApp.showConfirm('Есть несохранённые изменения. Уйти без сохранения?',r):r(window.confirm('Есть несохранённые изменения. Уйти без сохранения?')));if(!ok)return;dirty=false}
+    section=id;renderSections();document.querySelectorAll('.panel').forEach(p=>p.hidden=p.id!=='panel-'+id);
+    $('savebar').hidden=!savers[id];setStatus('');$('save').innerHTML=(id==='schedule'?'Сохранить и опубликовать':'Сохранить')+' <span>→</span>';
+    try{sessionStorage.setItem('adminSection',id)}catch(e){}
+    await loaders[id]();
+  }
+  $('save').addEventListener('click',async()=>{if(!savers[section])return;$('save').disabled=true;setStatus('Сохраняю…');try{await savers[section]()}catch(e){setStatus('Нет связи. Изменения не сохранены, попробуйте ещё раз.',true)}finally{$('save').disabled=false}});
+  const saved=text=>{dirty=false;setStatus(text);if(webApp&&webApp.HapticFeedback)webApp.HapticFeedback.notificationOccurred('success')};
+  const failed=r=>setStatus(r.status===400||r.body.errors?'Проверьте:\n'+(r.body.errors||[]).join('\n'):(r.body.error||'Не удалось сохранить'),true);
+
+  // ---------- Встречи ----------
+  let doc=null,extra={},current=0;
+  const translit=s=>s.toLowerCase().replace(/[а-яё]/g,c=>({а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}[c]||'')).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'city';
+  function renderCityTabs(){
+    const tabs=$('city-tabs');tabs.innerHTML='';
+    doc.cities.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.className='tab'+(i===current?' active':'');b.textContent=c.name||'Новый город';b.addEventListener('click',()=>{current=i;renderSchedule()});tabs.appendChild(b)});
+    const add=document.createElement('button');add.type='button';add.className='tab add';add.textContent='+ Город';
+    add.addEventListener('click',()=>{const meetings={};for(let m=1;m<=6;m++)meetings[m]={date:'',time:'',venue:'',address:'',seats:null,bring:'',details:''};doc.cities.push({id:'',name:'',timezone:'Europe/Moscow',organizer:{name:'',contact:''},meetings,_new:true});current=doc.cities.length-1;markDirty();renderSchedule();$('city-name').focus()});
+    tabs.appendChild(add);
+  }
   function bindCity(){
     const c=doc.cities[current];
     $('city-name').value=c.name;$('org-name').value=c.organizer.name;$('org-contact').value=c.organizer.contact;
     const tz=$('city-tz');tz.innerHTML='';const zones=ZONES.some(z=>z[0]===c.timezone)?ZONES:[[c.timezone,c.timezone],...ZONES];
     zones.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;o.selected=v===c.timezone;tz.appendChild(o)});
     const w=extra.waitlists&&extra.waitlists[c.id];$('waitlist-package').textContent=w&&w.package?`Ждут открытия пакета: ${w.package}`:'';
+    $('remove-city').hidden=!can('cities.remove')&&!c._new;
   }
-
-  function field(label,value,type,onInput,opts={}){
-    const l=document.createElement('label');if(opts.full)l.className='full';l.textContent=label;
-    const el=document.createElement(type==='textarea'?'textarea':'input');if(type!=='textarea')el.type=type;
-    el.value=value==null?'':value;if(opts.placeholder)el.placeholder=opts.placeholder;if(opts.min!==undefined)el.min=opts.min;if(type==='number')el.inputMode='numeric';
-    el.addEventListener('input',()=>{onInput(el.value);markDirty();if(opts.onChange)opts.onChange()});l.appendChild(el);return l;
-  }
-
   function stateText(c,mid){
     const m=c.meetings[mid];const sold=(extra.counts&&extra.counts[c.id+':'+mid])||0;const wait=(extra.waitlists&&extra.waitlists[c.id]&&extra.waitlists[c.id][mid])||0;
-    const parts=[];parts.push(m.date?`<b>${m.date.split('-').reverse().join('.')}${m.time?' '+m.time:''}</b>`:'без даты');
-    parts.push(`оплат: ${sold}${m.seats!==null&&m.seats!==''&&m.seats!==undefined?' из '+m.seats:''}`);if(wait)parts.push(`ждут: ${wait}`);return parts.join('<br>');
+    const seats=m.seats!==null&&m.seats!==''&&m.seats!==undefined;
+    return [m.date?`<b>${m.date.split('-').reverse().join('.')}${m.time?' '+esc(m.time):''}</b>`:'без даты',`оплат: ${sold}${seats?' из '+esc(m.seats):''}`,wait?`ждут: ${wait}`:''].filter(Boolean).join('<br>');
   }
-
   function renderMeetings(){
     const c=doc.cities[current];const box=$('meetings');const open=[...box.querySelectorAll('details[open]')].map(d=>d.dataset.mid);box.innerHTML='';
     for(let mid=1;mid<=6;mid++){
@@ -151,19 +238,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
         field('Место (видно всем)',m.venue,'text',v=>m.venue=v,{full:true,placeholder:'Например: Студия Light'}),
         field('Адрес (только в билете)',m.address,'text',v=>m.address=v,{full:true,placeholder:'Улица, дом, как пройти'}),
         field('Мест (пусто — без ограничения)',m.seats,'number',v=>m.seats=v===''?null:v,{min:0,onChange:refresh}));
-      body.append(g,field('Что взять с собой',m.bring,'textarea',v=>m.bring=v,{placeholder:'Удобная одежда, вода, блокнот…'}),
-        field('Что будет на встрече',m.details,'textarea',v=>m.details=v,{placeholder:ABOUT[mid]}));
+      body.append(g,field('Что взять с собой',m.bring,'textarea',v=>m.bring=v,{placeholder:'Удобная одежда, вода, блокнот…'}),field('Что будет на встрече',m.details,'textarea',v=>m.details=v,{placeholder:ABOUT[mid]}));
       if(m.date){const clear=document.createElement('button');clear.type='button';clear.className='link-btn';clear.textContent='Убрать дату (снова «скоро появится»)';clear.addEventListener('click',()=>{m.date='';m.time='';markDirty();renderMeetings()});body.appendChild(clear)}
-      const people=(extra.participants&&extra.participants[c.id]&&extra.participants[c.id][mid])||[];
-      const ph=document.createElement('div');ph.className='muted';ph.textContent=people.length?`Записались (${people.length}):`:'Пока никто не записался';body.appendChild(ph);
-      if(people.length){const ul=document.createElement('ul');ul.className='people';people.forEach(p=>{const li=document.createElement('li');li.textContent=[p.name,p.username?'@'+p.username:null].filter(Boolean).join(' ')||'Без имени';const sm=document.createElement('small');sm.textContent=' · '+[p.kind==='package'?'пакет':'разово',p.phone,p.email].filter(Boolean).join(' · ');li.appendChild(sm);ul.appendChild(li)});body.appendChild(ul)}
+      if(extra.participants){
+        const people=(extra.participants[c.id]&&extra.participants[c.id][mid])||[];
+        const ph=document.createElement('div');ph.className='muted';ph.textContent=people.length?`Записались (${people.length}):`:'Пока никто не записался';body.appendChild(ph);
+        if(people.length){const ul=document.createElement('ul');ul.className='people';people.forEach(p=>{const li=document.createElement('li');li.textContent=[p.name,p.username?'@'+p.username:null].filter(Boolean).join(' ')||'Без имени';const sm=document.createElement('small');sm.textContent=' · '+[p.kind==='package'?'пакет':'разово',p.phone,p.email].filter(Boolean).join(' · ');li.appendChild(sm);ul.appendChild(li)});body.appendChild(ul)}
+      }
       d.append(sum,body);box.appendChild(d);
     }
   }
-
-  function render(){renderTabs();bindCity();renderMeetings();$('price-single').value=doc.prices.single;$('price-package').value=doc.prices.package}
-
-  $('city-name').addEventListener('input',e=>{doc.cities[current].name=e.target.value;markDirty();renderTabs()});
+  function renderSchedule(){$('prices-card').hidden=!can('prices.edit');renderCityTabs();bindCity();renderMeetings();$('price-single').value=doc.prices.single;$('price-package').value=doc.prices.package}
+  $('city-name').addEventListener('input',e=>{doc.cities[current].name=e.target.value;markDirty();renderCityTabs()});
   $('city-tz').addEventListener('change',e=>{doc.cities[current].timezone=e.target.value;markDirty()});
   $('org-name').addEventListener('input',e=>{doc.cities[current].organizer.name=e.target.value;markDirty()});
   $('org-contact').addEventListener('input',e=>{doc.cities[current].organizer.contact=e.target.value;markDirty()});
@@ -172,25 +258,83 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
   $('remove-city').addEventListener('click',()=>{
     const c=doc.cities[current];const sold=Object.keys(extra.counts||{}).filter(k=>k.startsWith(c.id+':')).reduce((a,k)=>a+extra.counts[k],0);
     const ask=`Удалить город «${c.name||'без названия'}»?${sold?` Уже есть оплаты: ${sold}. Участницы сохранят свои билеты, но город пропадёт из приложения.`:''}`;
-    const done=ok=>{if(!ok)return;doc.cities.splice(current,1);current=Math.max(0,current-1);markDirty();render()};
+    const done=ok=>{if(!ok)return;doc.cities.splice(current,1);current=Math.max(0,current-1);markDirty();renderSchedule()};
     if(webApp&&webApp.showConfirm)webApp.showConfirm(ask,done);else done(window.confirm(ask));
   });
-
-  $('save').addEventListener('click',async()=>{
+  loaders.schedule=async()=>{const r=await post('schedule');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}doc=r.body.schedule;extra=r.body;current=Math.min(current,doc.cities.length-1);renderSchedule()};
+  savers.schedule=async()=>{
     const taken=new Set(doc.cities.filter(c=>!c._new).map(c=>c.id));
     doc.cities.forEach(c=>{if(c._new&&!c.id){let base=translit(c.name||'city'),id=base,n=2;while(taken.has(id))id=base+'-'+n++;c.id=id;taken.add(id)}});
     const payload={prices:{single:Number(doc.prices.single),package:Number(doc.prices.package)},cities:doc.cities.map(({_new,...c})=>c)};
-    $('save').disabled=true;setStatus('Сохраняю…');
-    try{
-      const r=await post({action:'save',schedule:payload});
-      if(r.status===400){setStatus('Проверьте:\n'+r.body.errors.join('\n'),true);return}
-      if(!r.body.ok){setStatus(r.body.error||'Не удалось сохранить',true);return}
-      doc=r.body.schedule;extra=r.body;dirty=false;render();
-      setStatus('Сохранено. Приложение обновлено.'+(r.body.notified?` Бот написал ожидающим: ${r.body.notified}.`:''));
-      if(webApp&&webApp.HapticFeedback)webApp.HapticFeedback.notificationOccurred('success');
-    }catch(e){setStatus('Нет связи. Изменения не сохранены, попробуйте ещё раз.',true)}
-    finally{$('save').disabled=false}
-  });
+    const r=await post('schedule',{action:'save',schedule:payload});
+    if(!r.body.ok)return failed(r);
+    doc=r.body.schedule;extra=r.body;renderSchedule();saved('Сохранено. Приложение обновлено.'+(r.body.notified?` Бот написал ожидающим: ${r.body.notified}.`:''));
+  };
+
+  // ---------- Аналитика ----------
+  const tiles=(el,items)=>{el.innerHTML=items.map(([v,l])=>`<div class="kpi"><b>${v}</b><span>${esc(l)}</span></div>`).join('')};
+  const blockError=(el,b)=>{if(!b||b.error){el.innerHTML=`<p class="muted">${b&&b.error?'Нет данных — источник сейчас недоступен.':'—'}</p>`;return true}return false};
+  function hbars(el,rows){const max=Math.max(1,...rows.map(r=>r[1]));el.innerHTML=rows.map(([label,v])=>`<div class="f-row"><span>${esc(label)}</span><div class="f-track"><div class="f-bar" style="width:${v/max*100}%"></div><span class="f-val" style="left:${v/max*100}%">${num(v)}</span></div></div>`).join('');
+    el.querySelectorAll('.f-row').forEach(row=>{const val=row.querySelector('.f-val'),track=row.querySelector('.f-track');if(val.offsetLeft+val.offsetWidth>track.offsetWidth){val.style.left='auto';val.style.right='0';val.style.color='#fff';val.style.paddingRight='6px'}})}
+  function columns(el,series){
+    const max=Math.max(1,...series.map(s=>s.value));const fmt=d=>d.slice(8,10)+'.'+d.slice(5,7);
+    el.innerHTML=`<div class="cols">${series.map(s=>`<div class="col${s.value?'':' zero'}" data-d="${s.date}" data-v="${s.value}"><i style="height:${s.value/max*100}%"></i></div>`).join('')}</div><div class="axis"><span>${fmt(series[0].date)}</span><span>макс. ${num(max)} в день</span><span>${fmt(series.at(-1).date)}</span></div>`;
+    const tip=document.createElement('div');tip.className='tip';tip.hidden=true;el.appendChild(tip);
+    const show=col=>{el.querySelectorAll('.col.hot').forEach(c=>c.classList.remove('hot'));col.classList.add('hot');tip.hidden=false;tip.textContent=`${fmt(col.dataset.d)}: ${num(col.dataset.v)}`;const x=col.offsetLeft+col.offsetWidth/2;tip.style.left=Math.min(Math.max(x,40),el.offsetWidth-40)+'px'};
+    el.querySelectorAll('.col').forEach(col=>{col.addEventListener('mouseenter',()=>show(col));col.addEventListener('click',()=>show(col))});
+    el.addEventListener('mouseleave',()=>{tip.hidden=true;el.querySelectorAll('.col.hot').forEach(c=>c.classList.remove('hot'))});
+  }
+  loaders.analytics=async()=>{
+    $('an-updated').textContent='Загружаю…';
+    const r=await post('analytics');if(!r.body.ok){$('an-updated').textContent=r.body.error||'Не удалось загрузить';return}
+    const a=r.body;$('an-updated').textContent='Обновлено '+new Date(a.generated_at).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+    if(!blockError($('an-community'),a.community))tiles($('an-community'),[[num(a.community.channel_members),'в бесплатном канале'],[num(a.community.club_members),'в группе клуба']]);
+    if(!blockError($('an-funnel'),a.funnel))hbars($('an-funnel'),[['Нажали /start',a.funnel.started],['Открыли приложение',a.funnel.app_users],['Прошли вход',a.funnel.onboarded],['Клуб активен',a.club&&!a.club.error?a.club.active:0],['Купили встречу',a.meetings&&!a.meetings.error?a.meetings.orders:0]]);
+    if(!blockError($('an-joins'),a.growth)){columns($('an-joins'),a.growth.joins_daily);tiles($('an-growth'),[[num(a.growth.joins_7d),'вступили за 7 дней'],[num(a.growth.joins_30d),'вступили за 30 дней'],[num(a.growth.starts_7d),'новых /start за 7 дней'],[num(a.growth.starts_30d),'новых /start за 30 дней']])}
+    if(!blockError($('an-club'),a.club))tiles($('an-club'),[[num(a.club.active),'активных подписок'],[num(a.club.new_30d),'новых за 30 дней'],[num(a.club.cancelling),'отменили, доступ ещё идёт'],[num(a.club.ending_7d),'период заканчивается за 7 дней'],[num(a.club.cancelled),'ушли']]);
+    if(!blockError($('an-meetings'),a.meetings)){
+      const m=a.meetings;tiles($('an-meetings'),[[rub(m.revenue),'выручка всего'],[rub(m.revenue_30d),'за 30 дней'],[num(m.orders),'оплат всего'],[num(m.packages),'из них пакетов'],[num(m.waitlist),'в листе ожидания']]);
+      $('an-cities').innerHTML='<tr><th>Город</th><th class="n">Оплат</th><th class="n">Выручка</th><th class="n">Ждут</th></tr>'+m.by_city.map(c=>`<tr><td>${esc(c.name)}</td><td class="n">${num(c.orders)}</td><td class="n">${rub(c.revenue)}</td><td class="n">${num(c.waitlist)}</td></tr>`).join('');
+      hbars($('an-seats'),m.by_meeting.map((x,i)=>['0'+(i+1)+' '+x.title,x.seats]));
+    }
+  };
+
+  // ---------- События ----------
+  let events=[];
+  function renderEvents(){
+    const box=$('events-list');box.innerHTML='';
+    if(!events.length){box.innerHTML='<p class="muted" style="margin-top:14px">Событий пока нет. На странице будет написано «Скоро здесь появятся новые события».</p>'}
+    events.forEach((ev,i)=>{
+      const item=document.createElement('section');item.className='item';
+      const g=document.createElement('div');g.className='grid';
+      g.append(field('Дата',ev.date,'date',v=>ev.date=v),field('Название',ev.title,'text',v=>ev.title=v,{maxlength:80,placeholder:'День дружбы'}));
+      const rm=document.createElement('button');rm.type='button';rm.className='link-btn';rm.textContent='Удалить событие';rm.addEventListener('click',()=>{events.splice(i,1);markDirty();renderEvents()});
+      item.append(g,field('Описание',ev.text,'textarea',v=>ev.text=v,{maxlength:400,placeholder:'Одно-два предложения'}),rm);box.appendChild(item);
+    });
+  }
+  $('add-event').addEventListener('click',()=>{events.push({date:'',title:'',text:''});markDirty();renderEvents()});
+  loaders.events=async()=>{const r=await post('events');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}events=r.body.events;renderEvents()};
+  savers.events=async()=>{const r=await post('events',{action:'save',events});if(!r.body.ok)return failed(r);events=r.body.events;renderEvents();saved('Сохранено. «Пространство» обновлено.')};
+
+  // ---------- Команда ----------
+  let members=[],roles={};
+  function renderTeam(){
+    $('roles').innerHTML=Object.values(roles).map(r=>`<div class="role-card"><b>${esc(r.label)}</b>${esc(r.perms.join(' · '))}</div>`).join('')+'<div class="role-card"><b>Владелец</b>Всё: расписание и клиенты, аналитика, события, цены, команда, уведомления</div>';
+    $('owners').innerHTML=members.filter(m=>m.fixed).map(m=>`<div class="member-fixed"><span>${String(m.id)===String(me.id)?'Вы':'ID '+esc(m.id)}</span><span class="muted">${esc(m.role_label)}</span></div>`).join('');
+    const box=$('team-list');box.innerHTML='';const team=members.filter(m=>!m.fixed);
+    if(!team.length)box.innerHTML='<p class="muted">Пока только вы. Добавьте Валерию и менеджера.</p>';
+    team.forEach(m=>{
+      const item=document.createElement('section');item.className='item';
+      const g=document.createElement('div');g.className='grid';
+      g.append(field('Имя',m.name,'text',v=>m.name=v,{maxlength:80,placeholder:'Валерия'}),field('Telegram ID',m.id,'text',v=>m.id=v.replace(/\D/g,''),{placeholder:'1809575565'}),
+        field('Роль',m.role||'','select',v=>m.role=v,{full:true,options:[['','Выберите роль'],...Object.entries(roles).map(([k,r])=>[k,r.label])]}));
+      const rm=document.createElement('button');rm.type='button';rm.className='link-btn';rm.textContent='Убрать доступ';rm.addEventListener('click',()=>{members.splice(members.indexOf(m),1);markDirty();renderTeam()});
+      item.append(g,rm);box.appendChild(item);
+    });
+  }
+  $('add-member').addEventListener('click',()=>{members.push({id:'',name:'',role:''});markDirty();renderTeam()});
+  loaders.team=async()=>{const r=await post('team');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}members=r.body.members;roles=r.body.roles;renderTeam()};
+  savers.team=async()=>{const r=await post('team',{action:'save',members:members.filter(m=>!m.fixed).map(({id,name,role,added_at})=>({id,name,role,added_at}))});if(!r.body.ok)return failed(r);members=r.body.members;roles=r.body.roles;renderTeam();saved('Сохранено. Доступы обновлены.')};
 
   window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
 
@@ -198,10 +342,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);o
     if(!initData){gate('Откройте в Telegram','Эта страница работает только внутри Telegram: отправьте боту команду /admin.');return}
     gate('Загрузка…','');
     try{
-      const r=await post({});
-      if(r.status===403){gate('Нет доступа','Попросите добавить ваш Telegram ID в настройки приложения (ADMIN_TELEGRAM_IDS):',String(r.body.your_id||''));return}
+      const r=await post('me');
+      if(r.status===403){gate('Нет доступа','Попросите владельца добавить ваш Telegram ID в команду:',String(r.body.your_id||''));return}
       if(!r.body.ok){gate('Не удалось загрузить',r.body.error||'Попробуйте обновить страницу.');return}
-      doc=r.body.schedule;extra=r.body;$('gate').hidden=true;$('editor').hidden=false;$('savebar').hidden=false;render();
+      me=r.body;$('gate').hidden=true;$('role-line').textContent=me.role_label;
+      const visible=SECTIONS.filter(s=>can(s[2])).map(s=>s[0]);
+      let first=visible[0];try{const saved=sessionStorage.getItem('adminSection');if(visible.includes(saved))first=saved}catch(e){}
+      await openSection(first);
     }catch(e){gate('Нет связи','Проверьте интернет и откройте страницу снова.')}
   })();
 })();

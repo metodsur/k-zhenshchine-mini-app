@@ -79,7 +79,7 @@ a.cta{text-decoration:none;box-sizing:border-box}
       <article class="card wide womens-circle"><span class="num">07</span><div class="eyebrow">После живой встречи с Мастером</div><h3>ЖЕНСКИЙ КРУГ</h3><p>Живой ритуал после встречи с Мастером многомерности. Пространство общения, поддержки и соединения женщин. Участие добровольное.</p><button class="cta">Присоединиться к ближайшей встрече <span>→</span></button></article>
     </section>
     <section class="section"><article class="event" id="next-event"><div class="event-copy"><div class="eyebrow">Ближайшее событие</div><h2 id="next-event-title">ОСНОВЫ</h2><div class="event-meta"><p><span id="next-event-when">ДАТА СКОРО ПОЯВИТСЯ</span><br>Встреча с Мастером многомерности<br>Варвара Вебер</p><div class="event-price" id="next-event-price">5 555 ₽</div></div><a class="cta" id="next-event-cta" href="/meetings.html?book=1">Сообщить, когда появится дата <span>→</span></a></div></article></section>
-    <section class="section"><div class="eyebrow">Дальше в пространстве</div><div class="timeline"><article class="time-item"><div class="eyebrow">22 сентября</div><h3>Новый ритуал пары</h3><p>Новый двухнедельный цикл в клубе.</p></article><article class="time-item"><div class="eyebrow">24 сентября</div><h3>День дружбы</h3><p>Ритуал поддержки и новых связей женщины с женщиной.</p></article><article class="time-item"><div class="eyebrow">26 сентября</div><h3>День коллабораций</h3><p>От нужного ресурса — к конкретной договорённости.</p></article><article class="time-item"><div class="eyebrow">28 сентября</div><h3>Встреча всего пространства</h3><p>Что произошло, что женщины создали, какие города проявились и что рождается дальше.</p></article></div></section>
+    <section class="section"><div class="eyebrow">Дальше в пространстве</div><div class="timeline" id="club-events"><article class="time-item"><h3>Скоро здесь появятся новые события</h3><p>Следите за каналом «к Женщине».</p></article></div></section>
     <section class="section"><article class="counter"><div class="eyebrow">Мы создаём вместе</div><h2>КОЛЛАБОРАЦИИ ЖЕНЩИН</h2><strong>27</strong><div class="eyebrow">Коллабораций</div><p>Реальные договорённости и проекты, которые женщины создали вместе.</p></article></section>
     <section class="section"><div class="eyebrow">Итоги этой недели</div><div class="stats"><div class="stat"><span>Коллаборации</span><strong>27</strong><small>состоялось</small></div><div class="stat"><span>Живые встречи</span><strong>4</strong><small>прошло</small></div><div class="stat"><span>Женщины</span><strong>86</strong><small>были в ритуалах</small></div><div class="stat"><span>Города</span><strong>3</strong><small>были активны</small></div></div></section>
     <section class="section"><article class="feature"><h2>МЫ СОЗДАЁМ ПРОСТРАНСТВО ВМЕСТЕ</h2><p>Города. Встречи. Женщины. Возможности.</p></article></section>
@@ -93,6 +93,18 @@ a.cta{text-decoration:none;box-sizing:border-box}
   var fmt=function(n){return Number(n).toLocaleString('ru-RU').replace(/\u00a0/g,' ')+' ₽'};
   fetch('/api/schedule',{cache:'no-store'}).then(function(r){return r.json()}).then(function(data){
     if(!data||!data.ok)return;
+    // "Дальше в пространстве": upcoming club events from the admin page.
+    var box=document.getElementById('club-events');
+    if(box&&data.events&&data.events.length){
+      box.innerHTML='';
+      data.events.slice(0,6).forEach(function(ev){
+        var a=document.createElement('article');a.className='time-item';
+        var d=document.createElement('div');d.className='eyebrow';d.textContent=ev.date_label;
+        var h=document.createElement('h3');h.textContent=ev.title;a.append(d,h);
+        if(ev.text){var p=document.createElement('p');p.textContent=ev.text;a.appendChild(p)}
+        box.appendChild(a);
+      });
+    }
     var items=[];
     data.cities.forEach(function(c){c.meetings.forEach(function(m){if(m.starts_at&&(m.status==='open'||m.status==='sold_out'))items.push({city:c,m:m})})});
     items.sort(function(a,b){return (a.m.status==='open'?0:1)-(b.m.status==='open'?0:1)||new Date(a.m.starts_at)-new Date(b.m.starts_at)});

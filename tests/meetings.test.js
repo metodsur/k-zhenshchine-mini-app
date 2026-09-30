@@ -4,7 +4,8 @@ const { setupEnv, createWorld, initData, call } = require('./helpers/fake-world'
 
 setupEnv();
 const scheduleApi = require('../api/schedule');
-const adminApi = require('../api/admin/schedule');
+const adminRoute = require('../api/admin/[section]');
+const adminApi = (req, res) => adminRoute({ ...req, query: { section: 'schedule' } }, res);
 const meetingsRoute = require('../api/meetings/[action]');
 const invoiceApi = (req, res) => meetingsRoute({ ...req, query: { action: 'invoice' } }, res);
 const waitlistApi = (req, res) => meetingsRoute({ ...req, query: { action: 'waitlist' } }, res);

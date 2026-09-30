@@ -1,4 +1,5 @@
 const schedule = require("../lib/schedule");
+const events = require("../lib/events");
 const { send } = require("../lib/http");
 
 module.exports = async function handler(req, res) {
@@ -6,10 +7,12 @@ module.exports = async function handler(req, res) {
   try {
     const doc = await schedule.loadSchedule();
     const counts = await schedule.soldCounts(doc);
-    return send(res, 200, { ok: true, ...schedule.publicView(doc, counts) });
+    let clubEvents = [];
+    try { clubEvents = events.upcoming(await events.loadEvents()); } catch { clubEvents = []; }
+    return send(res, 200, { ok: true, ...schedule.publicView(doc, counts), events: clubEvents });
   } catch (error) {
     console.error("Schedule read failed", error.message);
     // Storage outage: still show the meetings, all as "date coming soon".
-    return send(res, 200, { ok: true, degraded: true, ...schedule.publicView(schedule.defaultSchedule(), {}) });
+    return send(res, 200, { ok: true, degraded: true, ...schedule.publicView(schedule.defaultSchedule(), {}), events: [] });
   }
 };

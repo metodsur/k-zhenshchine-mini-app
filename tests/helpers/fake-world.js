@@ -32,6 +32,7 @@ function createWorld() {
       case 'DEL': { const had = kv.delete(key) || sets.delete(key); return had ? 1 : 0; }
       case 'SADD': { const s = sets.get(key) || new Set(); const before = s.size; rest.forEach((v) => s.add(String(v))); sets.set(key, s); return s.size - before; }
       case 'SMEMBERS': return [...(sets.get(key) || [])];
+      case 'INCR': { const v = (Number(kv.get(key)) || 0) + 1; kv.set(key, String(v)); return v; }
       case 'SCARD': return (sets.get(key) || new Set()).size;
       case 'MGET': return [key, ...rest].map((k) => (kv.has(k) ? kv.get(k) : null));
       case 'HGET': { const h = kv.get(key); return h ? (JSON.parse(h)[rest[0]] ?? null) : null; }
@@ -40,17 +41,19 @@ function createWorld() {
     }
   };
   const blockedChats = new Set();
-  const world = { members: new Set() };
+  const world = { members: new Set(), memberCounts: {}, tributeSubscribers: null };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });
     if (href.startsWith('https://redis.example.test')) return ok({ result: redis(JSON.parse(options.body)) });
+    if (href.startsWith('https://tribute.tg/') && world.tributeSubscribers) return ok(world.tributeSubscribers);
     const tg = href.match(/api\.telegram\.org\/bot[^/]+\/(\w+)$/);
     if (tg) {
       const payload = JSON.parse(options.body);
       telegramCalls.push({ method: tg[1], payload });
       if (tg[1] === 'sendMessage' && blockedChats.has(String(payload.chat_id))) return { ok: false, json: async () => ({ ok: false }) };
       if (tg[1] === 'createInvoiceLink') return ok({ ok: true, result: `https://t.me/$invoice-${payload.payload}` });
+      if (tg[1] === 'getChatMemberCount') return ok({ ok: true, result: world.memberCounts[String(payload.chat_id)] ?? 0 });
       if (tg[1] === 'getChatMember') return ok({ ok: true, result: { status: (world.members.has(String(payload.user_id)) ? 'member' : 'left') } });
       return ok({ ok: true, result: true });
     }
