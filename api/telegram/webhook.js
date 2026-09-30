@@ -1,4 +1,5 @@
 const { telegram, isChannelMember, isMemberStatus, safeEqualString } = require("../../lib/telegram");
+const store = require("../../lib/store");
 
 function send(res, status, body) {
   res.statusCode = status; res.setHeader("Content-Type", "application/json; charset=utf-8"); res.end(JSON.stringify(body));
@@ -63,7 +64,12 @@ module.exports = async function handler(req, res) {
     if (isConfiguredChannel) {
       const oldStatus = change.old_chat_member?.status;
       const newStatus = change.new_chat_member?.status;
-      if (!isMemberStatus(oldStatus) && isMemberStatus(newStatus)) await sendJoined(change.new_chat_member.user.id);
+      if (!isMemberStatus(oldStatus) && isMemberStatus(newStatus)) {
+        const joinedUserId = change.new_chat_member.user.id;
+        const joinedAt = new Date((change.date || Math.floor(Date.now() / 1000)) * 1000).toISOString();
+        try { await store.rememberChannelJoin(joinedUserId, joinedAt); } catch (error) { console.error("Join date storage failed"); }
+        await sendJoined(joinedUserId);
+      }
     }
     return send(res, 200, { ok: true });
   } catch (error) {

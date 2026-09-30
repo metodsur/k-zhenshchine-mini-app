@@ -56,3 +56,38 @@ test('/chatid is ignored in private chats', async () => {
   await deliver({ chat: { id: 3, type: 'private' }, from: { id: 3 }, text: '/chatid' });
   assert.equal(sent.length, 0);
 });
+
+test('joining the channel records the join date once and sends the welcome message', async () => {
+  process.env.KV_REST_API_URL = 'https://redis.example.test';
+  process.env.KV_REST_API_TOKEN = 'test-redis-token';
+  const stored = {};
+  const sent = [];
+  global.fetch = async (url, options) => {
+    const href = String(url);
+    const payload = JSON.parse(options.body);
+    if (href.startsWith('https://redis.example.test')) {
+      const [cmd, key, field, value] = payload;
+      assert.equal(cmd, 'HSETNX');
+      const isNew = !stored[key];
+      if (isNew) stored[key] = { [field]: value };
+      return { ok: true, json: async () => ({ result: isNew ? 1 : 0 }) };
+    }
+    if (href.endsWith('/sendMessage')) { sent.push(payload); return { ok: true, json: async () => ({ ok: true, result: {} }) }; }
+    throw new Error(`Unexpected request ${href}`);
+  };
+  const join = (date) => ({
+    chat: { id: -100555, username: 'test_channel' }, date,
+    old_chat_member: { status: 'left', user: { id: 77 } },
+    new_chat_member: { status: 'member', user: { id: 77 } }
+  });
+  const deliverUpdate = async (update) => {
+    const res = { statusCode: 0, setHeader() {}, end() {} };
+    await handler({ method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' }, body: update }, res);
+    return res.statusCode;
+  };
+  assert.equal(await deliverUpdate({ chat_member: join(1789000000) }), 200);
+  await deliverUpdate({ chat_member: join(1790000000) });
+  assert.equal(stored['user:77'].channel_joined_at, new Date(1789000000 * 1000).toISOString());
+  assert.equal(sent.length, 2);
+  assert.equal(sent[0].chat_id, 77);
+});
