@@ -41,6 +41,8 @@
       return;
     }
     if (access.full_access !== true || kind === "app") return;
+    // Opened on purpose from the app (e.g. "Открыть ритуал" on "Пространство"): no redirect.
+    if (kind === "ritual" && /[?&]open=1(&|$)/.test(window.location.search)) return;
     // Ritual button pressed: every entry opens "Пространство".
     if (access.onboarded) return go(MAIN_PAGE);
     // Reached the ritual page but has not pressed the button yet: back to the ritual page.

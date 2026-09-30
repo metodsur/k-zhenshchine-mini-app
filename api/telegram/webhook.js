@@ -2,6 +2,7 @@ const { telegram, isChannelMember, isMemberStatus, safeEqualString } = require("
 const store = require("../../lib/store");
 const payments = require("../../lib/payments");
 const stats = require("../../lib/stats");
+const clubActivity = require("../../lib/club-activity");
 
 function send(res, status, body) {
   res.statusCode = status; res.setHeader("Content-Type", "application/json; charset=utf-8"); res.end(JSON.stringify(body));
@@ -66,6 +67,9 @@ module.exports = async function handler(req, res) {
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     const message = update.message;
+    if (message && clubActivity.isClubGroup(message.chat)) {
+      try { await clubActivity.trackGroupMessage(message); } catch (error) { console.error("Club activity tracking failed"); }
+    }
     if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) await stats.trackStart(message.from.id);
     if (message?.chat?.type === "private" && typeof message.text === "string" && /^\/space(@\w+)?(\s|$)/.test(message.text)) {
       if (await isMemberSafe(message.from.id)) {

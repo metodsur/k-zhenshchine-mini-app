@@ -33,6 +33,8 @@ function createWorld() {
       case 'SADD': { const s = sets.get(key) || new Set(); const before = s.size; rest.forEach((v) => s.add(String(v))); sets.set(key, s); return s.size - before; }
       case 'SMEMBERS': return [...(sets.get(key) || [])];
       case 'INCR': { const v = (Number(kv.get(key)) || 0) + 1; kv.set(key, String(v)); return v; }
+      case 'EXPIRE': return 1;
+      case 'SUNION': { const u = new Set(); [key, ...rest].forEach((k) => (sets.get(k) || new Set()).forEach((v) => u.add(v))); return [...u]; }
       case 'SCARD': return (sets.get(key) || new Set()).size;
       case 'MGET': return [key, ...rest].map((k) => (kv.has(k) ? kv.get(k) : null));
       case 'HMGET': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; return rest.map((f) => h[f] ?? null); }

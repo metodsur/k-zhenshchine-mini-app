@@ -1,4 +1,4 @@
-const { verifyInitData, isChannelMember } = require("../../lib/telegram");
+const { verifyInitData, isChannelMember, isClubMember } = require("../../lib/telegram");
 const store = require("../../lib/store");
 const stats = require("../../lib/stats");
 
@@ -37,8 +37,18 @@ module.exports = async function handler(req, res) {
     if (subscribed) state = await store.onboardingState(user.id);
   } catch { state = { rituals_seen: false, ritual_done: false }; }
 
+  // Optional: pages with club buttons ask whether she is already in the paid club.
+  let club;
+  if (body.club) {
+    let member = false;
+    try { member = await isClubMember(user.id); } catch { member = false; }
+    const url = String(process.env.TELEGRAM_CLUB_URL || "").trim();
+    club = { member, url: member && url ? url : null };
+  }
+
   return send(res, 200, {
     ok: true,
+    ...(club ? { club } : {}),
     subscribed,
     full_access: subscribed,
     onboarded: state.ritual_done,

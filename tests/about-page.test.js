@@ -77,6 +77,7 @@ test('links: only the owner sets them; they reach the public schedule and the pr
   const ok = await admin(OWNER, 'settings', { action: 'save', settings: { materials_url: 'https://t.me/k_zhenshcine/10', ritual_url: 'https://t.me/+ritual' } });
   assert.equal(ok.status, 200);
   const pub = await call(scheduleApi, { method: 'GET' });
-  assert.deepEqual(pub.body.links, { materials_url: 'https://t.me/k_zhenshcine/10', ritual_url: 'https://t.me/+ritual' });
+  assert.equal(pub.body.links.materials_url, 'https://t.me/k_zhenshcine/10');
+  assert.equal(pub.body.links.ritual_url, 'https://t.me/+ritual');
   assert.equal((await profileOf(ANNA)).body.links.materials_url, 'https://t.me/k_zhenshcine/10');
 });

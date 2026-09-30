@@ -55,9 +55,15 @@
 /* Meeting cards fit their text: no fixed tall height */
 .practices .practice{min-height:0}
 .practices .practice .practice-bottom{padding-top:22px}
+.cta.is-soon{opacity:.6;pointer-events:none}
+.practice-when{margin:0 0 6px;color:#8a5b1f;font-size:.82rem;line-height:1.4}
+/* Manual progress is replaced by the automatic one on "Обо мне"; layer taps scroll to the meeting card */
+.journey-tools .progress-head,.journey-tools .progress-hint,.journey-tools .progress-track{display:none}
+.layer-detail{display:none}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 <script src="/access-guard.js"></script>
+<script src="/app-links.js"></script>
 <link rel="stylesheet" href="/nav.css">
 </head>
 <body>
@@ -69,14 +75,14 @@
     <div class="section-title">ШЕСТЬ ЖИВЫХ ПРАКТИК</div>
     <div class="journey-intro surface">За 6 встреч вы получите максимально полный опыт трансформации и раскрытия вашей многомерности.</div>
     <section class="practices">
-      <article class="practice p1 surface"><div class="num">01</div><h3>ОСНОВЫ</h3><p>Эта встреча в большей степени посвящена лекциям и теоретической информации про природу женщины, про суть женских энергий, про то, чем мы их блокируем каждый день и как их можно разблокировать и благостно применить сразу в жизнь.</p><p>После лекции мы идём с вами в практику чистки и разблокировки на уровне тела всех заблокированных энергий.</p><p class="effect">Эффект после практики — ясность мыслей, лёгкость в теле, ощущение свободы и желание творить и действовать по-новому.</p><div class="practice-bottom"><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="1">Выбрать встречу <span>→</span></a></div></article>
-      <article class="practice p2 surface"><div class="num">02</div><h3>ЦЕЛОСТНОСТЬ</h3><p>Чтобы в полной мере прочувствовать объём своего тела, души и духа, их нужно привести в целостность. Умение собирать себя из расстроенного состояния в целостность — один из ключевых навыков нового нестабильного мира, где внешних опор всё меньше и меньше.</p><div class="practice-bottom"><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="2">Выбрать встречу <span>→</span></a></div></article>
-      <article class="practice p3 surface"><div class="num">03</div><h3>ОПОРА И ОБЪЁМ</h3><p>На этой встрече вы прикоснётесь к своему истинному объёму и почувствуете опору на истину внутри себя.</p><div class="practice-bottom"><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="3">Выбрать встречу <span>→</span></a></div></article>
-      <article class="practice p4 surface"><div class="num">04</div><h3>ИСТОЧНИК И КОЛЛЕКТИВНОЕ ПОЛЕ</h3><p>Точка Абсолюта и умение чувствовать коллективное поле — важный навык, чтобы не цеплять на себя всё то, что происходит вокруг и не имеет к вам никакого отношения.</p><p>После встречи вы чётко будете понимать, что ваше, а что нет и что носить с собой больше не нужно.</p><div class="practice-bottom"><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="4">Выбрать встречу <span>→</span></a></div></article>
-      <article class="practice p5 surface"><div class="num">05</div><h3>БЕЗУСЛОВНАЯ ЛЮБОВЬ И ПРИНЯТИЕ. РАБОТА С КРИСТАЛЛИЧЕСКОЙ РЕШЁТКОЙ ЗЕМЛИ</h3><p>Мы с каждой встречей поднимаемся всё выше по вибрациям и приближаемся к энергиям, выше которых нет ничего. Если вы владеете этими типами энергий, вам не страшны никакие энергетические атаки, сливы энергии, апатия, депрессия и так далее. Потому что вы будете владеть и иметь доступ туда, куда при жизни не доходит 99% воплощённых душ.</p><p>После встречи вы больше никогда не будете прежней. Безусловная любовь и принятие навсегда меняют восприятие реальности, привычки, реакции и отношение ко всему, что окружает.</p><div class="practice-bottom"><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="5">Выбрать встречу <span>→</span></a></div></article>
-      <article class="practice p6 surface"><div class="num">06</div><h3>ИСХОДНЫЙ КОД. ПЕРВОРОДНЫЕ КОДЫ ЖЕНЩИНЫ</h3><p>Это финал наших встреч и тот самый пазл, которого многим не хватает, особенно если вы давно чувствуете мощность своего потенциала. Эта встреча для тех, кто готов шагнуть за грани этой реальности и почувствовать то, с чего всё начиналось. Без систем, без искажений, без наносных эффектов и всего, что нам предлагают текущие системы как правду.</p><p>Здесь мы пойдём туда, где всё началось, и вы прочувствуете, что значит соединиться со своей многомерной структурой в полной мере.</p><div class="practice-bottom"><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="6">Выбрать встречу <span>→</span></a></div></article>
+      <article class="practice p1 surface"><div class="num">01</div><h3>ОСНОВЫ</h3><p>Эта встреча в большей степени посвящена лекциям и теоретической информации про природу женщины, про суть женских энергий, про то, чем мы их блокируем каждый день и как их можно разблокировать и благостно применить сразу в жизнь.</p><p>После лекции мы идём с вами в практику чистки и разблокировки на уровне тела всех заблокированных энергий.</p><p class="effect">Эффект после практики — ясность мыслей, лёгкость в теле, ощущение свободы и желание творить и действовать по-новому.</p><div class="practice-bottom"><p class="practice-when">Дата скоро появится</p><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="1">Выбрать встречу <span>→</span></a></div></article>
+      <article class="practice p2 surface"><div class="num">02</div><h3>ЦЕЛОСТНОСТЬ</h3><p>Чтобы в полной мере прочувствовать объём своего тела, души и духа, их нужно привести в целостность. Умение собирать себя из расстроенного состояния в целостность — один из ключевых навыков нового нестабильного мира, где внешних опор всё меньше и меньше.</p><div class="practice-bottom"><p class="practice-when">Дата скоро появится</p><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="2">Выбрать встречу <span>→</span></a></div></article>
+      <article class="practice p3 surface"><div class="num">03</div><h3>ОПОРА И ОБЪЁМ</h3><p>На этой встрече вы прикоснётесь к своему истинному объёму и почувствуете опору на истину внутри себя.</p><div class="practice-bottom"><p class="practice-when">Дата скоро появится</p><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="3">Выбрать встречу <span>→</span></a></div></article>
+      <article class="practice p4 surface"><div class="num">04</div><h3>ИСТОЧНИК И КОЛЛЕКТИВНОЕ ПОЛЕ</h3><p>Точка Абсолюта и умение чувствовать коллективное поле — важный навык, чтобы не цеплять на себя всё то, что происходит вокруг и не имеет к вам никакого отношения.</p><p>После встречи вы чётко будете понимать, что ваше, а что нет и что носить с собой больше не нужно.</p><div class="practice-bottom"><p class="practice-when">Дата скоро появится</p><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="4">Выбрать встречу <span>→</span></a></div></article>
+      <article class="practice p5 surface"><div class="num">05</div><h3>БЕЗУСЛОВНАЯ ЛЮБОВЬ И ПРИНЯТИЕ. РАБОТА С КРИСТАЛЛИЧЕСКОЙ РЕШЁТКОЙ ЗЕМЛИ</h3><p>Мы с каждой встречей поднимаемся всё выше по вибрациям и приближаемся к энергиям, выше которых нет ничего. Если вы владеете этими типами энергий, вам не страшны никакие энергетические атаки, сливы энергии, апатия, депрессия и так далее. Потому что вы будете владеть и иметь доступ туда, куда при жизни не доходит 99% воплощённых душ.</p><p>После встречи вы больше никогда не будете прежней. Безусловная любовь и принятие навсегда меняют восприятие реальности, привычки, реакции и отношение ко всему, что окружает.</p><div class="practice-bottom"><p class="practice-when">Дата скоро появится</p><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="5">Выбрать встречу <span>→</span></a></div></article>
+      <article class="practice p6 surface"><div class="num">06</div><h3>ИСХОДНЫЙ КОД. ПЕРВОРОДНЫЕ КОДЫ ЖЕНЩИНЫ</h3><p>Это финал наших встреч и тот самый пазл, которого многим не хватает, особенно если вы давно чувствуете мощность своего потенциала. Эта встреча для тех, кто готов шагнуть за грани этой реальности и почувствовать то, с чего всё начиналось. Без систем, без искажений, без наносных эффектов и всего, что нам предлагают текущие системы как правду.</p><p>Здесь мы пойдём туда, где всё началось, и вы прочувствуете, что значит соединиться со своей многомерной структурой в полной мере.</p><div class="practice-bottom"><p class="practice-when">Дата скоро появится</p><div class="practice-price">5 555 ₽</div><a class="cta" href="#" data-book-meeting="6">Выбрать встречу <span>→</span></a></div></article>
     </section>
-    <section class="package surface"><div><div class="eyebrow">Полный путь</div><h2>ВСЕ 6 ВСТРЕЧ</h2><p>Полное погружение в многомерность. Шесть граней. Одна целостная ты.</p></div><div><div class="price">25 000 ₽</div><p class="old-price">Отдельно: 33 330 ₽</p><a class="cta" href="#" data-book-package>Выбрать пакет <span>→</span></a></div></section>
+    <section class="package surface"><div><div class="eyebrow">Полный путь</div><h2>ВСЕ 6 ВСТРЕЧ</h2><p>Полное погружение в многомерность. Шесть граней. Одна целостная ты.</p></div><div><div class="price" id="package-price">25 000 ₽</div><p class="old-price" id="package-old-price">Отдельно: 33 330 ₽</p><a class="cta" href="#" data-book-package>Выбрать пакет <span>→</span></a></div></section>
     <section class="journey-tools surface" aria-labelledby="journey-heading">
       <div class="progress-head"><div><div class="eyebrow">Ваш путь</div><h2 id="journey-heading">ПРОГРЕСС ВСТРЕЧ</h2></div><div class="progress-counts"><div class="progress-count"><strong id="done-count">0</strong><span>пройдено</span></div><div class="progress-count"><strong id="left-count">6</strong><span>осталось</span></div></div></div>
       <p class="progress-hint">Нажимайте на этапы, чтобы отмечать пройденные встречи.</p>
@@ -89,7 +95,7 @@
     </section>
     <section class="circle-card surface"><img class="circle-photo" src="/img/meetings-14-20a84c4ce2.webp" alt="Женщины общаются в кругу после офлайн-встречи" loading="lazy" decoding="async"><div class="circle-copy"><div class="eyebrow">РИТУАЛ ЭКОСИСТЕМЫ</div><h2>ЖЕНСКИЙ КРУГ</h2><p>После каждой офлайн-встречи мы собираемся женским кругом, делимся эмоциями, проводим нетворкинг, создаём коллаборации.</p><button class="cta" id="open-circle-form" type="button">Хочу прийти <span>→</span></button></div></section>
     <section class="story golden-story surface"><div class="eyebrow">Продолжение пути</div><h2>ЧТО ДАЛЬШЕ?</h2><p>После того как вы проходите путь многомерности, мы ни в коем случае не оставляем вас на произвол судьбы, а, наоборот, создаём пространство «к Женщине», где можно быть собой во всех мерностях, найти поддержку, подруг, реализацию и множество всего, о чём вы только думали. «к Женщине» — это экосистема полного цикла: от сообщества единомышленниц до бизнес-инкубаторов и возможности реализовать все свои смелые идеи.</p></section>
-    <section class="master surface"><img class="master-photo" src="/img/meetings-15-bf4f1296e9.webp" alt="Мастер многомерности проводит практику для женского круга" loading="lazy" decoding="async"><div class="master-copy"><div class="eyebrow">Следующий уровень</div><h2>После прохождения всех встреч вы можете стать Мастером многомерности</h2><a class="cta" href="#">Стать Мастером <span>→</span></a></div></section>
+    <section class="master surface"><img class="master-photo" src="/img/meetings-15-bf4f1296e9.webp" alt="Мастер многомерности проводит практику для женского круга" loading="lazy" decoding="async"><div class="master-copy"><div class="eyebrow">Следующий уровень</div><h2>После прохождения всех встреч вы можете стать Мастером многомерности</h2><a class="cta is-soon" href="#" aria-disabled="true">Скоро откроется <span>→</span></a></div></section>
     <div class="closing">— ТЫ УЖЕ ДОСТАТОЧНА, ЧТОБЫ БЫТЬ ЗДЕСЬ —</div>
   </main>
   <div class="form-modal" id="booking-modal" hidden><section class="form-dialog booking-dialog" role="dialog" aria-modal="true" aria-labelledby="booking-title"><div class="form-dialog-head"><div><div class="eyebrow" id="booking-eyebrow">Запись на встречу</div><h2 id="booking-title">ОСНОВЫ</h2></div><button class="form-close" type="button" aria-label="Закрыть">×</button></div><div class="booking-cities" id="booking-cities" role="tablist" aria-label="Город"></div><div class="booking-info"><div class="booking-date" id="booking-date">Дата скоро появится</div><div class="booking-meta" id="booking-meta"></div></div><button class="cta booking-action" id="booking-action" type="button">Оплатить <span>→</span></button><p class="form-status" id="booking-status" aria-live="polite"></p></section></div>
@@ -190,6 +196,7 @@
     action.disabled=false;
   });
 
+  document.querySelectorAll('.layer-hit').forEach(b=>b.addEventListener('click',()=>{const card=document.querySelector('.practice.p'+b.dataset.layer);if(card)setTimeout(()=>card.scrollIntoView({behavior:'smooth',block:'start'}),0)}));
   document.querySelectorAll('[data-book-meeting]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openBooking({kind:'single',meeting:a.dataset.bookMeeting})}));
   document.querySelectorAll('[data-book-package]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openBooking({kind:'package'})}));
 
@@ -197,14 +204,29 @@
   let linkHandled=false;
   function openFromLink(){
     if(linkHandled)return;linkHandled=true;
-    const q=new URLSearchParams(location.search);if(!q.get('book'))return;
+    const q=new URLSearchParams(location.search);
+    if(q.get('circle')){const b=document.getElementById('open-circle-form');if(b){b.scrollIntoView({block:'center'});b.click()}history.replaceState(null,'',location.pathname);return}
+    if(!q.get('book'))return;
     const c=q.get('city');if(c&&data.cities.some(x=>x.id===c))cityId=c;
     const mid=q.get('meeting');
     openBooking(q.get('package')?{kind:'package'}:{kind:'single',meeting:data.meetings.some(m=>m.id===mid)?mid:'1'});
     history.replaceState(null,'',location.pathname);
   }
+  // Prices and nearest dates on the practice cards come from the live schedule.
+  function renderCards(){
+    document.querySelectorAll('.practice .practice-price').forEach(el=>el.textContent=fmt(data.prices.single));
+    const pp=document.getElementById('package-price'),op=document.getElementById('package-old-price');
+    if(pp)pp.textContent=fmt(data.prices.package);if(op)op.textContent='Отдельно: '+fmt(data.prices.single*6);
+    data.meetings.forEach(meta=>{
+      const card=document.querySelector('.practice.p'+meta.id);if(!card)return;
+      const open=[];data.cities.forEach(c=>{const m=c.meetings.find(x=>x.id===meta.id);if(m&&m.status==='open')open.push({city:c.name,m})});
+      open.sort((a,b)=>new Date(a.m.starts_at)-new Date(b.m.starts_at));
+      const when=card.querySelector('.practice-when');if(!when)return;
+      when.textContent=open.length?open[0].city+' · '+open[0].m.date_label+(open.length>1?' · и ещё '+(open.length-1)+' '+(open.length===2?'город':'города'):''):'Дата скоро появится';
+    });
+  }
   async function load(){
-    try{const r=await fetch('/api/schedule',{cache:'no-store'}).then(x=>x.json());if(!r.ok)return;data=r;if(!data.cities.some(c=>c.id===cityId))cityId=data.cities[0].id;renderSchedule();if(!modal.hidden)renderBooking();openFromLink()}catch(e){/* keep the static schedule */}
+    try{const r=await fetch('/api/schedule',{cache:'no-store'}).then(x=>x.json());if(!r.ok)return;data=r;if(!data.cities.some(c=>c.id===cityId))cityId=data.cities[0].id;renderSchedule();if(!modal.hidden)renderBooking();renderCards();openFromLink()}catch(e){/* keep the static schedule */}
   }
   load();
 
