@@ -54,6 +54,18 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
     })
   });
   const data = await response.json();
+
+  // Bot menu: commands list and the button next to the message field.
+  // The button opens the app root, which sends returning members straight to "Пространство".
+  const call = (method, payload) => fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+  }).then((r) => r.json()).catch(() => ({ ok: false }));
+  const commands = await call("setMyCommands", { commands: [
+    { command: "space", description: "Открыть пространство" },
+    { command: "start", description: "Начать сначала" }
+  ] });
+  const menu = await call("setChatMenuButton", { menu_button: { type: "web_app", text: "Пространство", web_app: { url: `${baseUrl}/` } } });
+
   return send(res, response.ok && data.ok ? 200 : 502,
-    { ok: Boolean(data.ok), description: data.description || null });
+    { ok: Boolean(data.ok), description: data.description || null, commands: Boolean(commands.ok), menu_button: Boolean(menu.ok) });
 };

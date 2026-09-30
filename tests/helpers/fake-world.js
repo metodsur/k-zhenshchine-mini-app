@@ -40,6 +40,7 @@ function createWorld() {
     }
   };
   const blockedChats = new Set();
+  const world = { members: new Set() };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });
@@ -50,11 +51,12 @@ function createWorld() {
       telegramCalls.push({ method: tg[1], payload });
       if (tg[1] === 'sendMessage' && blockedChats.has(String(payload.chat_id))) return { ok: false, json: async () => ({ ok: false }) };
       if (tg[1] === 'createInvoiceLink') return ok({ ok: true, result: `https://t.me/$invoice-${payload.payload}` });
+      if (tg[1] === 'getChatMember') return ok({ ok: true, result: { status: (world.members.has(String(payload.user_id)) ? 'member' : 'left') } });
       return ok({ ok: true, result: true });
     }
     throw new Error(`Unexpected request ${href}`);
   };
-  return { kv, sets, telegramCalls, blockedChats, sent: (method) => telegramCalls.filter((c) => c.method === method).map((c) => c.payload) };
+  return Object.assign(world, { kv, sets, telegramCalls, blockedChats, sent: (method) => telegramCalls.filter((c) => c.method === method).map((c) => c.payload) });
 }
 
 function initData(user) {
