@@ -1,5 +1,6 @@
 const { telegram, isChannelMember, isMemberStatus, safeEqualString } = require("../../lib/telegram");
 const store = require("../../lib/store");
+const payments = require("../../lib/payments");
 
 function send(res, status, body) {
   res.statusCode = status; res.setHeader("Content-Type", "application/json; charset=utf-8"); res.end(JSON.stringify(body));
@@ -35,6 +36,7 @@ module.exports = async function handler(req, res) {
   if (!safeEqualString(req.headers["x-telegram-bot-api-secret-token"], process.env.TELEGRAM_WEBHOOK_SECRET)) return send(res, 403, { ok: false });
   const update = req.body || {};
   try {
+    if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     const message = update.message;
     if (message?.chat && typeof message.text === "string" && message.text.startsWith("/start")) {
       const userId = message.from.id;

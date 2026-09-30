@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Управление встречами — к Женщине</title>
+<style>
+:root{--gold:#b77a2b;--ink:#303438;--mute:#6f777b;--line:rgba(183,122,43,.22);--r:24px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:"Helvetica Neue","Arial Narrow",Arial,sans-serif;font-weight:300;background:radial-gradient(circle at 92% 4%,rgba(226,194,137,.18),transparent 340px),linear-gradient(180deg,#fbfdfe 0%,#f2f7f8 100%)}
+.app{width:min(100%,760px);margin:auto;padding:18px 16px calc(110px + env(safe-area-inset-bottom))}
+h1{margin:6px 0 4px;font-size:1.9rem;font-weight:200;letter-spacing:.01em}
+h2{margin:0;font-size:1.15rem;font-weight:300}
+.eyebrow{font-size:.7rem;letter-spacing:.17em;text-transform:uppercase;color:#737b80}
+.lead{margin:0 0 18px;color:var(--mute);font-size:.86rem;line-height:1.5}
+.card{margin-top:14px;padding:18px;border:1px solid rgba(255,255,255,.95);border-radius:var(--r);background:rgba(255,255,255,.72);box-shadow:0 10px 30px rgba(69,77,80,.07)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.full{grid-column:1/-1}
+label{display:grid;gap:5px;font-size:.74rem;color:var(--mute);letter-spacing:.02em}
+input,select,textarea{width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);font:300 .95rem/1.35 "Helvetica Neue",Arial,sans-serif;-webkit-appearance:none;appearance:none}
+textarea{min-height:76px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(183,122,43,.35);outline-offset:1px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin-top:14px}
+.tab{flex:0 0 auto;border:1px solid rgba(183,122,43,.28);border-radius:999px;padding:9px 16px;background:rgba(255,255,255,.75);color:#555d61;font:300 .9rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
+.tab.active{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}
+.tab.add{border-style:dashed;color:var(--gold)}
+.meeting{margin-top:12px;border:1px solid rgba(255,255,255,.95);border-radius:20px;background:rgba(255,255,255,.8);overflow:hidden}
+.meeting summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:14px 16px}
+.meeting summary::-webkit-details-marker{display:none}
+.num{color:#a36b24}
+.m-title{font-size:.95rem}
+.m-state{font-size:.74rem;color:var(--mute);text-align:right;line-height:1.35}
+.m-state b{font-weight:400;color:#8a5b1f}
+.m-body{padding:4px 16px 16px;display:grid;gap:10px}
+.people{margin:4px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.people li{padding:9px 11px;border-radius:12px;background:#f7f4ee;font-size:.82rem;line-height:1.4}
+.people small{color:var(--mute)}
+.muted{color:var(--mute);font-size:.8rem}
+.row-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.link-btn{border:0;background:none;color:#a0522d;font:300 .82rem "Helvetica Neue",Arial,sans-serif;padding:6px 0;cursor:pointer}
+.savebar{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,760px);padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(250,249,246,.94);border-top:1px solid #fff;box-shadow:0 -12px 30px rgba(69,77,80,.08);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.cta{width:100%;min-height:50px;border:1px solid rgba(119,72,17,.2);border-radius:999px;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(112deg,#8f5818 0%,#bd7f29 16%,#e4bb67 34%,#f1d58c 43%,#bd7b24 59%,#d7a44c 76%,#955b19 100%);color:#fff;font:300 1rem "Helvetica Neue",Arial,sans-serif;box-shadow:0 10px 24px rgba(128,78,20,.22);cursor:pointer}
+.cta[disabled]{opacity:.55}
+.status{min-height:18px;margin:8px 2px 0;font-size:.8rem;color:#8a5b1f;white-space:pre-line}
+.status.error{color:#a33a2a}
+.gate{margin-top:40px;text-align:center}
+.gate code{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:12px;background:#fff;font-size:1.1rem;user-select:all}
+[hidden]{display:none!important}
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
+</head>
+<body>
+<main class="app">
+  <div class="eyebrow">к Женщине · админ</div>
+  <h1>Управление встречами</h1>
+  <p class="lead">Меняйте даты, места и детали — после сохранения всё сразу обновится в приложении. Пустая дата показывается как «Дата скоро появится». Когда вы впервые ставите дату, бот сам пишет всем из листа ожидания.</p>
+
+  <section class="gate" id="gate" hidden>
+    <h2 id="gate-title">Загрузка…</h2>
+    <p class="muted" id="gate-text"></p>
+    <code id="gate-id" hidden></code>
+  </section>
+
+  <div id="editor" hidden>
+    <section class="card">
+      <h2>Цены</h2>
+      <div class="grid" style="margin-top:12px">
+        <label>Одна встреча, ₽<input id="price-single" type="number" inputmode="numeric" min="1"></label>
+        <label>Пакет 6 встреч, ₽<input id="price-package" type="number" inputmode="numeric" min="1"></label>
+      </div>
+    </section>
+
+    <div class="tabs" id="city-tabs" role="tablist" aria-label="Города"></div>
+
+    <section class="card" id="city-card">
+      <div class="grid">
+        <label>Город<input id="city-name" maxlength="60"></label>
+        <label>Часовой пояс<select id="city-tz"></select></label>
+        <label>Организатор<input id="org-name" maxlength="80" placeholder="Имя"></label>
+        <label>Контакт организатора<input id="org-contact" maxlength="200" placeholder="@username или телефон"></label>
+      </div>
+      <p class="muted" style="margin:10px 0 0">Организатор и полный адрес видны только тем, кто оплатил, — в сообщении от бота.</p>
+      <div class="row-actions"><span class="muted" id="waitlist-package"></span><button class="link-btn" id="remove-city" type="button">Удалить город</button></div>
+    </section>
+
+    <div id="meetings"></div>
+  </div>
+</main>
+
+<div class="savebar" id="savebar" hidden>
+  <button class="cta" id="save" type="button">Сохранить и опубликовать <span>→</span></button>
+  <p class="status" id="status" aria-live="polite"></p>
+</div>
+
+<script>
+(function admin(){
+  const webApp=window.Telegram&&window.Telegram.WebApp;
+  const initData=webApp&&webApp.initData||'';
+  const TITLES={1:'Основы',2:'Целостность',3:'Опора и объём',4:'Источник и коллективное поле',5:'Безусловная любовь и принятие',6:'Исходный код'};
+  const ABOUT={1:'Лекция о природе женщины и женских энергиях, затем телесная практика чистки и разблокировки.',2:'Собираем тело, душу и дух в целостность — внутреннюю опору в нестабильном мире.',3:'Прикасаемся к своему истинному объёму и чувствуем опору на истину внутри себя.',4:'Учимся чувствовать коллективное поле и различать, что ваше, а что к вам не относится.',5:'Поднимаемся к энергиям безусловной любви и принятия, работаем с кристаллической решёткой Земли.',6:'Соединяемся со своей многомерной структурой и первородными кодами женщины.'};
+  const ZONES=[['Europe/Kaliningrad','Калининград (UTC+2)'],['Europe/Moscow','Москва (UTC+3)'],['Europe/Samara','Самара (UTC+4)'],['Asia/Yekaterinburg','Екатеринбург (UTC+5)'],['Asia/Omsk','Омск (UTC+6)'],['Asia/Novosibirsk','Новосибирск (UTC+7)'],['Asia/Krasnoyarsk','Красноярск (UTC+7)'],['Asia/Irkutsk','Иркутск (UTC+8)'],['Asia/Yakutsk','Якутск (UTC+9)'],['Asia/Vladivostok','Владивосток (UTC+10)'],['Asia/Dubai','Дубай (UTC+4)'],['Asia/Tbilisi','Тбилиси (UTC+4)'],['Asia/Almaty','Алматы (UTC+5)'],['Europe/Istanbul','Стамбул (UTC+3)'],['Asia/Bangkok','Бангкок (UTC+7)'],['Asia/Makassar','Бали (UTC+8)'],['Europe/Berlin','Берлин (CET)'],['Europe/London','Лондон (GMT)']];
+  const $=id=>document.getElementById(id);
+  let doc=null,extra={},current=0,dirty=false;
+
+  const post=body=>fetch('/api/admin/schedule',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData,...body})}).then(async r=>({status:r.status,body:await r.json().catch(()=>({}))}));
+  function gate(title,text,id){$('gate').hidden=false;$('editor').hidden=true;$('savebar').hidden=true;$('gate-title').textContent=title;$('gate-text').textContent=text;if(id){$('gate-id').hidden=false;$('gate-id').textContent=id}}
+  function setStatus(text,isError){$('status').textContent=text;$('status').classList.toggle('error',Boolean(isError))}
+  const translit=s=>s.toLowerCase().replace(/[а-яё]/g,c=>({а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'}[c]||'')).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'city';
+  const markDirty=()=>{if(!dirty){dirty=true;setStatus('Есть несохранённые изменения')}};
+
+  function renderTabs(){
+    const tabs=$('city-tabs');tabs.innerHTML='';
+    doc.cities.forEach((c,i)=>{const b=document.createElement('button');b.type='button';b.className='tab'+(i===current?' active':'');b.textContent=c.name||'Новый город';b.addEventListener('click',()=>{current=i;render()});tabs.appendChild(b)});
+    const add=document.createElement('button');add.type='button';add.className='tab add';add.textContent='+ Город';
+    add.addEventListener('click',()=>{const meetings={};for(let m=1;m<=6;m++)meetings[m]={date:'',time:'',venue:'',address:'',seats:null,bring:'',details:''};doc.cities.push({id:'',name:'',timezone:'Europe/Moscow',organizer:{name:'',contact:''},meetings,_new:true});current=doc.cities.length-1;markDirty();render();$('city-name').focus()});
+    tabs.appendChild(add);
+  }
+
+  function bindCity(){
+    const c=doc.cities[current];
+    $('city-name').value=c.name;$('org-name').value=c.organizer.name;$('org-contact').value=c.organizer.contact;
+    const tz=$('city-tz');tz.innerHTML='';const zones=ZONES.some(z=>z[0]===c.timezone)?ZONES:[[c.timezone,c.timezone],...ZONES];
+    zones.forEach(([v,l])=>{const o=document.createElement('option');o.value=v;o.textContent=l;o.selected=v===c.timezone;tz.appendChild(o)});
+    const w=extra.waitlists&&extra.waitlists[c.id];$('waitlist-package').textContent=w&&w.package?`Ждут открытия пакета: ${w.package}`:'';
+  }
+
+  function field(label,value,type,onInput,opts={}){
+    const l=document.createElement('label');if(opts.full)l.className='full';l.textContent=label;
+    const el=document.createElement(type==='textarea'?'textarea':'input');if(type!=='textarea')el.type=type;
+    el.value=value==null?'':value;if(opts.placeholder)el.placeholder=opts.placeholder;if(opts.min!==undefined)el.min=opts.min;if(type==='number')el.inputMode='numeric';
+    el.addEventListener('input',()=>{onInput(el.value);markDirty();if(opts.onChange)opts.onChange()});l.appendChild(el);return l;
+  }
+
+  function stateText(c,mid){
+    const m=c.meetings[mid];const sold=(extra.counts&&extra.counts[c.id+':'+mid])||0;const wait=(extra.waitlists&&extra.waitlists[c.id]&&extra.waitlists[c.id][mid])||0;
+    const parts=[];parts.push(m.date?`<b>${m.date.split('-').reverse().join('.')}${m.time?' '+m.time:''}</b>`:'без даты');
+    parts.push(`оплат: ${sold}${m.seats!==null&&m.seats!==''&&m.seats!==undefined?' из '+m.seats:''}`);if(wait)parts.push(`ждут: ${wait}`);return parts.join('<br>');
+  }
+
+  function renderMeetings(){
+    const c=doc.cities[current];const box=$('meetings');const open=[...box.querySelectorAll('details[open]')].map(d=>d.dataset.mid);box.innerHTML='';
+    for(let mid=1;mid<=6;mid++){
+      const m=c.meetings[mid];
+      const d=document.createElement('details');d.className='meeting';d.dataset.mid=mid;if(open.includes(String(mid)))d.open=true;
+      const sum=document.createElement('summary');sum.innerHTML=`<span class="num">0${mid}</span><span class="m-title"></span><span class="m-state"></span>`;sum.querySelector('.m-title').textContent=TITLES[mid];sum.querySelector('.m-state').innerHTML=stateText(c,mid);
+      const refresh=()=>{sum.querySelector('.m-state').innerHTML=stateText(c,mid)};
+      const body=document.createElement('div');body.className='m-body';
+      const g=document.createElement('div');g.className='grid';
+      g.append(field('Дата',m.date,'date',v=>m.date=v,{onChange:refresh}),field('Время',m.time,'time',v=>m.time=v,{onChange:refresh}),
+        field('Место (видно всем)',m.venue,'text',v=>m.venue=v,{full:true,placeholder:'Например: Студия Light'}),
+        field('Адрес (только в билете)',m.address,'text',v=>m.address=v,{full:true,placeholder:'Улица, дом, как пройти'}),
+        field('Мест (пусто — без ограничения)',m.seats,'number',v=>m.seats=v===''?null:v,{min:0,onChange:refresh}));
+      body.append(g,field('Что взять с собой',m.bring,'textarea',v=>m.bring=v,{placeholder:'Удобная одежда, вода, блокнот…'}),
+        field('Что будет на встрече',m.details,'textarea',v=>m.details=v,{placeholder:ABOUT[mid]}));
+      if(m.date){const clear=document.createElement('button');clear.type='button';clear.className='link-btn';clear.textContent='Убрать дату (снова «скоро появится»)';clear.addEventListener('click',()=>{m.date='';m.time='';markDirty();renderMeetings()});body.appendChild(clear)}
+      const people=(extra.participants&&extra.participants[c.id]&&extra.participants[c.id][mid])||[];
+      const ph=document.createElement('div');ph.className='muted';ph.textContent=people.length?`Записались (${people.length}):`:'Пока никто не записался';body.appendChild(ph);
+      if(people.length){const ul=document.createElement('ul');ul.className='people';people.forEach(p=>{const li=document.createElement('li');li.textContent=[p.name,p.username?'@'+p.username:null].filter(Boolean).join(' ')||'Без имени';const sm=document.createElement('small');sm.textContent=' · '+[p.kind==='package'?'пакет':'разово',p.phone,p.email].filter(Boolean).join(' · ');li.appendChild(sm);ul.appendChild(li)});body.appendChild(ul)}
+      d.append(sum,body);box.appendChild(d);
+    }
+  }
+
+  function render(){renderTabs();bindCity();renderMeetings();$('price-single').value=doc.prices.single;$('price-package').value=doc.prices.package}
+
+  $('city-name').addEventListener('input',e=>{doc.cities[current].name=e.target.value;markDirty();renderTabs()});
+  $('city-tz').addEventListener('change',e=>{doc.cities[current].timezone=e.target.value;markDirty()});
+  $('org-name').addEventListener('input',e=>{doc.cities[current].organizer.name=e.target.value;markDirty()});
+  $('org-contact').addEventListener('input',e=>{doc.cities[current].organizer.contact=e.target.value;markDirty()});
+  $('price-single').addEventListener('input',e=>{doc.prices.single=e.target.value;markDirty()});
+  $('price-package').addEventListener('input',e=>{doc.prices.package=e.target.value;markDirty()});
+  $('remove-city').addEventListener('click',()=>{
+    const c=doc.cities[current];const sold=Object.keys(extra.counts||{}).filter(k=>k.startsWith(c.id+':')).reduce((a,k)=>a+extra.counts[k],0);
+    const ask=`Удалить город «${c.name||'без названия'}»?${sold?` Уже есть оплаты: ${sold}. Участницы сохранят свои билеты, но город пропадёт из приложения.`:''}`;
+    const done=ok=>{if(!ok)return;doc.cities.splice(current,1);current=Math.max(0,current-1);markDirty();render()};
+    if(webApp&&webApp.showConfirm)webApp.showConfirm(ask,done);else done(window.confirm(ask));
+  });
+
+  $('save').addEventListener('click',async()=>{
+    const taken=new Set(doc.cities.filter(c=>!c._new).map(c=>c.id));
+    doc.cities.forEach(c=>{if(c._new&&!c.id){let base=translit(c.name||'city'),id=base,n=2;while(taken.has(id))id=base+'-'+n++;c.id=id;taken.add(id)}});
+    const payload={prices:{single:Number(doc.prices.single),package:Number(doc.prices.package)},cities:doc.cities.map(({_new,...c})=>c)};
+    $('save').disabled=true;setStatus('Сохраняю…');
+    try{
+      const r=await post({action:'save',schedule:payload});
+      if(r.status===400){setStatus('Проверьте:\n'+r.body.errors.join('\n'),true);return}
+      if(!r.body.ok){setStatus(r.body.error||'Не удалось сохранить',true);return}
+      doc=r.body.schedule;extra=r.body;dirty=false;render();
+      setStatus('Сохранено. Приложение обновлено.'+(r.body.notified?` Бот написал ожидающим: ${r.body.notified}.`:''));
+      if(webApp&&webApp.HapticFeedback)webApp.HapticFeedback.notificationOccurred('success');
+    }catch(e){setStatus('Нет связи. Изменения не сохранены, попробуйте ещё раз.',true)}
+    finally{$('save').disabled=false}
+  });
+
+  window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
+
+  (async function start(){
+    if(!initData){gate('Откройте в Telegram','Эта страница работает только внутри Telegram: отправьте боту команду /admin.');return}
+    gate('Загрузка…','');
+    try{
+      const r=await post({});
+      if(r.status===403){gate('Нет доступа','Попросите добавить ваш Telegram ID в настройки приложения (ADMIN_TELEGRAM_IDS):',String(r.body.your_id||''));return}
+      if(!r.body.ok){gate('Не удалось загрузить',r.body.error||'Попробуйте обновить страницу.');return}
+      doc=r.body.schedule;extra=r.body;$('gate').hidden=true;$('editor').hidden=false;$('savebar').hidden=false;render();
+    }catch(e){gate('Нет связи','Проверьте интернет и откройте страницу снова.')}
+  })();
+})();
+</script>
+</body>
+</html>

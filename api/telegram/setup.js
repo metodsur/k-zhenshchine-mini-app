@@ -50,7 +50,7 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
     body: JSON.stringify({
       url: `${baseUrl}/api/telegram/webhook`,
       secret_token: webhookSecret,
-      allowed_updates: ["message", "chat_member"]
+      allowed_updates: ["message", "chat_member", "pre_checkout_query"]
     })
   });
   const data = await response.json();

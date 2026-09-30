@@ -10,7 +10,8 @@ Object.assign(process.env, {
   CRON_SECRET: 'test-cron-secret'
 });
 
-const handler = require('../api/cron/club-reminders');
+const handler = require('../lib/handlers/club-reminders');
+const cronRoute = require('../api/cron/[job]');
 const tribute = require('../lib/tribute');
 const DAY = 24 * 60 * 60 * 1000;
 const NOW = Date.parse('2026-10-01T07:00:00Z');
@@ -77,7 +78,7 @@ test('cron endpoint requires the Vercel cron secret', async () => {
   mockWorld([]);
   const call = async (authorization) => {
     const res = { statusCode: 0, setHeader() {}, end() {} };
-    await handler({ method: 'GET', headers: authorization ? { authorization } : {} }, res);
+    await cronRoute({ method: 'GET', query: { job: 'club-reminders' }, headers: authorization ? { authorization } : {} }, res);
     return res.statusCode;
   };
   assert.equal(await call(), 403);
