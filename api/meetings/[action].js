@@ -4,7 +4,8 @@ const { send } = require("../../lib/http");
 const actions = {
   invoice: require("../../lib/handlers/invoice"),
   waitlist: require("../../lib/handlers/waitlist"),
-  "circle-request": require("../../lib/handlers/circle-request")
+  "circle-request": require("../../lib/handlers/circle-request"),
+  application: require("../../lib/handlers/application")
 };
 
 module.exports = async function handler(req, res) {

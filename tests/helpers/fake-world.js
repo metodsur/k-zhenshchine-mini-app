@@ -34,6 +34,7 @@ function createWorld() {
       case 'SMEMBERS': return [...(sets.get(key) || [])];
       case 'INCR': { const v = (Number(kv.get(key)) || 0) + 1; kv.set(key, String(v)); return v; }
       case 'EXPIRE': return 1;
+      case 'LPUSH': { const l = world.lists[key] || (world.lists[key] = []); rest.forEach((v) => l.unshift(v)); return l.length; }
       case 'SUNION': { const u = new Set(); [key, ...rest].forEach((k) => (sets.get(k) || new Set()).forEach((v) => u.add(v))); return [...u]; }
       case 'SCARD': return (sets.get(key) || new Set()).size;
       case 'MGET': return [key, ...rest].map((k) => (kv.has(k) ? kv.get(k) : null));
@@ -44,7 +45,7 @@ function createWorld() {
     }
   };
   const blockedChats = new Set();
-  const world = { members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [] };
+  const world = { members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {} };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });

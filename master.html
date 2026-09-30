@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#faf9f6">
-  <title>Путь — к Женщине</title>
+  <title>Мастер многомерности — к Женщине</title>
   <style>
     :root{--ink:#292d30;--muted:#70777c;--gold:#b87825;--cream:#faf9f6;--r:28px;--shadow:0 16px 38px rgba(65,72,76,.1)}
     *{box-sizing:border-box}html{background:#eef2f3;scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:"Helvetica Neue","Arial Narrow",Arial,sans-serif;font-weight:300;background:radial-gradient(circle at 95% 5%,rgba(226,194,137,.18),transparent 340px),linear-gradient(180deg,#fbfdfe,#f5f9fa)}h1,h2,h3,p{margin:0}a,button{font:inherit}.app{width:min(100%,760px);margin:auto;min-height:100vh;padding:12px 16px calc(116px + env(safe-area-inset-bottom));overflow:hidden}.eyebrow{font-size:.72rem;letter-spacing:.17em;text-transform:uppercase;color:#737b80}.surface{border:1px solid rgba(255,255,255,.92);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
@@ -44,6 +44,41 @@
 
 .cta.is-soon{opacity:.6;pointer-events:none}
 .path-badge{display:inline-block;margin:0 0 0 10px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(183,122,43,.28);color:#8a5b1f;font-size:.7rem;letter-spacing:.02em;vertical-align:middle}.path-badge.is-done{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}.path-badge.is-soon{color:#8a9094}
+
+/* ---- development path pages ---- */
+.back{display:inline-flex;align-items:center;gap:6px;margin:4px 4px 12px;color:#8c5a1e;font-size:.86rem;text-decoration:none}
+.dev-hero{position:relative;min-height:430px;display:flex;align-items:flex-end;padding:28px;background-size:cover;background-position:center;overflow:hidden}
+.dev-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.05) 20%,rgba(255,255,255,.86) 62%,rgba(255,255,255,.96))}
+.dev-hero .dev-copy{position:relative;z-index:2}
+.dev-hero h1{margin:8px 0 12px;font-size:clamp(1.75rem,7vw,2.6rem);font-weight:200;line-height:1.04;letter-spacing:-.02em}
+.dev-hero p{margin:0;color:#4d5458;line-height:1.55}
+.dev-section{margin-top:14px;padding:24px}
+.dev-section h2{margin:0 0 14px;font-size:1.25rem;font-weight:300;letter-spacing:.03em}
+.dev-list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.dev-list li{position:relative;padding-left:26px;color:#4d5458;line-height:1.5}
+.dev-list li:before{content:"";position:absolute;left:4px;top:.55em;width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,#c38831,#f1d083)}
+.dev-steps{margin:0;padding:0;list-style:none;display:grid;gap:12px;counter-reset:step}
+.dev-steps li{position:relative;padding:3px 0 3px 46px;min-height:34px;color:#4d5458;line-height:1.45;counter-increment:step}
+.dev-steps li b{display:block;color:#292d30;font-weight:400}
+.dev-steps li:before{content:counter(step);position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#a86d1c;background:#fbf6ec;border:1px solid rgba(182,124,45,.22)}
+.dev-note{margin:14px 0 0;color:#70777c;font-size:.86rem;line-height:1.5}
+.path-choice{display:grid;gap:12px;margin-top:14px}
+.choice{position:relative;min-height:300px;display:flex;align-items:flex-end;padding:24px;background-size:cover;background-position:center;overflow:hidden;color:inherit;text-decoration:none}
+.choice:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 15%,rgba(255,255,255,.9) 58%,rgba(255,255,255,.97))}
+.choice .dev-copy{position:relative;z-index:2}
+.choice h2{margin:6px 0 8px;font-size:1.5rem;font-weight:200;letter-spacing:.02em}
+.choice p{margin:0 0 4px;color:#4d5458;line-height:1.5}
+.dev-form{display:grid;gap:10px;margin-top:4px}
+.dev-form label{display:grid;gap:5px;font-size:.76rem;color:#70777c}
+.dev-form input,.dev-form textarea{width:100%;min-height:46px;padding:11px 14px;border:1px solid rgba(183,122,43,.26);border-radius:15px;background:#fff;color:#292d30;font:300 .98rem "Helvetica Neue",Arial,sans-serif;box-sizing:border-box}
+.dev-form textarea{min-height:84px;resize:vertical}
+.dev-form .cta{margin-top:6px}
+.dev-status{min-height:20px;margin:6px 2px 0;color:#8a5b1f;font-size:.86rem}
+.progress-line{display:flex;align-items:center;gap:12px;margin:0 0 10px}
+.progress-line b{font-size:2rem;font-weight:200;color:#8a5b1f;line-height:1}
+.progress-dots{display:flex;gap:6px}
+.progress-dots i{width:22px;height:6px;border-radius:3px;background:#ece5d8}
+.progress-dots i.on{background:linear-gradient(90deg,#b87321,#e2b766)}
 </style>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
@@ -53,29 +88,63 @@
 </head>
 <body>
   <main class="app">
-    <section class="hero surface"><div class="hero-copy"><div class="eyebrow">Наша миссия</div><p>Перевести миллионы женщин из состояния функции в многомерный, многогранный объём, раскрыть внутри состояние Женщины Мира и сделать одну из лучших экосистем проявленности женщины.</p><p class="hero-welcome">Добро пожаловать домой.</p><h1>Твой ПУТЬ начинается здесь.</h1><a class="cta outline" href="#ritual">Практика многомерности <span>→</span></a></div></section>
-    <section id="ritual" class="ritual surface"><div class="ritual-copy"><div class="eyebrow">● &nbsp; Важный ритуал</div><h2>Я принимаю</h2><p>Практики на принятие себя, своей многогранности и всего своего объёма.</p><a class="cta outline" href="#" data-link="accept_url">Открыть ритуал <span>→</span></a></div><p class="quote">«Я вижу и признаю твой объём.<br>Я принимаю.<br>Я разрешаю себе быть во всём своём объёме.»</p></section>
-    <div id="journey" class="section-head"><h2>ТВОЙ ПУТЬ МНОГОМЕРНОСТИ</h2></div>
-    <section class="journey-grid">
-      <article class="journey one surface"><div class="num">01</div><h3>ТВОЯ ЦЕЛОСТНОСТЬ</h3><p>Приведи себя в целостность и собери все части воедино. Бесплатные материалы и практики — в любое время.</p><a class="cta outline" href="#" data-link="materials_url">Открыть материалы <span>→</span></a></article>
-      <article class="journey two surface"><div class="num">02</div><h3>НАПОЛНЕНИЕ</h3><p>Женщина приходит в изобилие, когда она наполнена. Каждый день мы занимаемся ритуалами наполнения ресурса в клубе «к Женщине».</p><a class="cta" href="#" data-club-pay>Ждем тебя в клубе <span>→</span></a></article>
-      <article class="journey three surface"><div class="num">03</div><h3>РАСКРЫТИЕ МНОГОМЕРНОГО ОБЪЁМА</h3><p>6 этапов. Раскрывай объём поэтапно в своём ритме.</p><a class="cta" href="/meetings.html">Открыть <span>→</span></a></article>
-      <article class="journey four surface"><div class="num">04</div><h3>ПРОЯВЛЕНИЕ МНОГОМЕРНОСТИ</h3><p>Из внутреннего света — в мир. Два пути, одна миссия: Партнёр и Мастер.</p><a class="cta" href="/manifestation.html">Выбрать путь <span>→</span></a></article>
-    </section>
+    <a class="back" href="/manifestation.html">← Два пути</a>
+    <section class="dev-hero surface" style="background-image:url('/img/meetings-15-bf4f1296e9.webp')"><div class="dev-copy"><div class="eyebrow">Путь Мастера</div><h1>МАСТЕР МНОГОМЕРНОСТИ</h1><p>После шести встреч ты можешь не только проживать практики, но и вести их: передавать другим женщинам, выстроить из своего мастерства систему и зарабатывать на этом.</p></div></section>
+    <section class="dev-section surface" id="master-progress"><h2>Мой путь к Мастеру</h2>
+      <div class="progress-line"><b id="mp-count">0</b><div><div class="progress-dots" id="mp-dots"><i></i><i></i><i></i><i></i><i></i><i></i></div><p class="dev-note" style="margin:6px 0 0">из 6 встреч пройдено</p></div></div>
+      <p class="dev-note" id="mp-text">Мастером можно стать после всех шести встреч. Заявку можно оставить уже сейчас.</p>
+      <a class="cta outline" id="mp-link" href="/meetings.html">Выбрать встречу <span>→</span></a></section>
+    <section class="dev-section surface"><h2>Что даёт путь Мастера</h2><ul class="dev-list">
+      <li>Раскрыть свои практики и работать с ними структурнее.</li>
+      <li>Зарабатывать на своём мастерстве системно, а не от случая к случаю.</li>
+      <li>Передавать практики своим клиенткам и вести встречи самой.</li>
+      <li>Расти в партнёрстве с «к Женщине» вместе с другими мастерами.</li></ul></section>
+    <section class="dev-section surface"><h2>Как стать Мастером</h2><ol class="dev-steps">
+      <li><b>Пройди шесть встреч</b>Это основа: ты проживаешь все грани сама.</li>
+      <li><b>Оставь заявку</b>Расскажи, почему хочешь идти этим путём.</li>
+      <li><b>Личная встреча</b>Знакомимся и обсуждаем формат обучения.</li>
+      <li><b>Старт на пути Мастера</b>Начинаешь вести практики вместе с «к Женщине».</li></ol>
+      <p class="dev-note">Формат обучения и условия обсуждаем лично.</p></section>
+    <section class="dev-section surface" id="apply"><h2>Заявка на путь Мастера</h2>
+      <form class="dev-form" data-application="master">
+        <label>Имя<input name="name" autocomplete="name" required maxlength="80" placeholder="Как к вам обращаться"></label>
+        <label>Город<input name="city" maxlength="60" placeholder="Где вы живёте"></label>
+        <label>Телефон или Telegram<input name="contact" required maxlength="120" placeholder="Контакт для связи"></label>
+        <button class="cta" type="submit">Отправить заявку <span>→</span></button><p class="dev-status" aria-live="polite"></p>
+      </form></section>
     <div class="closing">— ТЫ УЖЕ ДОСТАТОЧНА, ЧТОБЫ БЫТЬ ЗДЕСЬ —</div>
   </main>
+
   <nav class="app-nav" aria-label="Основная навигация"><a href="space.html"><span class="icon"><svg class="line-icon" viewBox="-4 -4 56 56" aria-hidden="true"><g transform="translate(24 24)"><path d="M0-27 1.5-8 0-4.8-1.5-8ZM0 27-1.5 8 0 4.8 1.5 8ZM-27 0-8-1.5-4.8 0-8 1.5ZM27 0 8 1.5 4.8 0 8-1.5ZM-19.1-19.1-5.8-7.8-4.1-4.1-7.8-5.8ZM19.1 19.1 5.8 7.8 4.1 4.1 7.8 5.8ZM19.1-19.1 7.8-5.8 4.1-4.1 5.8-7.8ZM-19.1 19.1-7.8 5.8-4.1 4.1-5.8 7.8Z" fill="currentColor" stroke="none"/><path d="M-10.3-24.8-3.1-9.1M10.3 24.8 3.1 9.1M10.3-24.8 3.1-9.1M-10.3 24.8-3.1 9.1M-24.8-10.3-9.1-3.1M24.8 10.3 9.1 3.1M24.8-10.3 9.1-3.1M-24.8 10.3-9.1 3.1" stroke-width="1.15"/><circle r="3.2" stroke-width="1.35"/><circle r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Пространство</span></a><a href="path.html" class="active" aria-current="page"><span class="icon"><svg class="line-icon" viewBox="-2 -2 52 52" aria-hidden="true"><g transform="translate(24 24)"><ellipse rx="24" ry="10.4" transform="rotate(-13)" stroke-width="1.35"/><ellipse rx="21.5" ry="9" transform="rotate(48)" stroke-width="1.05"/><path d="M-18.5 12.5C-9.5 19.6 7.8 19 18.7 8.3" stroke-width="1.05"/><circle r="6.7" stroke-width="1.25"/><circle cx="21.5" cy="-5.5" r="1.55" fill="currentColor" stroke="none"/><circle cx="-15.8" cy="13.2" r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Путь</span></a><a href="meetings.html"><span class="icon"><svg class="line-icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(24 24)"><path d="M-6 16C-10.3 11.6-20.5 4.4-20.5-4.6-20.5-13.3-10.5-17-5.2-9.7-.1-17 10-13.3 10-4.6 10 4.2.2 11.6-6 16Z" stroke-width="1.35"/><path d="M6 16C1.7 11.6-8.5 4.4-8.5-4.6-8.5-13.3 1.5-17 6.8-9.7 11.9-17 22-13.3 22-4.6 22 4.2 12.2 11.6 6 16Z" stroke-width="1.35"/><circle cx="-6" cy="16" r=".95" fill="currentColor" stroke="none"/><circle cx="6" cy="16" r=".95" fill="currentColor" stroke="none"/></g></svg></span><span>Встречи</span></a><a href="about.html"><span class="icon"><svg class="fill-icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M241.251 145.056c-39.203-17.423-91.472 17.423-104.54 60.982-13.068 43.558 8.712 117.608 65.337 143.742 56.626 26.135 108.896-8.712 87.117-39.202-74.049-8.712-121.963-87.117-100.184-126.319s91.472-21.78 52.27-39.203zM337.079 271.375c47.914-39.202 21.779-126.319-17.423-135.031-39.202-8.712-56.626 13.068-26.135 39.202 39.203 30.491-8.712 91.472-39.202 87.117 0 0 34.847 47.914 82.76 8.712zM254.318 119.788c43.558-17.423 74.049-9.579 100.184 16.556 13.068-39.202-30.491-104.54-108.896-113.252S93.153 118.921 127.999 171.191c8.712-17.424 60.982-64.47 126.319-51.403zM110.576 245.24C36.527 262.663 28.87 335.248 45.239 380.27c17.423 47.914 4.356 82.761 26.135 91.472 20.622 8.253 91.472 13.068 152.454 17.423 60.982 4.356 108.896-47.914 91.472-108.896-174.233 30.492-204.724-95.827-204.724-135.029zM93.883 235.796s2.178-28.313 10.89-43.558c-4.356-4.356-8.712-21.779-8.712-21.779s-4.356-19.601-4.356-34.846c-32.669-6.534-89.295 34.846-91.472 41.38-2.178 6.534 10.889 80.583 39.202 82.761 30.492-23.958 54.448-23.958 54.448-23.958zM489.533 175.546c-39.202-82.761-113.252-65.337-113.252-65.337s4.356 21.779-4.356 34.846c43.558 47.914 13.067 146.643-24.681 158.265 130.675 56.626 159.712-58.081 164.068-75.504 4.356-17.423-13.067-30.49-21.779-52.27zM454.108 332.076c-22.359 15.841-85.663 11.613-121.964-7.265 1.446 14.514-13.067 37.756-20.325 39.202 27.59 11.621 53.725 62.436 7.265 116.161 18.878 18.87 95.828 4.356 140.842-24.689 7.325-4.722 18.869-52.27 21.779-79.851 3.855-36.531 7.258-68.247-27.597-43.558zM257.227 213.294c-18.928 5.164-30.439-6.27-23.234-18.869 5.811-10.167 5.266-20.69-8.712-13.068-29.044 17.423-11.612 66.784 24.689 62.428 49.36-17.423 27.581-62.428 14.514-60.982-13.067 1.446 8.712 26.135-7.257 30.491z"/></svg></span><span>Обо мне</span></a></nav>
 <script>
-(function personalPath(){
-  // Personal status on the 4 stages (same data as "Обо мне").
-  var webApp=window.Telegram&&window.Telegram.WebApp;var initData=webApp&&webApp.initData;
-  function badge(cls,text,kind){var card=document.querySelector('.journey.'+cls+' .num');if(!card)return;var b=document.createElement('span');b.className='path-badge'+(kind?' '+kind:'');b.textContent=text;card.appendChild(b)}
-  badge('one','Доступно всегда');
-  if(!initData)return;
+(function devForms(){
+  var webApp=window.Telegram&&window.Telegram.WebApp;var initData=webApp&&webApp.initData||'';
+  document.querySelectorAll('form[data-application]').forEach(function(form){
+    form.addEventListener('submit',function(e){
+      e.preventDefault();var st=form.querySelector('.dev-status');var btn=form.querySelector('button[type=submit]');
+      if(!initData){st.textContent='Откройте приложение в Telegram, чтобы отправить заявку.';return}
+      var data={initData:initData,kind:form.getAttribute('data-application')};new FormData(form).forEach(function(v,k){data[k]=v});
+      btn.disabled=true;st.textContent='Отправляю…';
+      fetch('/api/meetings/application',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.json()}).then(function(r){
+        if(r.ok){st.textContent='Заявка отправлена. Мы свяжемся с вами в Telegram.';btn.innerHTML='Заявка отправлена <span>✓</span>'}
+        else{st.textContent=r.error||'Не получилось отправить. Попробуйте ещё раз.';btn.disabled=false}
+      }).catch(function(){st.textContent='Нет связи. Попробуйте ещё раз.';btn.disabled=false});
+    });
+  });
+})();
+</script>
+<script>
+(function masterProgress(){
+  // Meetings passed, counted from her paid tickets (same as "Обо мне").
+  var webApp=window.Telegram&&window.Telegram.WebApp;var initData=webApp&&webApp.initData;if(!initData)return;
   fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData:initData})}).then(function(r){return r.ok?r.json():null}).then(function(p){
-    if(!p||!p.ok)return;
-    var c=p.club||{};if(c.member===true||c.status==='active'||c.status==='pre_cancelled')badge('two','Я в клубе','is-done');
-    var n=(p.tickets&&p.tickets.passed)||0;badge('three','Пройдено '+n+' из 6',n>=6?'is-done':'');
+    if(!p||!p.ok)return;var n=Math.min(6,(p.tickets&&p.tickets.passed)||0);
+    document.getElementById('mp-count').textContent=n;
+    document.querySelectorAll('#mp-dots i').forEach(function(d,i){d.classList.toggle('on',i<n)});
+    var link=document.getElementById('mp-link');
+    if(n>=6){document.getElementById('mp-text').textContent='Все шесть встреч пройдены — путь Мастера открыт. Оставь заявку ниже.';link.setAttribute('href','#apply');link.innerHTML='К заявке <span>→</span>'}
+    else{var next=(p.tickets.items||[]).find(function(t){return t.status==='upcoming'});
+      document.getElementById('mp-text').textContent=next?'Следующая встреча: «'+next.title+'» — '+next.date_label+'. Заявку можно оставить уже сейчас.':'Мастером можно стать после всех шести встреч. Заявку можно оставить уже сейчас.'}
   }).catch(function(){});
 })();
 </script>
