@@ -1,0 +1,98 @@
+/* Shared visual polish for every page of the app. Loaded last, so it refines the page styles. */
+
+/* ---------- Gold buttons: rich gold under the label + a slow shimmer that never sits on the text ---------- */
+.cta:not(.outline){position:relative}
+.cta:not(.outline),.gold-button,.mission-reference-button,.personal-reference-button{
+  isolation:isolate;overflow:hidden;
+  background:linear-gradient(115deg,#8c5517 0%,#a96c22 26%,#bf8433 50%,#d39f4d 74%,#b0722a 100%)!important;
+  text-shadow:0 1px 2px rgba(80,44,6,.38);font-weight:400;letter-spacing:.01em}
+.cta:not(.outline)::before,.gold-button::before{
+  content:""!important;position:absolute!important;inset:0!important;width:auto!important;height:auto!important;
+  z-index:-1!important;opacity:1!important;filter:none!important;pointer-events:none;
+  background:linear-gradient(100deg,transparent 30%,rgba(255,243,210,.5) 50%,transparent 70%)!important;
+  transform:translateX(-120%);animation:kz-shimmer 7s ease-in-out infinite}
+.cta:not(.outline)::after{z-index:-1}
+@keyframes kz-shimmer{0%,62%{transform:translateX(-120%)}88%,100%{transform:translateX(120%)}}
+@media (prefers-reduced-motion:reduce){.cta::before,.gold-button::before{animation:none!important;opacity:0!important}}
+.cta,.gold-button{-webkit-tap-highlight-color:transparent;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.cta:active{transform:scale(.98);filter:brightness(.97)}
+.gold-button:active{filter:brightness(.95)}
+
+/* ---------- Closing line: one balanced line, no lonely dash ---------- */
+.closing{letter-spacing:.1em!important;text-wrap:balance;line-height:1.6}
+
+/* ---------- Smooth image appearance (no blank boxes while photos load) ---------- */
+img[loading="lazy"]{background:linear-gradient(180deg,#f3ede4,#faf8f4)}
+
+@media (max-width:520px){
+  /* Comfortable reading sizes on phones */
+  body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  .closing{font-size:11px!important;padding-left:12px;padding-right:12px}
+  .eyebrow{font-size:11.5px}
+
+  /* --- Space: «Женщина женщине — дом» — photo on top, full-width text below --- */
+  .culture{min-height:0!important;padding:0!important;background-position:center top!important;background-size:100% auto!important;background-color:#faf9f6!important}
+  .culture:after{background:linear-gradient(180deg,transparent 0,transparent 200px,rgba(250,249,246,.94) 300px,#faf9f6 340px)!important}
+  .culture-copy{width:auto!important;padding:250px 24px 28px}
+  .culture p{font-size:15px!important;line-height:1.55!important}
+  /* Two paragraphs in a card: no double gap */
+  .card p:has(+p){margin-bottom:6px}
+  .card p+p{margin-top:0}
+  .chip,.card.rituals-pair .chip{font-size:12.5px;padding:7px 11px}
+
+  /* --- Path: stage cards — photo on top, text below on cream --- */
+  .journey{min-height:0!important;padding:232px 22px 24px!important;background-size:100% auto!important;background-position:center top!important;background-color:#faf9f6;justify-content:flex-start!important}
+  .journey:after{background:linear-gradient(180deg,transparent 0,transparent 170px,rgba(250,249,246,.94) 248px,#faf9f6 275px)!important}
+  .journey>*{width:auto!important}
+  .journey h3{font-size:1.5rem!important}
+  .journey p{font-size:15px!important;line-height:1.5!important}
+  .journey .cta{width:100%!important;max-width:none!important;min-height:50px!important;font-size:15px!important;box-sizing:border-box}
+  .path-badge{font-size:12px}
+
+  /* --- Rituals: hero text never on top of the hair; «Что запускает ритуал?» as a clean 2×2 grid --- */
+  .system-hero:after{background:linear-gradient(180deg,rgba(250,247,242,.93) 0%,rgba(250,247,242,.86) 40%,rgba(250,247,242,.35) 56%,transparent 68%)!important}
+  .system-subtitle{font-size:12px!important;letter-spacing:.1em}
+  .flow{grid-template-columns:1fr 1fr!important;gap:22px 14px!important}
+  .flow-arrow{display:none!important}
+  .flow .flow-item{margin-top:0!important}
+  .flow-item p{font-size:14px!important;line-height:1.35!important}
+  .flow{align-items:start!important}
+  .flow-item p{max-width:160px;margin-left:auto!important;margin-right:auto!important;margin-top:10px!important}
+  .ritual-item span{font-size:12px}
+  .hero:has(#ritual-title){border-radius:28px;overflow:hidden;box-shadow:0 14px 34px rgba(65,72,76,.08)}
+  .hero:has(#ritual-title) .hero-copy p{font-size:15px!important;line-height:1.55!important}
+  .system-panel p{font-size:14px}
+
+  /* --- Meetings --- */
+  .hero-copy p{font-size:14.5px}
+  .layer-hit small{font-size:9.5px!important;letter-spacing:.1em}
+  .progress-step small{font-size:10px!important}
+  .schedule-when{font-size:13px!important}
+  .journey-tools .schedule-title{margin-top:0;padding-top:0;border-top:0}
+  .city-tab{box-shadow:none}
+
+  /* --- About --- */
+  .hero-lead{font-size:12.5px!important;letter-spacing:.08em}
+  .facet span:not(.facet-orb){font-size:12px!important}
+  .step-state{font-size:12px!important}
+  .vision{background:linear-gradient(115deg,#8c5517 0%,#a96c22 26%,#bf8433 50%,#d39f4d 74%,#b0722a 100%)!important}
+  .vision p.is-empty{color:rgba(255,255,255,.92)!important;font-style:italic}
+
+  /* --- Start pages --- */
+  .welcome-brand span{font-size:10.5px!important}
+  .welcome-lines{font-size:14px!important;line-height:1.55!important;color:#4c5357!important;letter-spacing:.02em!important}
+  .welcome-copy .gold-button{font-size:14px!important;min-height:54px!important}
+  .mission-reference-brand span{font-size:10px!important}
+  .mission-video-label{font-size:11px!important}
+  .mission-reference-eyebrow{font-size:11.5px!important}
+  .mission-reference-copy p{font-size:14.5px!important;line-height:1.55!important}
+  .mission-wait{font-size:12px!important}
+  .mission-reference-button{font-size:13.5px!important}
+  .personal-reference-greeting p{font-size:11px!important}
+  .personal-reference-lead{font-size:14.5px!important}
+  .personal-direction strong{font-size:11.5px!important}
+  .personal-reference-more{font-size:14px!important}
+  .personal-reference-button{font-size:13.5px!important}
+  .personal-reference-footer{font-size:14px!important}
+  .personal-reference-page{min-height:0!important;padding-bottom:34px}
+}
