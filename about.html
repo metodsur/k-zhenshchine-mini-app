@@ -106,6 +106,23 @@
 .step-card[data-step="3"] img{object-position:90% 30%}
 .step-card[data-step="4"] img{object-position:85% 42%}
 .hero-unique{margin-top:10px!important;color:#9d651e!important;letter-spacing:.14em}
+/* "Мой путь" cards in the style of the Space page cards: photo on top, number badge, text and outline button below */
+.steps{gap:14px}
+.step-card{min-height:470px;display:flex;align-items:flex-end;border-radius:28px;border:1px solid rgba(255,255,255,.9);box-shadow:0 14px 34px rgba(65,72,76,.1);background:#faf9f6}
+.step-card:after{background:linear-gradient(180deg,rgba(255,255,255,.03) 10%,rgba(255,255,255,.2) 34%,rgba(250,249,246,.94) 58%,rgba(250,249,246,.99) 100%)}
+.step-card.is-soon{opacity:1}
+.step-copy{width:100%;padding:24px 22px 22px}
+.step-card .step-badge{position:absolute;z-index:3;top:18px;left:20px;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.83);border:1px solid rgba(183,122,43,.38);color:#30363a;font-size:.78rem;letter-spacing:0}
+.step-top{gap:8px;margin-bottom:2px}
+.step-card h3{margin:8px 0 8px;font-size:clamp(1.35rem,5.6vw,1.72rem);font-weight:200;line-height:1.1;letter-spacing:.002em}
+.step-card p{font-size:.95rem;line-height:1.45}
+.step-link{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:54px;margin-top:16px;padding:10px 24px;box-sizing:border-box;border-radius:999px;border:1px solid rgba(183,122,43,.52);background:rgba(255,255,255,.75);color:#86551c;font-size:1rem;text-decoration:none}
+.step-link span{font-size:1.4rem;font-weight:200}
+.step-link.is-soon{color:#9aa1a5;border-color:rgba(154,161,165,.35)}
+.step-card[data-step="1"] img{object-position:74% 0%}
+.step-card[data-step="2"] img{object-position:62% 0%}
+.step-card[data-step="3"] img{object-position:100% 0%}
+.step-card[data-step="4"] img{object-position:90% 0%}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 <script src="/access-guard.js"></script>
@@ -116,10 +133,10 @@
   <section class="hero" aria-labelledby="about-title"><img class="hero-art" src="/img/about-03-0979d275e9.webp" alt="Женщина в белом платье среди золотых световых сфер и снежных гор"><div class="profile"><div class="portrait-wrap"><img class="portrait" id="profile-avatar" src="/img/about-04-4a85d5dfb3.webp" alt="Моё фото"><label class="avatar-upload" title="Загрузить своё фото" aria-label="Загрузить своё фото">↥<input id="avatar-input" type="file" accept="image/*"></label></div><div class="identity-copy"><h1 id="about-title">Моя страница</h1><p class="membership-badge"><span id="space-since">В пространстве с сентября 2026</span></p><p class="club-membership" id="club-membership" hidden></p><p class="hero-lead">Я раскрываюсь. Я меняюсь. Я остаюсь собой.</p><p class="hero-lead hero-unique">Ты особенная. Твой путь уникален.</p></div></div></section>
   <div class="section-title"><h2>МОЙ ПУТЬ</h2><small>Где я сейчас и что дальше</small></div>
     <section class="steps" id="my-path">
-      <article class="step-card" data-step="1"><img src="/img/about-07-80f5cb2eba.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">01</span><span class="step-state is-open" id="step1-state">Доступно всегда</span></div><h3>МОЯ ЦЕЛОСТНОСТЬ</h3><p id="step1-text">Бесплатные материалы и практики — изучай в любое время.</p><a class="step-link" id="step1-link" href="#">Открыть материалы →</a></div></article>
-      <article class="step-card" data-step="2"><img src="/img/about-05-2f341cc01f.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">02</span><span class="step-state" id="step2-state">Клуб</span></div><h3>НАПОЛНЕНИЕ</h3><p id="step2-text">Каждый день — ритуалы наполнения ресурса в клубе «к Женщине».</p><a class="step-link" id="step2-link" href="#">Вступить в клуб →</a></div></article>
-      <article class="step-card" data-step="3"><img src="/img/meetings-12-301c227afb.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">03</span><span class="step-state" id="step3-state">0 из 6</span></div><h3>РАСКРЫТИЕ ОБЪЁМА</h3><p id="step3-text">6 живых встреч. Раскрывай объём поэтапно в своём ритме.</p><a class="step-link" id="step3-link" href="meetings.html">Выбрать встречу →</a></div></article>
-      <article class="step-card" data-step="4"><img src="/img/about-06-050e46803e.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">04</span><span class="step-state">Два пути</span></div><h3>ПРОЯВЛЕНИЕ</h3><p>Два пути, одна миссия: Партнёр и Мастер.</p><a class="step-link" href="/manifestation.html">Выбрать путь →</a></div></article>
+      <article class="step-card" data-step="1"><img src="/img/about-07-80f5cb2eba.webp" alt="" loading="lazy" decoding="async"><span class="step-badge step-num">01</span><div class="step-copy"><div class="step-top"><span class="step-state is-open" id="step1-state">Доступно всегда</span></div><h3>МОЯ ЦЕЛОСТНОСТЬ</h3><p id="step1-text">Бесплатные материалы и практики — изучай в любое время.</p><a class="step-link" id="step1-link" href="#">Открыть материалы <span>→</span></a></div></article>
+      <article class="step-card" data-step="2"><img src="/img/about-05-2f341cc01f.webp" alt="" loading="lazy" decoding="async"><span class="step-badge step-num">02</span><div class="step-copy"><div class="step-top"><span class="step-state" id="step2-state">Клуб</span></div><h3>НАПОЛНЕНИЕ</h3><p id="step2-text">Каждый день — ритуалы наполнения ресурса в клубе «к Женщине».</p><a class="step-link" id="step2-link" href="#">Вступить в клуб <span>→</span></a></div></article>
+      <article class="step-card" data-step="3"><img src="/img/meetings-12-301c227afb.webp" alt="" loading="lazy" decoding="async"><span class="step-badge step-num">03</span><div class="step-copy"><div class="step-top"><span class="step-state" id="step3-state">0 из 6</span></div><h3>РАСКРЫТИЕ ОБЪЁМА</h3><p id="step3-text">6 живых встреч. Раскрывай объём поэтапно в своём ритме.</p><a class="step-link" id="step3-link" href="meetings.html">Выбрать встречу <span>→</span></a></div></article>
+      <article class="step-card" data-step="4"><img src="/img/about-06-050e46803e.webp" alt="" loading="lazy" decoding="async"><span class="step-badge step-num">04</span><div class="step-copy"><div class="step-top"><span class="step-state">Два пути</span></div><h3>ПРОЯВЛЕНИЕ</h3><p>Два пути, одна миссия: Партнёр и Мастер.</p><a class="step-link" href="/manifestation.html">Выбрать путь <span>→</span></a></div></article>
     </section>
     <div class="section-title"><h2>МОИ ВСТРЕЧИ</h2><small>Мои билеты и пройденные встречи</small></div>
     <section class="tickets surface" id="my-tickets"><p class="tickets-empty">Здесь появятся встречи, на которые вы записались.</p><a class="cta" href="meetings.html">Выбрать встречу <span>→</span></a></section>
@@ -206,7 +223,7 @@ function setStep(n,{state,stateClass,text:t,link,linkText,href,soon}){
   const st=$('step'+n+'-state'),p=$('step'+n+'-text'),a=$('step'+n+'-link');
   if(state!==undefined){st.textContent=state;st.className='step-state'+(stateClass?' '+stateClass:'')}
   if(t!==undefined)p.textContent=t;
-  if(a){if(linkText)a.textContent=linkText+' →';a.classList.toggle('is-soon',Boolean(soon));a.onclick=null;
+  if(a){if(linkText){a.textContent=linkText+' ';const ar=document.createElement('span');ar.textContent='→';a.appendChild(ar)}a.classList.toggle('is-soon',Boolean(soon));a.onclick=null;
     if(href){a.setAttribute('href',href)}else{a.setAttribute('href','#');if(link)a.onclick=e=>{e.preventDefault();openLink(link)}}}
 }
 function renderPath(p){
