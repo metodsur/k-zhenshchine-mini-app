@@ -81,8 +81,8 @@ a.cta{text-decoration:none;box-sizing:border-box}
     </section>
     <section class="section"><article class="event" id="next-event"><div class="event-copy"><div class="eyebrow">Ближайшее событие</div><h2 id="next-event-title">ОСНОВЫ</h2><div class="event-meta"><p><span id="next-event-when">ДАТА СКОРО ПОЯВИТСЯ</span><br>Встреча с Мастером многомерности<br>Варвара Вебер</p><div class="event-price" id="next-event-price">5 555 ₽</div></div><a class="cta" id="next-event-cta" href="/meetings.html?book=1">Сообщить, когда появится дата <span>→</span></a></div></article></section>
     <section class="section"><div class="eyebrow">Дальше в пространстве</div><div class="timeline" id="club-events"><article class="time-item"><h3>Скоро здесь появятся новые события</h3><p>Следите за каналом «к Женщине».</p></article></div></section>
-    <section class="section" id="collabs-block" hidden><article class="counter"><div class="eyebrow">Мы создаём вместе</div><h2>КОЛЛАБОРАЦИИ ЖЕНЩИН</h2><strong id="collabs-total">0</strong><div class="eyebrow">Коллабораций</div><p>Реальные договорённости и проекты, которые женщины создали вместе.</p></article></section>
-    <section class="section" id="week-block" hidden><div class="eyebrow">Итоги за 7 дней</div><div class="stats"><div class="stat"><span>Коллаборации</span><strong id="week-collabs">0</strong><small>состоялось</small></div><div class="stat"><span>Живые встречи</span><strong id="week-meetings">0</strong><small>прошло</small></div><div class="stat"><span>Женщины</span><strong id="week-women">0</strong><small>были активны в клубе</small></div><div class="stat"><span>Города</span><strong id="week-cities">0</strong><small>провели встречи</small></div></div></section>
+    <section class="section" id="collabs-block"><article class="counter"><div class="eyebrow">Мы создаём вместе</div><h2>КОЛЛАБОРАЦИИ ЖЕНЩИН</h2><strong id="collabs-total">0</strong><div class="eyebrow">Коллабораций</div><p id="collabs-note">Реальные договорённости и проекты, которые женщины создали вместе.</p></article></section>
+    <section class="section" id="week-block"><div class="eyebrow">Итоги за 7 дней</div><div class="stats"><div class="stat"><span>Коллаборации</span><strong id="week-collabs">0</strong><small>состоялось</small></div><div class="stat"><span>Живые встречи</span><strong id="week-meetings">0</strong><small>прошло</small></div><div class="stat"><span>Женщины</span><strong id="week-women">0</strong><small>были активны в клубе</small></div><div class="stat"><span>Города</span><strong id="week-cities">0</strong><small>провели встречи</small></div></div></section>
     <section class="section"><article class="feature"><h2>МЫ СОЗДАЁМ ПРОСТРАНСТВО ВМЕСТЕ</h2><p>Города. Встречи. Женщины. Возможности.</p></article></section>
     <div class="closing">— ТЫ УЖЕ ДОСТАТОЧНА, ЧТОБЫ БЫТЬ ЗДЕСЬ —</div>
   </main>
@@ -94,12 +94,13 @@ a.cta{text-decoration:none;box-sizing:border-box}
   var fmt=function(n){return Number(n).toLocaleString('ru-RU').replace(/\u00a0/g,' ')+' ₽'};
   (window.kzSchedule||fetch('/api/schedule',{cache:'no-store'}).then(function(r){return r.json()})).then(function(data){
     if(!data||!data.ok)return;
-    // Club activity counted by the bot in the paid club group (hidden until there is data).
+    // Club activity counted by the bot in the paid club group (always shown, real numbers).
     var cs=data.club_stats;
     if(cs){
-      if(cs.collabs_total>0){document.getElementById('collabs-total').textContent=cs.collabs_total;document.getElementById('collabs-block').hidden=false}
+      document.getElementById('collabs-total').textContent=cs.collabs_total||0;
+      if(!cs.collabs_total)document.getElementById('collabs-note').textContent='Счёт только начался. Договорились о совместном проекте в клубе — отметьте пост хэштегом #коллаборация, и он появится здесь.';
       var w=cs.week||{};
-      if(w.collabs||w.meetings||w.women||w.cities){['collabs','meetings','women','cities'].forEach(function(k){document.getElementById('week-'+k).textContent=w[k]||0});document.getElementById('week-block').hidden=false}
+      ['collabs','meetings','women','cities'].forEach(function(k){document.getElementById('week-'+k).textContent=w[k]||0});
     }
     // "Дальше в пространстве": upcoming club events from the admin page.
     var box=document.getElementById('club-events');

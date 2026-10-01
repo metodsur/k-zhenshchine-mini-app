@@ -44,6 +44,21 @@
 
 .cta.is-soon{opacity:.6;pointer-events:none}
 .path-badge{display:inline-block;margin:0 0 0 10px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(183,122,43,.28);color:#8a5b1f;font-size:.7rem;letter-spacing:.02em;vertical-align:middle}.path-badge.is-done{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}.path-badge.is-soon{color:#8a9094}
+/* Phones: photo on top, text below on a light background (like the cards), so any font size fits */
+@media(max-width:620px){
+  .app .hero{min-height:0;padding:0;background:url('/img/path-01-c9e71e4efd.webp') 84% 0/auto 330px no-repeat,#faf9f6}
+  .app .hero:after{background:linear-gradient(180deg,transparent 0,transparent 170px,rgba(250,249,246,.92) 290px,#faf9f6 330px)}
+  .app .hero-copy{position:relative;left:auto;top:auto;transform:none;width:auto;padding:268px 22px 24px}
+  .app .hero-copy p{font-size:.95rem;line-height:1.5}
+  .app .hero h1{font-size:1.95rem;line-height:1.08;margin-top:6px}
+  .app .hero .cta{width:100%;box-sizing:border-box;margin-top:18px}
+  .app .ritual{min-height:0;padding:0;background:url('/img/path-02-f8a2964f4a.webp') 100% 0/auto 250px no-repeat,#faf9f6}
+  .app .ritual:after{background:linear-gradient(180deg,transparent 0,transparent 120px,rgba(250,249,246,.92) 215px,#faf9f6 250px)}
+  .app .ritual-copy{width:auto;padding:200px 22px 0}
+  .app .ritual-copy p{font-size:.95rem;line-height:1.5}
+  .app .ritual .cta{width:100%;box-sizing:border-box;margin-top:16px}
+  .app .quote{display:block;position:relative;right:auto;top:auto;width:auto;margin:16px 22px 24px;text-align:left;font-size:.95rem;line-height:1.5;text-shadow:none}
+}
 </style>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
