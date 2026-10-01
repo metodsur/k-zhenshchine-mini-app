@@ -99,6 +99,13 @@
 .facet-add-form button{border:0;border-radius:14px;padding:0 16px;background:#b77a2b;color:#fff;font:300 .9rem "Helvetica Neue",Arial,sans-serif}
 .facet.custom{position:relative}
 .facet .facet-remove{position:absolute;top:-4px;right:calc(50% - 38px);width:22px;height:22px;border-radius:50%;border:0;background:#fff;color:#a0522d;box-shadow:0 2px 8px rgba(0,0,0,.12);font-size:.8rem;line-height:22px;padding:0}
+/* Keep faces in frame: each photo shows its upper part where the heads are */
+.step-card{min-height:178px}
+.step-card[data-step="1"] img{object-position:62% 14%}
+.step-card[data-step="2"] img{object-position:center 4%}
+.step-card[data-step="3"] img{object-position:90% 30%}
+.step-card[data-step="4"] img{object-position:85% 42%}
+.hero-unique{margin-top:10px!important;color:#9d651e!important;letter-spacing:.14em}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 <script src="/access-guard.js"></script>
@@ -106,12 +113,12 @@
 </head>
 <body>
 <main class="page">
-  <section class="hero" aria-labelledby="about-title"><img class="hero-art" src="/img/about-03-0979d275e9.webp" alt="Женщина в белом платье среди золотых световых сфер и снежных гор"><div class="profile"><div class="portrait-wrap"><img class="portrait" id="profile-avatar" src="/img/about-04-4a85d5dfb3.webp" alt="Моё фото"><label class="avatar-upload" title="Загрузить своё фото" aria-label="Загрузить своё фото">↥<input id="avatar-input" type="file" accept="image/*"></label></div><div class="identity-copy"><h1 id="about-title">Моя страница</h1><p class="membership-badge"><span id="space-since">В пространстве с сентября 2026</span></p><p class="club-membership" id="club-membership" hidden></p><p class="hero-lead">Я раскрываюсь. Я меняюсь. Я остаюсь собой.</p></div></div></section>
+  <section class="hero" aria-labelledby="about-title"><img class="hero-art" src="/img/about-03-0979d275e9.webp" alt="Женщина в белом платье среди золотых световых сфер и снежных гор"><div class="profile"><div class="portrait-wrap"><img class="portrait" id="profile-avatar" src="/img/about-04-4a85d5dfb3.webp" alt="Моё фото"><label class="avatar-upload" title="Загрузить своё фото" aria-label="Загрузить своё фото">↥<input id="avatar-input" type="file" accept="image/*"></label></div><div class="identity-copy"><h1 id="about-title">Моя страница</h1><p class="membership-badge"><span id="space-since">В пространстве с сентября 2026</span></p><p class="club-membership" id="club-membership" hidden></p><p class="hero-lead">Я раскрываюсь. Я меняюсь. Я остаюсь собой.</p><p class="hero-lead hero-unique">Ты особенная. Твой путь уникален.</p></div></div></section>
   <div class="section-title"><h2>МОЙ ПУТЬ</h2><small>Где я сейчас и что дальше</small></div>
     <section class="steps" id="my-path">
       <article class="step-card" data-step="1"><img src="/img/about-07-80f5cb2eba.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">01</span><span class="step-state is-open" id="step1-state">Доступно всегда</span></div><h3>МОЯ ЦЕЛОСТНОСТЬ</h3><p id="step1-text">Бесплатные материалы и практики — изучай в любое время.</p><a class="step-link" id="step1-link" href="#">Открыть материалы →</a></div></article>
       <article class="step-card" data-step="2"><img src="/img/about-05-2f341cc01f.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">02</span><span class="step-state" id="step2-state">Клуб</span></div><h3>НАПОЛНЕНИЕ</h3><p id="step2-text">Каждый день — ритуалы наполнения ресурса в клубе «к Женщине».</p><a class="step-link" id="step2-link" href="#">Вступить в клуб →</a></div></article>
-      <article class="step-card" data-step="3"><img src="/img/about-11-c5e767910a.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">03</span><span class="step-state" id="step3-state">0 из 6</span></div><h3>РАСКРЫТИЕ ОБЪЁМА</h3><p id="step3-text">6 живых встреч. Раскрывай объём поэтапно в своём ритме.</p><a class="step-link" id="step3-link" href="meetings.html">Выбрать встречу →</a></div></article>
+      <article class="step-card" data-step="3"><img src="/img/meetings-12-301c227afb.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">03</span><span class="step-state" id="step3-state">0 из 6</span></div><h3>РАСКРЫТИЕ ОБЪЁМА</h3><p id="step3-text">6 живых встреч. Раскрывай объём поэтапно в своём ритме.</p><a class="step-link" id="step3-link" href="meetings.html">Выбрать встречу →</a></div></article>
       <article class="step-card" data-step="4"><img src="/img/about-06-050e46803e.webp" alt="" loading="lazy" decoding="async"><div class="step-copy"><div class="step-top"><span class="step-num">04</span><span class="step-state">Два пути</span></div><h3>ПРОЯВЛЕНИЕ</h3><p>Два пути, одна миссия: Партнёр и Мастер.</p><a class="step-link" href="/manifestation.html">Выбрать путь →</a></div></article>
     </section>
     <div class="section-title"><h2>МОИ ВСТРЕЧИ</h2><small>Мои билеты и пройденные встречи</small></div>
