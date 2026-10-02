@@ -7,6 +7,7 @@ const cycles = require("../../lib/cycles");
 const board = require("../../lib/os-board");
 const events = require("../../lib/events");
 const tribute = require("../../lib/tribute");
+const collections = require("../../lib/os-collections");
 const { send, readBody } = require("../../lib/http");
 
 const DAY_MS = 864e5;
@@ -53,12 +54,29 @@ async function calendarItems(from, to, cycleView) {
   for (const e of await events.loadEvents()) {
     if (e.date >= from && e.date <= to) items.push({ kind: "club", id: `club:${e.date}:${e.title}`, date: e.date, time: "", title: e.title, place: "Клуб", meta: e.text || "" });
   }
+  for (const name of ["content", "media"]) {
+    const cal = collections.SCHEMAS[name].calendar;
+    for (const it of await collections.load(name)) {
+      const date = it[cal.field];
+      if (!date || date < from || date > to) continue;
+      const schema = collections.SCHEMAS[name];
+      items.push({ kind: cal.kind, id: `${name}:${it.id}`, ref: it.id, date, time: it[cal.time] || "", title: it.title, place: "", meta: `${cal.label} · ${schema.stages[it.stage] || ""}`, varvara: name === "media" });
+    }
+  }
   for (const e of await board.loadEntries()) {
     if (e.date >= from && e.date <= to) items.push({ kind: "entry", ...e, type_label: board.CALENDAR_TYPES[e.type] || "" });
   }
   items.sort((a, b) => (a.date + (a.time || "99")).localeCompare(b.date + (b.time || "99")));
   return items;
 }
+
+// Bot-link codes of media appearances shown by the appearance's name ("Медиа: Подкаст …").
+async function mediaSources() {
+  const map = new Map();
+  for (const it of await collections.load("media")) if (it.tracking) map.set(crm.sourceLabel(it.tracking), `Медиа: ${it.title}`);
+  return map;
+}
+const withSource = (map) => (card) => (map.has(card.source) ? { ...card, source: map.get(card.source) } : card);
 
 const sections = {
   async me(member) { return { status: 200, body: meView(member) }; },
@@ -75,25 +93,41 @@ const sections = {
       .filter((c) => c.stage !== "refused" && c.next_step && c.next_step.date && c.next_step.date <= today)
       .sort((a, b) => a.next_step.date.localeCompare(b.next_step.date))
       .map(crm.summary);
-    const newLeads = cards.filter((c) => new Date(c.created_at).getTime() >= now - 2 * DAY_MS).sort((a, b) => b.created_at.localeCompare(a.created_at)).map(crm.summary);
+    const sourceNames = await mediaSources();
+    const newLeads = cards.filter((c) => new Date(c.created_at).getTime() >= now - 2 * DAY_MS).sort((a, b) => b.created_at.localeCompare(a.created_at)).map(crm.summary).map(withSource(sourceNames));
     const payments = [];
     for (const c of cards) for (const p of c.payments) if (new Date(p.at).getTime() >= week) payments.push({ ...p, card_id: c.id, name: c.name, username: c.username });
     payments.sort((a, b) => b.at.localeCompare(a.at));
     const activeCycles = cycleView.cycles.filter((c) => cycles.ACTIVE.includes(c.status));
     const upcoming = await calendarItems(today, dayOf(now + 7 * DAY_MS), cycleView);
+    const attention = [];
+    for (const name of ["content", "media"]) {
+      const schema = collections.SCHEMAS[name];
+      const order = Object.keys(schema.stages);
+      for (const it of await collections.load(name)) {
+        const due = it[schema.due_field];
+        if (!due || due > today || order.indexOf(it.stage) >= order.indexOf(schema.done_from)) continue;
+        attention.push({ board: name, id: it.id, title: it.title, due, stage: schema.stages[it.stage], owner: it.owner || it.contact_name || "", action: it.next_action || "" });
+      }
+    }
+    attention.sort((a, b) => a.due.localeCompare(b.due));
+    const contentList = await collections.load("content");
+    const weekStart = dayOf(week);
+    const publishedWeek = contentList.filter((c) => ["published", "analyzed"].includes(c.stage) && c.publish_date && c.publish_date >= weekStart && c.publish_date <= today).length;
     const kpi = {
       leads_7d: cards.filter((c) => new Date(c.created_at).getTime() >= week).length,
       payments_7d: payments.length,
       revenue_7d: payments.reduce((a, p) => a + p.amount, 0),
       club_active: club ? [...club.values()].filter((s) => s.status === "active").length : null,
       active_cycles: activeCycles.length,
-      free_seats: activeCycles.reduce((a, c) => a + c.free_seats, 0)
+      free_seats: activeCycles.reduce((a, c) => a + c.free_seats, 0),
+      published_7d: publishedWeek
     };
     return {
       status: 200,
       body: {
         ok: true, today, kpi, crm_visible: canCrm,
-        followups, new_leads: newLeads, payments: payments.slice(0, 20), upcoming,
+        followups, attention, new_leads: newLeads, payments: payments.slice(0, 20), upcoming,
         cycles: activeCycles.map((c) => ({ id: c.id, city_name: c.city_name, status: c.status, capacity: c.capacity, free_seats: c.free_seats, master: c.master.name, published: c.published, next: c.meetings[["1", "2", "3", "4", "5", "6"].find((mid) => c.meetings[mid].date && c.meetings[mid].date >= today)] || null })),
         tasks: tasks.filter((t) => !t.done).sort((a, b) => Number(b.blocker) - Number(a.blocker) || String(a.due || "9").localeCompare(String(b.due || "9")))
       }
@@ -104,10 +138,10 @@ const sections = {
     if (!team.can(member, "crm.view")) return deny("CRM");
     const action = body.action || "list";
     if (action === "list") {
-      const [cards, club] = await Promise.all([crm.listCards(), clubStatusMap()]);
+      const [cards, club, sourceNames] = await Promise.all([crm.listCards(), clubStatusMap(), mediaSources()]);
       const rows = cards.map((c) => {
         const live = club && c.tg_id ? club.get(String(c.tg_id)) : null;
-        return crm.summary(live ? { ...c, club: live } : c);
+        return withSource(sourceNames)(crm.summary(live ? { ...c, club: live } : c));
       }).sort((a, b) => b.last_touch_at.localeCompare(a.last_touch_at));
       return { status: 200, body: { ok: true, cards: rows } };
     }
@@ -150,6 +184,34 @@ const sections = {
     if (!team.can(member, "cycles.edit")) return deny("календарь");
     const result = action === "save" ? await board.saveEntry(body.entry || {}, who(member)) : action === "remove" ? await board.removeEntry(String(body.id || "")) : { status: 400, errors: ["Неизвестное действие"] };
     return result.status === 200 ? { status: 200, body: { ok: true } } : fail(result);
+  },
+
+  async collection(member, body) {
+    const name = String(body.name || "");
+    if (!collections.SCHEMAS[name]) return { status: 404, body: { ok: false, errors: ["Раздел не найден"] } };
+    const schema = collections.SCHEMAS[name];
+    const action = body.action || "list";
+    if (action === "list") {
+      const items = await collections.load(name);
+      let extras = null;
+      // Media: women who came by the appearance's link (CRM source) and what they paid.
+      if (name === "media" && team.can(member, "crm.view")) {
+        const cards = await crm.listCards();
+        extras = {};
+        for (const it of items) {
+          if (!it.tracking) continue;
+          const label = crm.sourceLabel(it.tracking);
+          const own = cards.filter((c) => c.source === label);
+          extras[it.id] = { leads: own.length, paid: own.filter((c) => c.payments.length).length, revenue: own.reduce((a, c) => a + c.payments.reduce((x, p) => x + p.amount, 0), 0) };
+        }
+      }
+      return { status: 200, body: { ok: true, schema: collections.publicSchema(name), items, extras, can_edit: team.can(member, schema.perm), bot_username: process.env.TELEGRAM_BOT_USERNAME || "K_zhenshcine_bot" } };
+    }
+    if (!team.can(member, schema.perm)) return deny(schema.title);
+    const result = action === "save" ? await collections.saveItem(name, body.item, who(member))
+      : action === "remove" ? await collections.removeItem(name, String(body.id || ""))
+      : { status: 400, errors: ["Неизвестное действие"] };
+    return result.status === 200 ? { status: 200, body: { ok: true, item: result.item || null } } : fail(result);
   },
 
   async tasks(member, body) {

@@ -177,3 +177,51 @@ test('tasks with blockers show first on "Сегодня"', async () => {
   const bad = await os('tasks', { action: 'save', task: { title: '' } }, cookie);
   assert.equal(bad.status, 400);
 });
+
+test('content board, media pipeline with tracking link, roles', async () => {
+  const world = await setup();
+  await admin(OWNER, 'team', { action: 'save', members: [
+    { id: '5001', name: 'Валерия', role: 'director' }, { id: '5004', name: 'Катя', role: 'content' }] });
+  const KATYA = { id: 5004, first_name: 'Катя' };
+  const valeria = await login(world, VALERIA);
+  const katya = await login(world, KATYA);
+
+  // Content assistant: content yes, media no.
+  const idea = await os('collection', { name: 'content', action: 'save', item: { title: 'Женщина женщине — дом', format: 'reels', due: inDays(-1), hook: 'А вы знаете, что…' } }, katya);
+  assert.equal(idea.status, 200, JSON.stringify(idea.body));
+  assert.equal(idea.body.item.stage, 'idea');
+  assert.equal((await os('collection', { name: 'media', action: 'save', item: { title: 'Подкаст' } }, katya)).status, 403);
+  const bad = await os('collection', { name: 'content', action: 'save', item: { title: 'x', post_url: 'ссылка' } }, katya);
+  assert.equal(bad.status, 400);
+
+  // Overdue content shows on "Сегодня"; publishing records the move and the date.
+  let today = await os('today', {}, valeria);
+  assert.equal(today.body.attention.length, 1);
+  const moved = await os('collection', { name: 'content', action: 'save', item: { ...idea.body.item, stage: 'published', publish_date: inDays(0), metrics: { views: '1200', retention: '45,5' } } }, katya);
+  assert.equal(moved.status, 200, JSON.stringify(moved.body));
+  assert.deepEqual(moved.body.item.metrics, { views: 1200, retention: 45.5 });
+  assert.match(moved.body.item.history.pop().text, /Idea → Published/);
+  today = await os('today', {}, valeria);
+  assert.equal(today.body.attention.length, 0);
+  assert.equal(today.body.kpi.published_7d, 1);
+
+  // Media: women who came by the appearance's bot link are counted, with what they paid.
+  const media = await os('collection', { name: 'media', action: 'save', item: { title: 'Подкаст «Сила»', kind: 'podcast', stage: 'booked', date: inDays(4), tracking: 'media_sila' } }, valeria);
+  assert.equal(media.status, 200, JSON.stringify(media.body));
+  await say(CLIENT, '/start media_sila');
+  const list = await os('collection', { name: 'media', action: 'list' }, valeria);
+  assert.equal(list.body.extras[media.body.item.id].leads, 1);
+  const crmList = await os('crm', { action: 'list' }, valeria);
+  assert.equal(crmList.body.cards.find((c) => c.id === 'tg7001').source, 'Медиа: Подкаст «Сила»');
+  assert.equal((await os('collection', { name: 'media', action: 'save', item: { title: 'x', tracking: 'кириллица' } }, valeria)).status, 400);
+
+  // Both show in the calendar.
+  const cal = await os('calendar', { action: 'list', from: inDays(-1), to: inDays(10) }, valeria);
+  assert.deepEqual(cal.body.items.map((i) => i.kind).sort(), ['content', 'media']);
+
+  // Platforms and library need a title; removal works.
+  const lib = await os('collection', { name: 'library', action: 'save', item: { title: 'Короткое био', category: 'bio', text: 'Варвара Вебер — основательница…', approved: true } }, katya);
+  assert.equal(lib.status, 200);
+  assert.equal((await os('collection', { name: 'library', action: 'remove', id: lib.body.item.id }, katya)).status, 200);
+  assert.equal((await os('collection', { name: 'platforms', action: 'save', item: { title: '' } }, valeria)).status, 400);
+});
