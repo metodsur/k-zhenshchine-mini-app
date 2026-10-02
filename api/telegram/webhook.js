@@ -3,6 +3,7 @@ const store = require("../../lib/store");
 const payments = require("../../lib/payments");
 const stats = require("../../lib/stats");
 const clubActivity = require("../../lib/club-activity");
+const crm = require("../../lib/crm");
 
 function send(res, status, body) {
   res.statusCode = status; res.setHeader("Content-Type", "application/json; charset=utf-8"); res.end(JSON.stringify(body));
@@ -70,7 +71,11 @@ module.exports = async function handler(req, res) {
     if (message && clubActivity.isClubGroup(message.chat)) {
       try { await clubActivity.trackGroupMessage(message); } catch (error) { console.error("Club activity tracking failed"); }
     }
-    if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) await stats.trackStart(message.from.id);
+    if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) {
+      await stats.trackStart(message.from.id);
+      const source = crm.startParam(message.text);
+      await crm.safeTouch(message.from, { type: "start", onlyIfNew: true, source: source || "bot", text: `Нажала «Старт» в боте · источник: ${crm.sourceLabel(source)}` });
+    }
     if (message?.chat?.type === "private" && typeof message.text === "string" && /^\/space(@\w+)?(\s|$)/.test(message.text)) {
       if (await isMemberSafe(message.from.id)) {
         await telegram("sendMessage", { chat_id: message.chat.id, text: "Твоё пространство «к Женщине» 🤍", reply_markup: spaceKeyboard() });
@@ -117,6 +122,7 @@ module.exports = async function handler(req, res) {
         try {
           if (Number(await store.rememberChannelJoin(joinedUserId, joinedAt)) === 1) await stats.trackChannelJoin(new Date(joinedAt));
         } catch (error) { console.error("Join date storage failed"); }
+        await crm.safeTouch(change.new_chat_member.user, { type: "channel", text: "Вступила в бесплатный канал «к Женщине»" });
         await sendJoined(joinedUserId);
       }
     }
