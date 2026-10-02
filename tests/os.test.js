@@ -225,3 +225,46 @@ test('content board, media pipeline with tracking link, roles', async () => {
   assert.equal((await os('collection', { name: 'library', action: 'remove', id: lib.body.item.id }, katya)).status, 200);
   assert.equal((await os('collection', { name: 'platforms', action: 'save', item: { title: '' } }, valeria)).status, 400);
 });
+
+test('rhythm: week and month windows, checks, marks, plan, bot reminder', async () => {
+  const rhythm = require('../lib/os-rhythm');
+  const at = (s) => Date.parse(s);
+  const fri = rhythm.weekPeriod(at('2026-10-02T06:00:00Z'));
+  assert.deepEqual([fri.active, fri.key, fri.to], [true, '2026-09-28', '2026-10-04']);
+  const mon = rhythm.weekPeriod(at('2026-10-05T06:00:00Z'));
+  assert.deepEqual([mon.active, mon.key], [true, '2026-09-28']);
+  assert.equal(rhythm.weekPeriod(at('2026-10-07T06:00:00Z')).active, false);
+  const endMonth = rhythm.monthPeriod(at('2026-10-30T06:00:00Z'));
+  assert.deepEqual([endMonth.active, endMonth.key, endMonth.next_key], [true, '2026-10', '2026-11']);
+  const startMonth = rhythm.monthPeriod(at('2026-11-02T06:00:00Z'));
+  assert.deepEqual([startMonth.active, startMonth.key], [true, '2026-10']);
+  assert.equal(rhythm.monthPeriod(at('2026-10-15T06:00:00Z')).active, false);
+  assert.equal(rhythm.monthPeriod(at('2026-12-30T06:00:00Z')).next_key, '2027-01');
+
+  const world = await setup();
+  await say(CLIENT, '/start');
+  const cookie = await login(world, VALERIA);
+  let r = await os('rhythm', {}, cookie);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  const steps = r.body.week.items.find((i) => i.id === 'crm_steps');
+  assert.equal(steps.status, 'warn');
+  assert.match(steps.text, /Без следующего шага: 1/);
+  assert.equal(r.body.month.items.find((i) => i.id === 'plan_next').status, 'warn');
+
+  r = await os('rhythm', { action: 'mark', kind: 'week', key: r.body.week.key, item: 'crm_steps', done: true }, cookie);
+  assert.equal(r.body.week.done_count, 1);
+  assert.equal(r.body.week.items.find((i) => i.id === 'crm_steps').done.by, 'Валерия');
+  r = await os('rhythm', { action: 'plan', key: r.body.month.next_key, plan: { revenue: '300000', cycle_sales: 10, club_sales: 20 } }, cookie);
+  assert.equal(r.body.month.items.find((i) => i.id === 'plan_next').status, 'ok');
+  assert.equal((await os('rhythm', { action: 'mark', kind: 'week', key: 'x', item: 'nope', done: true }, cookie)).status, 400);
+
+  // Friday morning: owner and director get one reminder each, once.
+  const before = world.sent('sendMessage').length;
+  const sent = await rhythm.runReminders(at('2026-10-02T06:00:00Z'));
+  assert.equal(sent.sent, 2);
+  const msgs = world.sent('sendMessage').slice(before);
+  assert.match(msgs[0].text, /итогов недели/);
+  assert.match(msgs[0].text, /\/dashboard/);
+  assert.equal((await rhythm.runReminders(at('2026-10-02T07:00:00Z'))).sent, 0);
+  assert.equal((await rhythm.runReminders(at('2026-10-07T06:00:00Z'))).periods, 0);
+});

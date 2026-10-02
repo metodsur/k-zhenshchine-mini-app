@@ -8,6 +8,7 @@ const board = require("../../lib/os-board");
 const events = require("../../lib/events");
 const tribute = require("../../lib/tribute");
 const collections = require("../../lib/os-collections");
+const rhythm = require("../../lib/os-rhythm");
 const { send, readBody } = require("../../lib/http");
 
 const DAY_MS = 864e5;
@@ -212,6 +213,16 @@ const sections = {
       : action === "remove" ? await collections.removeItem(name, String(body.id || ""))
       : { status: 400, errors: ["Неизвестное действие"] };
     return result.status === 200 ? { status: 200, body: { ok: true, item: result.item || null } } : fail(result);
+  },
+
+  async rhythm(member, body) {
+    const action = body.action || "get";
+    if (action === "get") return { status: 200, body: { ok: true, can_edit: team.can(member, "tasks.edit"), ...(await rhythm.view(member)) } };
+    if (!team.can(member, "tasks.edit")) return deny("итоги");
+    const result = action === "mark" ? await rhythm.mark(body.kind, body.key, body.item, Boolean(body.done), who(member))
+      : action === "plan" ? await rhythm.savePlan(body.key, body.plan || {})
+      : { status: 400, errors: ["Неизвестное действие"] };
+    return result.status === 200 ? { status: 200, body: { ok: true, ...(await rhythm.view(member)) } } : fail(result);
   },
 
   async tasks(member, body) {
