@@ -201,6 +201,17 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .dot{flex:none;width:9px;height:9px;margin-top:7px;border-radius:50%;background:var(--info)}
 .dot.warn{background:var(--bad)}
 .dot.ok{background:var(--ok)}
+.mine-toggle{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--line);border-radius:99px;background:var(--panel);font-size:.84rem;color:#5d6468;cursor:pointer;white-space:nowrap}
+.mine-toggle.on{background:var(--gold-bg);border-color:#e3c999;color:#7a4a12}
+.mine-toggle input{margin:0;accent-color:var(--gold)}
+.panel-h .mine-toggle{padding:4px 10px;font-size:.74rem;letter-spacing:0;text-transform:none}
+table.att{min-width:420px}
+table.att th{position:static;padding:6px 6px;text-align:center;font-size:.7rem}
+table.att th:first-child,table.att td:first-child{text-align:left}
+table.att td{padding:7px 6px;text-align:center;border-bottom:1px solid #f0eae0;cursor:default}
+table.att tbody tr{cursor:default}
+table.att td.na{color:#c5c9cb}
+table.att input{width:17px;height:17px;accent-color:var(--gold)}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:40;padding:11px 20px;border-radius:99px;background:var(--ink);color:#fff;font-size:.9rem;box-shadow:var(--shadow)}
 .loading{padding:40px 0;color:var(--muted)}
 @media (max-width:1280px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -256,15 +267,16 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     library: '<svg viewBox="0 0 24 24"><path d="M4 4.5h5v15H4zM10 4.5h5v15h-5z"/><path d="m16 5.2 4.6-1.2 3 14.3-4.6 1.2z" transform="translate(-2 0)"/></svg>'
   };
   var VIEWS = [
-    { id: "today", label: "Сегодня" },
-    { id: "rhythm", label: "Итоги" },
+    { id: "today", label: "Сегодня", perm: "os.workspace" },
+    { id: "rhythm", label: "Итоги", perm: "os.workspace" },
     { id: "crm", label: "CRM", perm: "crm.view" },
     { id: "cycles", label: "Циклы" },
-    { id: "calendar", label: "Календарь" },
-    { id: "content", label: "Контент" },
-    { id: "media", label: "Медийность" },
-    { id: "platforms", label: "Площадки" },
-    { id: "library", label: "Библиотека" }
+    { id: "calendar", label: "Календарь", perm: "os.workspace" },
+    { id: "content", label: "Контент", perm: "os.workspace" },
+    { id: "media", label: "Медийность", perm: "os.workspace" },
+    { id: "platforms", label: "Площадки", perm: "os.workspace" },
+    { id: "library", label: "Библиотека", perm: "os.workspace" },
+    { id: "templates", label: "Шаблоны", perm: "crm.view", hidden: true }
   ];
   var MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
@@ -329,7 +341,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
   function renderNav() {
     var nav = document.getElementById("nav"); nav.innerHTML = "";
     VIEWS.forEach(function (v) {
-      if (v.perm && !can(v.perm)) return;
+      if (v.hidden || (v.perm && !can(v.perm))) return;
       if (v.id === "content") nav.appendChild(h("div", { class: "nav-group", text: "Контент и медиа" }));
       var b = h("button", { type: "button", class: state.view === v.id ? "on" : "", onclick: function () { go(v.id); } });
       b.innerHTML = ICONS[v.id]; b.appendChild(h("span", { text: v.label }));
@@ -348,7 +360,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
     renderNav();
     var main = document.getElementById("view"); main.innerHTML = ""; main.appendChild(h("div", { class: "loading", text: "Загрузка…" }));
-    if (["content", "media", "platforms", "library"].indexOf(view) !== -1) viewCollection(view);
+    if (["content", "media", "platforms", "library", "templates"].indexOf(view) !== -1) viewCollection(view);
     else ({ today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
     window.scrollTo(0, 0);
   }
@@ -360,8 +372,23 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     document.getElementById("me-name").textContent = me.name || "Варвара";
     document.getElementById("me-role").textContent = me.role_label;
     var view = (location.hash || "").replace("#", "");
-    go(VIEWS.some(function (v) { return v.id === view && (!v.perm || can(v.perm)); }) ? view : "today");
-    if (view !== "rhythm") setTimeout(rhythmPopup, 600);
+    var home = can("os.workspace") ? "today" : "cycles";
+    go(VIEWS.some(function (v) { return v.id === view && (!v.perm || can(v.perm)); }) ? view : home);
+    if (view !== "rhythm" && can("os.workspace")) setTimeout(rhythmPopup, 600);
+    if (!me.team) api("me").then(function (d) { if (d.ok) { state.me.team = d.team; teamList(); } }); else teamList();
+  }
+  // Team names for "Ответственный" fields, and the "Только моё" switch.
+  function teamList() {
+    var old = document.getElementById("team-names"); if (old) old.remove();
+    document.body.appendChild(h("datalist", { id: "team-names" }, (state.me.team || []).map(function (m) { return h("option", { value: m.name }); })));
+  }
+  try { state.mine = localStorage.getItem("kz-mine") === "1"; } catch (e) { state.mine = false; }
+  function myName() { return String((state.me && state.me.name) || "").trim().toLowerCase(); }
+  function isMine(owner) { return String(owner || "").trim().toLowerCase() === myName(); }
+  function mineToggle(redraw) {
+    return h("label", { class: "mine-toggle" + (state.mine ? " on" : "") }, h("input", { type: "checkbox", checked: state.mine, onchange: function (e) {
+      state.mine = e.target.checked; try { localStorage.setItem("kz-mine", state.mine ? "1" : "0"); } catch (x) {} redraw();
+    } }), "Только моё");
   }
   window.addEventListener("hashchange", function () {
     var view = (location.hash || "").replace("#", "");
@@ -430,8 +457,11 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 
   function tasksPanel(list) {
     var body = h("div");
+    var all = list;
     function draw(items) {
+      all = items;
       body.innerHTML = "";
+      if (state.mine) items = items.filter(function (t) { return isMine(t.owner); });
       if (!items.length) body.appendChild(h("div", { class: "empty", text: "Открытых задач нет." }));
       items.forEach(function (t) {
         body.appendChild(h("div", { class: "task" },
@@ -446,11 +476,11 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     draw(list);
     var form = null;
     if (can("tasks.edit")) {
-      var title = h("input", { placeholder: "Новая задача или блокер…" }), owner = h("input", { placeholder: "Кто", style: "max-width:130px" }), due = h("input", { type: "date" }), blocker = h("input", { type: "checkbox" });
+      var title = h("input", { placeholder: "Новая задача или блокер…" }), owner = h("input", { placeholder: "Кто", list: "team-names", style: "max-width:130px" }), due = h("input", { type: "date" }), blocker = h("input", { type: "checkbox" });
       form = h("form", { class: "add-task", onsubmit: function (e) { e.preventDefault(); if (!title.value.trim()) return; save({ title: title.value, owner: owner.value, due: due.value, blocker: blocker.checked }); title.value = ""; blocker.checked = false; } },
         title, owner, due, h("label", null, blocker, "блокер"), h("button", { class: "btn small", type: "submit", text: "Добавить" }));
     }
-    return h("section", { class: "panel" }, h("div", { class: "panel-h" }, h("h2", { text: "Задачи и блокеры" })), body, form);
+    return h("section", { class: "panel" }, h("div", { class: "panel-h" }, h("h2", { text: "Задачи и блокеры" }), mineToggle(function () { draw(all); })), body, form);
   }
 
   // ---------- CRM ----------
@@ -467,6 +497,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       if (f.stage && c.stage !== f.stage) return false;
       if (f.interest && c.interests.indexOf(f.interest) === -1) return false;
       if (f.source && c.source !== f.source) return false;
+      if (state.mine && !isMine(c.owner)) return false;
       if (q && [c.name, c.username, c.phone, c.email, c.city].join(" ").toLowerCase().indexOf(q) === -1) return false;
       return true;
     });
@@ -519,8 +550,11 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     }
     setView([
       h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Продажи" }), h("h1", { text: "CRM" }), h("p", { text: "Лид → контакт → диалог → предложение → оплата → follow-up" })),
-        can("crm.edit") ? h("button", { class: "btn gold", type: "button", text: "+ Новая карточка", onclick: function () { openNewCard(); } }) : null),
-      h("div", { class: "toolbar" }, search, interest, source, seg), h("div", { class: "toolbar" }, stageChips), listBox
+        h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+          h("button", { class: "btn", type: "button", text: "Шаблоны сообщений", onclick: function () { go("templates"); } }),
+          can("crm.broadcast") ? h("button", { class: "btn", type: "button", text: "Рассылка по выбранным", onclick: function () { openBroadcast(filteredCards()); } }) : null,
+          can("crm.edit") ? h("button", { class: "btn gold", type: "button", text: "+ Новая карточка", onclick: function () { openNewCard(); } }) : null)),
+      h("div", { class: "toolbar" }, search, interest, source, seg, mineToggle(drawCrm)), h("div", { class: "toolbar" }, stageChips), listBox
     ]);
     drawList();
   }
@@ -548,7 +582,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       city: h("input", { value: card.city || "", disabled: ro }),
       source: h("input", { value: card.source || "", list: "sources", disabled: ro }),
       stage: select(dict.stage_order.map(function (s) { return [s, dict.stages[s]]; }), card.stage || "new", { disabled: ro }),
-      owner: h("input", { value: card.owner || "", placeholder: "Кто ведёт", disabled: ro }),
+      owner: h("input", { value: card.owner || "", placeholder: "Кто ведёт", list: "team-names", disabled: ro }),
       step_date: h("input", { type: "date", value: (card.next_step && card.next_step.date) || "", disabled: ro }),
       step_action: h("input", { value: (card.next_step && card.next_step.action) || "", placeholder: "Например: написать про свободные места", disabled: ro }),
       refusal: h("input", { value: card.refusal_reason || "", placeholder: "Почему отказалась", disabled: ro })
@@ -596,7 +630,20 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       var history = h("ul", { class: "history" }, card.history.slice().reverse().map(function (e) {
         return h("li", null, h("time", { text: new Date(e.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + (e.by && e.by !== "система" ? " · " + e.by : "") }), h("span", { text: e.text }));
       }));
-      add(body, [facts, payments ? [h("div", { class: "section-t", text: "Оплаты" }), payments] : null, h("div", { class: "section-t", text: "Карточка" }), form.node, errBox,
+      var tplBox = h("div");
+      api("collection", { name: "templates", action: "list" }).then(function (t) {
+        if (!t.ok || !t.items.length) return;
+        var out = h("textarea", { style: "width:100%;min-height:96px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-top:8px" });
+        var pick = select([["", "Выберите шаблон…"]].concat(t.items.map(function (x) { return [x.id, x.title]; })), "", { onchange: function () {
+          var tpl = t.items.filter(function (x) { return x.id === pick.value; })[0];
+          out.value = tpl ? fillTemplate(tpl.text, card) : "";
+        } });
+        add(tplBox, [h("div", { class: "section-t", text: "Написать по шаблону" }), field("", pick), out,
+          h("div", { class: "actions" },
+            h("button", { class: "btn small", type: "button", text: "Копировать", onclick: function () { if (out.value) copyText(out.value); } }),
+            card.username ? h("a", { class: "btn small", href: "https://t.me/" + card.username, target: "_blank", rel: "noopener", text: "Открыть чат в Telegram" }) : null)]);
+      });
+      add(body, [facts, payments ? [h("div", { class: "section-t", text: "Оплаты" }), payments] : null, tplBox, h("div", { class: "section-t", text: "Карточка" }), form.node, errBox,
         can("crm.edit") ? h("div", { class: "actions" }, h("button", { class: "btn gold", type: "button", text: "Сохранить", onclick: function () {
           var v = form.value();
           api("crm", { action: "update", id: card.id, patch: v }).then(function (r) {
@@ -611,6 +658,52 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         } }))] : null,
         h("div", { class: "section-t", text: "История" }), history]);
     });
+  }
+  function fillTemplate(text, card) {
+    var first = String(card.name || "").split(" ")[0] || "Дорогая";
+    return String(text).replace(/\{имя\}/gi, first).replace(/\{город\}/gi, card.city || "в твоём городе");
+  }
+  function openBroadcast(cards) {
+    var body = h("div"), errBox = h("div");
+    var dr = drawer("Рассылка через бота", "CRM · выбрано по фильтру: " + cards.length, body);
+    var text = h("textarea", { placeholder: "Текст сообщения. {имя} и {город} подставятся сами.", style: "width:100%;min-height:150px;padding:12px;border:1px solid var(--line);border-radius:12px" });
+    var button = select([["meetings", "Кнопка «Выбрать встречу»"], ["club", "Кнопка «Вступить в клуб»"], ["space", "Кнопка «Открыть пространство»"], ["", "Без кнопки"]], "meetings");
+    var info = h("div", { class: "notice", style: "background:var(--info-bg);color:var(--info)", text: "Считаю получателей…" });
+    var preview = h("div");
+    var tplPick = h("span");
+    api("collection", { name: "templates", action: "list" }).then(function (t) {
+      if (!t.ok) return;
+      var pick = select([["", "Вставить шаблон…"]].concat(t.items.map(function (x) { return [x.id, x.title]; })), "", { onchange: function () {
+        var tpl = t.items.filter(function (x) { return x.id === pick.value; })[0]; if (tpl) { text.value = tpl.text; refreshPreview(); }
+      } });
+      tplPick.appendChild(pick);
+    });
+    var ids = cards.map(function (c) { return c.id; });
+    var count = 0;
+    function refreshPreview() {
+      api("crm", { action: "broadcast_preview", ids: ids, text: text.value }).then(function (r) {
+        if (!r.ok) { info.textContent = (r.errors || [])[0] || "Нет доступа"; return; }
+        count = r.recipients;
+        info.textContent = "Получат: " + r.recipients + (r.skipped_no_bot ? " · без бота (добавлены вручную): " + r.skipped_no_bot : "") + (r.skipped_opt_out ? " · отписались: " + r.skipped_opt_out : "");
+        preview.innerHTML = "";
+        if (text.value.trim() && r.sample.length) add(preview, [h("div", { class: "section-t", text: "Так увидит " + (r.sample[0].name || "первая получательница") }), h("div", { class: "panel", style: "padding:12px 14px;white-space:pre-wrap;font-size:.9rem", text: r.sample[0].text + "\n\nНе хочешь получать такие сообщения — отправь /stop" })]);
+      });
+    }
+    var timer; text.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(refreshPreview, 400); });
+    refreshPreview();
+    add(body, [info, h("p", { style: "margin:0 0 12px;color:var(--muted);font-size:.88rem", text: "Сообщение придёт от бота только тем, кто сам писал боту и не отписался. Ответы девушек придут вам в бот и в их карточки." }),
+      h("div", { class: "toolbar" }, tplPick, button), text, preview, errBox,
+      h("div", { class: "actions" }, h("button", { class: "btn gold", type: "button", text: "Отправить", onclick: function () {
+        errBox.innerHTML = "";
+        if (!text.value.trim()) return errBox.appendChild(errorsBox({ errors: ["Напишите текст рассылки"] }));
+        if (!confirm("Отправить рассылку " + count + " получательницам?")) return;
+        var btn = this; btn.disabled = true; btn.textContent = "Отправляю…";
+        api("crm", { action: "broadcast", ids: ids, text: text.value, button: button.value }).then(function (r) {
+          btn.disabled = false; btn.textContent = "Отправить";
+          if (!r.ok) return errBox.appendChild(errorsBox(r));
+          dr.close(); toast("Отправлено: " + r.sent + (r.failed ? " · не доставлено: " + r.failed : "")); refresh();
+        });
+      } }))]);
   }
   function openNewCard() {
     var form = cardForm({ stage: "new", interests: [], source: "" }), errBox = h("div"), body = h("div");
@@ -638,9 +731,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     if (d.unassigned_orders) notices.push(h("div", { class: "notice", text: "Оплат без цикла: " + d.unassigned_orders + " — это покупки, сделанные до появления циклов. Они видны в CRM и в админке приложения." }));
     var cards = list.map(function (c) {
       var fullest = Math.max.apply(null, ["1", "2", "3", "4", "5", "6"].map(function (m) { return c.seats_by_meeting[m]; }));
-      var people = h("div", { class: "people", hidden: true }, c.participants.length ? c.participants.map(function (p) {
-        return h("div", null, h("span", null, h("span", { text: p.name || (p.username ? "@" + p.username : "Без имени") }), h("span", { class: "sub", text: " · " + (p.package ? "все 6" : "встречи " + p.meetings.join(", ")) })), h("span", { class: "sub", text: [p.phone, rub(p.paid)].filter(Boolean).join(" · ") }));
-      }) : h("div", { class: "sub", text: "Оплат пока нет." }));
+      var people = h("div", { class: "people", hidden: !d.can_edit ? false : true }, c.participants.length ? attendanceGrid(c, d) : h("div", { class: "sub", text: "Оплат пока нет." }));
       return h("article", { class: "panel cycle" },
         h("div", { class: "cycle-top" },
           h("div", null, h("h3", { text: c.city_name + (c.title ? " · " + c.title : "") }), h("div", { class: "sub", text: [c.master.name ? "Мастер: " + c.master.name : "Мастер не назначен", c.venue].filter(Boolean).join(" · ") })),
@@ -649,6 +740,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
           var x = c.meetings[m]; var past = x.date && x.date < today;
           return h("div", { class: (past ? "past" : "") + (x.date ? "" : " none"), title: "Встреча " + m + ": занято " + c.seats_by_meeting[m] + " из " + c.capacity }, m, h("b", { text: x.date ? dayLabel(x.date) : "—" }), x.time || "");
         })),
+        c.rating ? h("div", { class: "sub", style: "margin:-4px 0 10px", text: "★ " + c.rating.avg + " · отзывов: " + c.rating.count }) : null,
         h("div", { class: "fill" }, h("span", { text: "Занято " + fullest + " из " + c.capacity }), h("div", { class: "bar" }, h("i", { style: "width:" + Math.round(100 * fullest / c.capacity) + "%" })), h("span", { text: rub(c.revenue) })),
         h("div", { class: "actions", style: "justify-content:flex-start" },
           h("button", { class: "btn small", type: "button", text: "Участницы (" + c.participants.length + ")", onclick: function () { people.hidden = !people.hidden; } }),
@@ -671,6 +763,27 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       cards.length ? h("div", { class: "cycles" }, cards) : h("div", { class: "panel empty", text: "Циклов пока нет. Создайте цикл: город, Мастер, площадка и 6 дат. Потом нажмите «Поставить в приложение» — даты появятся у девушек, а лист ожидания получит уведомление." })
     ]);
   }
+  // Participants × meetings: a tick = she was there (the Master marks it from the phone).
+  function attendanceGrid(c, d) {
+    var mids = ["1", "2", "3", "4", "5", "6"];
+    var table = h("table", { class: "att" },
+      h("thead", null, h("tr", null, h("th", { text: "Участница" }), mids.map(function (m) { return h("th", { text: m, title: c.meetings[m].date ? dayLabel(c.meetings[m].date) : "" }); }), h("th", { text: "Была" }))),
+      h("tbody", null, c.participants.map(function (p) {
+        return h("tr", null,
+          h("td", null, h("span", { text: p.name || (p.username ? "@" + p.username : "Без имени") }), h("span", { class: "sub", text: [p.phone, d.can_edit ? rub(p.paid) : ""].filter(Boolean).join(" · ") })),
+          mids.map(function (m) {
+            var has = p.meetings.indexOf(m) !== -1, was = (p.attended || []).indexOf(m) !== -1;
+            if (!has) return h("td", { class: "na", text: "—" });
+            return h("td", null, h("input", { type: "checkbox", checked: was, disabled: !d.can_mark, title: "Встреча " + m, onchange: function (e) {
+              var present = c.participants.filter(function (x) { return (x.attended || []).indexOf(m) !== -1 && x.user_id !== p.user_id; }).map(function (x) { return x.user_id; });
+              if (e.target.checked) present.push(p.user_id);
+              api("cycles", { action: "attendance", id: c.id, meeting: m, present: present }).then(function (r) { if (r.ok) { toast("Отмечено"); drawCycles(r); } else toast((r.errors || [])[0]); });
+            } }));
+          }),
+          h("td", { text: (p.attended || []).length + "/" + p.meetings.length }));
+      })));
+    return h("div", { style: "overflow-x:auto" }, table);
+  }
   function openCycle(c, d) {
     var dict = state.me.dict, body = h("div"), errBox = h("div");
     c = c || { city_id: d.cities[0] && d.cities[0].id, status: "planned", capacity: d.capacity_default, master: { name: "", contact: "" }, venue: "", address: "", notes: "", title: "", meetings: {} };
@@ -680,6 +793,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       status: select(Object.keys(dict.cycle_statuses).map(function (k) { return [k, dict.cycle_statuses[k]]; }), c.status),
       capacity: h("input", { type: "number", min: 1, max: 30, value: c.capacity }),
       master: h("input", { value: c.master.name || "" }), masterContact: h("input", { value: c.master.contact || "", placeholder: "@ник или телефон" }),
+      masterId: select([["", "— не связан"]].concat((d.masters || []).map(function (m) { return [m.id, m.name]; })), c.master_id || ""),
       venue: h("input", { value: c.venue || "" }), address: h("input", { value: c.address || "" }),
       notes: h("textarea", { text: c.notes || "", placeholder: "Техника, съёмка, договорённости с площадкой…" })
     };
@@ -694,13 +808,14 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     add(body, [
       c.published ? h("div", { class: "notice", text: "Цикл сейчас в приложении: изменения дат и мест сразу появятся у девушек." }) : null,
       h("div", { class: "form" }, field("Город", f.city), field("Название", f.title), field("Статус", f.status), field("Мест в группе", f.capacity),
-        field("Мастер", f.master), field("Контакт Мастера", f.masterContact), field("Площадка", f.venue), field("Адрес", f.address)),
+        field("Мастер", f.master), field("Контакт Мастера", f.masterContact),
+        field("Доступ Мастера в кабинет (роль «Мастер» в команде)", f.masterId, "full"), field("Площадка", f.venue), field("Адрес", f.address)),
       h("div", { class: "section-t", text: "Даты встреч" }), dateGrid,
       h("div", { class: "section-t", text: "Заметки" }), field("", f.notes, "full"),
       errBox,
       h("div", { class: "actions" }, h("button", { class: "btn gold", type: "button", text: "Сохранить", onclick: function () {
         var meetings = {}; dates.forEach(function (x) { meetings[x.m] = { date: x.date.value, time: x.time.value }; });
-        var cycle = { city_id: f.city.value, title: f.title.value, status: f.status.value, capacity: f.capacity.value, master: { name: f.master.value, contact: f.masterContact.value }, venue: f.venue.value, address: f.address.value, notes: f.notes.value, meetings: meetings };
+        var cycle = { city_id: f.city.value, title: f.title.value, status: f.status.value, capacity: f.capacity.value, master: { name: f.master.value, contact: f.masterContact.value }, master_id: f.masterId.value, venue: f.venue.value, address: f.address.value, notes: f.notes.value, meetings: meetings };
         api("cycles", { action: "save", id: c.id || null, cycle: cycle }).then(function (r) {
           errBox.innerHTML = ""; if (!r.ok) return errBox.appendChild(errorsBox(r));
           dr.close(); toast(r.warning || (r.notified ? "Сохранено · уведомлено из листа ожидания: " + r.notified : "Сохранено")); drawCycles(r);
@@ -750,14 +865,17 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     content: ["Контент", "Production board: idea → script → shoot → edit → approved → scheduled → published → analyzed"],
     media: ["Медийность", "Target → contacted → replied → negotiation → booked → preparation → appearance → published → distribution → analytics"],
     platforms: ["Площадки", "Все действующие аккаунты, каналы, бот, сайт и страницы оплат — с ролью, CTA и маршрутом"],
-    library: ["Библиотека", "Актуальные био, описания, фото, media kit, цены и отзывы — всё в одном месте"]
+    library: ["Библиотека", "Актуальные био, описания, фото, media kit, цены и отзывы — всё в одном месте"],
+    templates: ["Шаблоны сообщений", "Готовые тексты для продаж. {имя} и {город} подставляются сами — в карточке женщины и в рассылке"]
   };
   function drawCollection(name) {
     var d = COLL[name], s = d.schema, st = state.coll[name], today = iso(new Date());
     var q = st.q.trim().toLowerCase();
     var items = d.items.filter(function (it) { return !q || JSON.stringify(it).toLowerCase().indexOf(q) !== -1; });
+    if (state.mine && (name === "content" || name === "media")) items = items.filter(function (it) { return isMine(it.owner); });
     var search = h("input", { type: "search", placeholder: "Поиск", value: st.q, oninput: function () { st.q = search.value; var pos = search.selectionStart; drawCollection(name); var again = document.querySelector("main input[type=search]"); if (again) { again.focus(); again.setSelectionRange(pos, pos); } } });
     var tools = [search];
+    if (name === "content" || name === "media") tools.push(mineToggle(function () { drawCollection(name); }));
     if (s.stages) tools.push(h("div", { class: "seg" }, [["board", "Доска"], ["list", "Список"]].map(function (m) { return h("button", { type: "button", class: st.mode === m[0] ? "on" : "", text: m[1], onclick: function () { st.mode = m[0]; drawCollection(name); } }); })));
     if (name === "library") {
       var catField = s.fields.filter(function (f) { return f.id === "category"; })[0];
@@ -792,6 +910,13 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         h("tbody", null, items.slice().sort(function (a, b) { return s.stage_order.indexOf(a.stage) - s.stage_order.indexOf(b.stage); }).map(function (it) {
           return h("tr", { onclick: function () { openItem(name, it); } }, [h("td", null, h("span", { class: "tag" + (overdue(it) ? " over" : ""), text: s.stages[it.stage] }))].concat(cols.map(function (f) { return h("td", { text: fieldText(f, it[f.id]) || "—" }); })));
         }))));
+    } else if (name === "templates") {
+      var catT = s.fields.filter(function (f) { return f.id === "category"; })[0];
+      content = h("div", { class: "panel" }, h("ul", { class: "rows" }, items.map(function (it) {
+        return h("li", { class: "click", onclick: function () { if (d.can_edit) openItem(name, it); } },
+          h("div", { class: "main" }, h("b", { text: it.title }), " ", it.category ? h("span", { class: "tag", text: fieldText(catT, it.category) }) : null, h("span", { class: "sub", style: "white-space:normal", text: it.text })),
+          h("button", { class: "btn small", type: "button", text: "Копировать", onclick: function (e) { e.stopPropagation(); copyText(it.text); } }));
+      })));
     } else if (name === "library") {
       var catF = s.fields.filter(function (f) { return f.id === "category"; })[0];
       content = h("div", null, catF.options.concat([{ value: "", label: "Без раздела" }]).map(function (o) {
@@ -864,7 +989,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         el = h("div", { class: "form", style: "grid-template-columns:repeat(4,minmax(0,1fr))" });
         el._m = {};
         f.metrics.forEach(function (m) { var i = h("input", { inputmode: "decimal", value: v && v[m[0]] !== undefined ? v[m[0]] : "", disabled: ro }); el._m[m[0]] = i; el.appendChild(field(m[1], i)); });
-      } else el = h("input", { type: { date: "date", time: "time", number: "number", url: "url" }[f.type] || "text", value: v == null ? "" : v, disabled: ro, placeholder: f.type === "url" ? "https://" : f.type === "code" ? "латиницей, например podcast_ivanova" : "" });
+      } else el = h("input", { type: { date: "date", time: "time", number: "number", url: "url" }[f.type] || "text", list: f.id === "owner" ? "team-names" : null, value: v == null ? "" : v, disabled: ro, placeholder: f.type === "url" ? "https://" : f.type === "code" ? "латиницей, например podcast_ivanova" : "" });
       inputs[f.id] = el;
       return el;
     }

@@ -67,9 +67,20 @@ module.exports = async function handler(req, res) {
   const update = req.body || {};
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
+    try {
+      if (await require("../../lib/conversations").handleReply(update.message)) return send(res, 200, { ok: true });
+    } catch (error) { console.error("Reply handling failed", error.message); }
     const message = update.message;
     if (message && clubActivity.isClubGroup(message.chat)) {
       try { await clubActivity.trackGroupMessage(message); } catch (error) { console.error("Club activity tracking failed"); }
+    }
+    if (message?.chat?.type === "private" && typeof message.text === "string" && /^\/(stop|subscribe)(@\w+)?(\s|$)/.test(message.text)) {
+      const stop = message.text.startsWith("/stop");
+      try { await crm.setOptOut(message.from.id, stop); } catch (error) { console.error("Opt-out failed"); }
+      await telegram("sendMessage", { chat_id: message.chat.id, text: stop
+        ? "Хорошо, больше не будем присылать рассылки 🤍\nСообщения о твоих встречах и оплатах продолжат приходить. Вернуть рассылки — /subscribe"
+        : "Готово, рассылки «к Женщине» снова включены 🤍" });
+      return send(res, 200, { ok: true });
     }
     if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) {
       await stats.trackStart(message.from.id);

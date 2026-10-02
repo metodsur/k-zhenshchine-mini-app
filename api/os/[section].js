@@ -9,6 +9,7 @@ const events = require("../../lib/events");
 const tribute = require("../../lib/tribute");
 const collections = require("../../lib/os-collections");
 const rhythm = require("../../lib/os-rhythm");
+const { notifyAssignee } = require("../../lib/os-notify");
 const { send, readBody } = require("../../lib/http");
 
 const DAY_MS = 864e5;
@@ -80,7 +81,7 @@ async function mediaSources() {
 const withSource = (map) => (card) => (map.has(card.source) ? { ...card, source: map.get(card.source) } : card);
 
 const sections = {
-  async me(member) { return { status: 200, body: meView(member) }; },
+  async me(member) { return { status: 200, body: { ...meView(member), team: (await team.listMembers()).filter((m) => m.name).map((m) => ({ id: String(m.id), name: m.name, role_label: m.role_label })) } }; },
 
   async today(member) {
     const now = Date.now();
@@ -150,9 +151,35 @@ const sections = {
       const card = await crm.getCard(body.id);
       return card ? { status: 200, body: { ok: true, card } } : { status: 404, body: { ok: false, errors: ["Карточка не найдена"] } };
     }
+    if (action === "broadcast_preview" || action === "broadcast") {
+      if (!team.can(member, "crm.broadcast")) return deny("рассылки");
+      const ids = (Array.isArray(body.ids) ? body.ids : []).slice(0, 500);
+      const cards = (await Promise.all(ids.map((id) => crm.getCard(id)))).filter(Boolean);
+      const ok = cards.filter((c) => c.tg_id && !c.opt_out);
+      if (action === "broadcast_preview") {
+        return { status: 200, body: { ok: true, recipients: ok.length, skipped_no_bot: cards.filter((c) => !c.tg_id).length, skipped_opt_out: cards.filter((c) => c.tg_id && c.opt_out).length, sample: ok.slice(0, 3).map((c) => ({ name: c.name, text: crm.fill(String(body.text || ""), c) })) } };
+      }
+      const text = String(body.text || "").trim().slice(0, 3500);
+      if (!text) return { status: 400, body: { ok: false, errors: ["Напишите текст рассылки"] } };
+      const base = String(process.env.APP_BASE_URL || "").replace(/\/$/, "");
+      const buttons = {
+        meetings: { text: "Выбрать встречу", web_app: { url: `${base}/meetings.html` } },
+        club: { text: "Вступить в клуб", url: "https://t.me/tribute/app?startapp=s17IJ" },
+        space: { text: "Открыть пространство", web_app: { url: `${base}/space.html` } }
+      };
+      const result = await crm.broadcast(ok.map((c) => c.id), text, buttons[body.button] || null, who(member));
+      return { status: 200, body: { ok: true, ...result } };
+    }
     if (!team.can(member, "crm.edit")) return deny("ведение CRM");
     let result;
-    if (action === "update") result = await crm.updateCard(body.id, body.patch, who(member));
+    if (action === "update") {
+      const before = await crm.getCard(body.id);
+      result = await crm.updateCard(body.id, body.patch, who(member));
+      const c = result.card;
+      if (c && c.owner && (!before || before.owner !== c.owner)) {
+        await notifyAssignee(c.owner, member, `Вам передана карточка в CRM: ${c.name || (c.username ? "@" + c.username : "без имени")}${c.next_step && c.next_step.action ? `\nСледующий шаг: ${c.next_step.action}${c.next_step.date ? ` (${c.next_step.date})` : ""}` : ""}`);
+      }
+    }
     else if (action === "create") result = await crm.createCard(body.card, who(member));
     else if (action === "note") result = await crm.addNote(body.id, body.text, who(member), body.type);
     else return { status: 400, body: { ok: false, errors: ["Неизвестное действие"] } };
@@ -162,16 +189,35 @@ const sections = {
   async cycles(member, body) {
     const action = body.action || "list";
     const canEdit = team.can(member, "cycles.edit");
-    const contacts = team.can(member, "participants.view") || team.can(member, "crm.view");
-    if (action === "list") return { status: 200, body: { ok: true, can_edit: canEdit, ...(await cycles.overview(contacts)) } };
-    if (!canEdit) return deny("циклы");
+    const masterOnly = !canEdit && team.can(member, "attendance.mark") ? member.id : null;
+    const contacts = Boolean(masterOnly) || team.can(member, "participants.view") || team.can(member, "crm.view");
+    const listing = async () => {
+      const view = await cycles.overview(contacts, masterOnly);
+      const ratings = await require("../../lib/reviews").stats();
+      for (const c of view.cycles) c.rating = ratings[c.id] || null;
+      const masters = canEdit ? (await team.listMembers()).filter((m) => m.role === "master").map((m) => ({ id: String(m.id), name: m.name })) : [];
+      return { can_edit: canEdit, can_mark: canEdit || team.can(member, "attendance.mark"), masters, ...view };
+    };
+    if (action === "list") return { status: 200, body: { ok: true, ...(await listing()) } };
     let result;
+    if (action === "attendance") {
+      if (!canEdit && !team.can(member, "attendance.mark")) return deny("посещаемость");
+      if (masterOnly && !(await cycles.loadCycles()).some((c) => c.id === body.id && c.master_id === String(member.id))) return deny("чужая группа");
+      result = await cycles.markAttendance(String(body.id || ""), String(body.meeting || ""), body.present);
+      if (result.status !== 200) return fail(result);
+      return { status: 200, body: { ok: true, ...(await listing()) } };
+    }
+    if (!canEdit) return deny("циклы");
     if (action === "save") result = await cycles.saveCycle(body.cycle, body.id || null);
     else if (action === "publish") result = await cycles.publish(String(body.id || ""));
     else if (action === "unpublish") result = await cycles.unpublish(String(body.id || ""));
     else return { status: 400, body: { ok: false, errors: ["Неизвестное действие"] } };
     if (result.status !== 200) return fail(result);
-    return { status: 200, body: { ok: true, notified: result.notified || 0, warning: result.warning || null, can_edit: true, ...(await cycles.overview(contacts)) } };
+    if (action === "save" && result.cycle && result.cycle.master_id) {
+      const m = (await team.listMembers()).find((x) => String(x.id) === result.cycle.master_id);
+      if (m && m.name) await notifyAssignee(m.name, member, `Вы — Мастер цикла: ${result.cycle.title || ""} (${result.cycle.city_id}). Группа и отметка присутствующих — в кабинете.`);
+    }
+    return { status: 200, body: { ok: true, notified: result.notified || 0, warning: result.warning || null, ...(await listing()) } };
   },
 
   async calendar(member, body) {
@@ -212,6 +258,9 @@ const sections = {
     const result = action === "save" ? await collections.saveItem(name, body.item, who(member))
       : action === "remove" ? await collections.removeItem(name, String(body.id || ""))
       : { status: 400, errors: ["Неизвестное действие"] };
+    if (result.status === 200 && result.item && result.item.owner && (!result.before || result.before.owner !== result.item.owner)) {
+      await notifyAssignee(result.item.owner, member, `${schema.item}: «${result.item.title}»${result.item.stage ? ` · ${schema.stages[result.item.stage]}` : ""}${result.item.due ? `\nСрок: ${result.item.due}` : ""}`);
+    }
     return result.status === 200 ? { status: 200, body: { ok: true, item: result.item || null } } : fail(result);
   },
 
@@ -229,7 +278,12 @@ const sections = {
     const action = body.action || "list";
     if (action === "list") return { status: 200, body: { ok: true, tasks: await board.loadTasks() } };
     if (!team.can(member, "tasks.edit")) return deny("задачи");
-    const result = action === "save" ? await board.saveTask(body.task || {}, who(member)) : action === "remove" ? await board.removeTask(String(body.id || "")) : { status: 400, errors: ["Неизвестное действие"] };
+    const task = body.task || {};
+    const prev = task.id ? (await board.loadTasks()).find((t) => t.id === task.id) : null;
+    const result = action === "save" ? await board.saveTask(task, who(member)) : action === "remove" ? await board.removeTask(String(body.id || "")) : { status: 400, errors: ["Неизвестное действие"] };
+    if (result.status === 200 && action === "save" && task.owner && !task.done && (!prev || prev.owner !== task.owner)) {
+      await notifyAssignee(task.owner, member, `Задача: ${String(task.title || "").slice(0, 200)}${task.blocker ? " (блокер)" : ""}${task.due ? `\nСрок: ${task.due}` : ""}`);
+    }
     return result.status === 200 ? { status: 200, body: { ok: true, tasks: result.tasks } } : fail(result);
   }
 };
@@ -256,6 +310,8 @@ module.exports = async function handler(req, res) {
     if (!section) return send(res, 404, { ok: false });
     const member = await auth.memberFromRequest(req);
     if (!member) return send(res, 401, { ok: false, error: "Войдите через бота: напишите /dashboard" });
+    // Masters see only their groups; everything else needs the full workspace.
+    if (!["me", "cycles", "crm"].includes(name) && !team.can(member, "os.workspace")) return send(res, 403, { ok: false, errors: ["Этот раздел недоступен для вашей роли"] });
     const result = await section(member, body);
     return send(res, result.status, result.body);
   } catch (error) {
