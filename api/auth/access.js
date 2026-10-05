@@ -1,6 +1,7 @@
 const { verifyInitData, isChannelMember, isClubMember } = require("../../lib/telegram");
 const store = require("../../lib/store");
 const stats = require("../../lib/stats");
+const consent = require("../../lib/consent");
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -20,6 +21,16 @@ module.exports = async function handler(req, res) {
   } catch {
     return send(res, 401, { ok: false, error: "Invalid Telegram authorization" });
   }
+
+  // Consent to personal data processing first: until she agrees, nothing about her is stored.
+  try {
+    if (body.consent === true) await consent.record(user.id, "app");
+    else if (!(await consent.has(user.id))) {
+      let settings = {};
+      try { settings = await require("../../lib/settings").loadSettings(); } catch { settings = {}; }
+      return send(res, 200, { ok: true, consent: false, policy_url: consent.policyUrl(settings) });
+    }
+  } catch { /* storage trouble must not lock her out */ }
 
   await stats.trackAppUser(user.id);
   let subscribed;
@@ -48,6 +59,7 @@ module.exports = async function handler(req, res) {
 
   return send(res, 200, {
     ok: true,
+    consent: true,
     ...(club ? { club } : {}),
     subscribed,
     full_access: subscribed,

@@ -39,13 +39,18 @@ function createWorld() {
       case 'SCARD': return (sets.get(key) || new Set()).size;
       case 'MGET': return [key, ...rest].map((k) => (kv.has(k) ? kv.get(k) : null));
       case 'HMGET': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; return rest.map((f) => h[f] ?? null); }
-      case 'HGET': { const h = kv.get(key); return h ? (JSON.parse(h)[rest[0]] ?? null) : null; }
+      case 'HGET': {
+        const h = kv.get(key); const v = h ? (JSON.parse(h)[rest[0]] ?? null) : null;
+        // Most tests are about other things: consent counts as given unless a test turns this off.
+        if (v === null && rest[0] === 'consent_at' && world.autoConsent) return '2026-01-01T00:00:00.000Z';
+        return v;
+      }
       case 'HSETNX': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; if (h[rest[0]]) return 0; h[rest[0]] = rest[1]; kv.set(key, JSON.stringify(h)); return 1; }
       default: throw new Error(`Fake Redis: unsupported ${cmd}`);
     }
   };
   const blockedChats = new Set();
-  const world = { members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {} };
+  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {} };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });

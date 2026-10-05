@@ -26,10 +26,10 @@ const sections = {
   },
   async settings(member, body) {
     if (!team.can(member, "settings.edit")) return deny("ссылки");
-    if (body.action !== "save") return { status: 200, body: { ok: true, settings: await settings.loadSettings(), fields: settings.FIELDS } };
+    if (body.action !== "save") return { status: 200, body: { ok: true, settings: await settings.loadSettings(), fields: settings.FIELDS, text_fields: settings.TEXT_FIELDS } };
     const { errors, settings: next } = settings.normalizeSettings(body.settings);
     if (errors.length) return { status: 400, body: { ok: false, errors } };
-    return { status: 200, body: { ok: true, settings: await settings.saveSettings(next), fields: settings.FIELDS } };
+    return { status: 200, body: { ok: true, settings: await settings.saveSettings(next), fields: settings.FIELDS, text_fields: settings.TEXT_FIELDS } };
   },
   async team(member, body) {
     if (!team.can(member, "team.manage")) return deny("команда");

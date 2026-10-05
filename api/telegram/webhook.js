@@ -4,6 +4,7 @@ const payments = require("../../lib/payments");
 const stats = require("../../lib/stats");
 const clubActivity = require("../../lib/club-activity");
 const crm = require("../../lib/crm");
+const consent = require("../../lib/consent");
 
 function send(res, status, body) {
   res.statusCode = status; res.setHeader("Content-Type", "application/json; charset=utf-8"); res.end(JSON.stringify(body));
@@ -59,6 +60,32 @@ async function scheduleReminder(chatId, userId) {
   }
 }
 
+// Consent to personal data processing comes first. /start (or /space) from someone who has not
+// agreed yet → the consent message with a «Согласна» button; the original command is kept and
+// continues right after she agrees. Team members are not asked.
+async function consentGate(message) {
+  if (!message || !message.chat || message.chat.type !== "private" || typeof message.text !== "string" || !message.from) return null;
+  const text = message.text.trim();
+  const userId = message.from.id;
+  if (consent.isAgree(text)) {
+    if (await consent.has(userId)) return null;
+    await consent.record(userId, "bot");
+    let pending = null;
+    try { pending = await store.command("GET", `pending_start:${userId}`); await store.command("DEL", `pending_start:${userId}`); } catch { pending = null; }
+    await telegram("sendMessage", { chat_id: message.chat.id, text: "Спасибо, что доверяешь нам 🤍", reply_markup: { remove_keyboard: true } });
+    message.text = pending || "/start";
+    return "continue";
+  }
+  if (!/^\/(start|space)(@\w+)?(\s|$)/.test(text)) return null;
+  if (await consent.has(userId)) return null;
+  try { if (await require("../../lib/team").getMember(userId)) return null; } catch { /* ask */ }
+  try { await store.command("SET", `pending_start:${userId}`, text, "EX", 7 * 86400); } catch { /* falls back to /start */ }
+  let settings = {};
+  try { settings = await require("../../lib/settings").loadSettings(); } catch { settings = {}; }
+  await telegram("sendMessage", { chat_id: message.chat.id, ...consent.botMessage(settings) });
+  return "handled";
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return send(res, 405, { ok: false });
   const required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "TELEGRAM_CHANNEL_ID", "TELEGRAM_CHANNEL_URL", "APP_BASE_URL"];
@@ -67,6 +94,7 @@ module.exports = async function handler(req, res) {
   const update = req.body || {};
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
+    if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });
     try {
       if (await require("../../lib/conversations").handleReply(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Reply handling failed", error.message); }

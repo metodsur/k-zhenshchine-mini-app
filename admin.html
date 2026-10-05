@@ -324,8 +324,9 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
 
   // ---------- Ссылки ----------
   let links={},linkFields={};
-  function renderSettings(){const box=$('settings-fields');box.innerHTML='';Object.entries(linkFields).forEach(([k,label])=>{const f=field(label,links[k],'url',v=>links[k]=v.trim(),{placeholder:'https://…'});f.style.marginTop='10px';box.appendChild(f)})}
-  loaders.settings=async()=>{const r=await post('settings');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}links=r.body.settings;linkFields=r.body.fields;renderSettings()};
+  let textFields={};
+  function renderSettings(){const box=$('settings-fields');box.innerHTML='';Object.entries(linkFields).forEach(([k,label])=>{const f=field(label,links[k],'url',v=>links[k]=v.trim(),{placeholder:'https://…'});f.style.marginTop='10px';box.appendChild(f)});if(Object.keys(textFields).length){const h=document.createElement('h3');h.textContent='Персональные данные: сведения об операторе';h.style.margin='22px 0 4px';box.appendChild(h);Object.entries(textFields).forEach(([k,label])=>{const f=field(label,links[k]||'','text',v=>links[k]=v.trim());f.style.marginTop='10px';box.appendChild(f)})}}
+  loaders.settings=async()=>{const r=await post('settings');if(!r.body.ok){setStatus(r.body.error||'Не удалось загрузить',true);return}links=r.body.settings;linkFields=r.body.fields;textFields=r.body.text_fields||{};renderSettings()};
   savers.settings=async()=>{const r=await post('settings',{action:'save',settings:links});if(!r.body.ok)return failed(r);links=r.body.settings;renderSettings();saved('Сохранено. Кнопки обновлены.')};
 
   // ---------- Команда ----------
