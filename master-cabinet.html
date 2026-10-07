@@ -151,8 +151,8 @@
   // ---------- Master ----------
   function masterView(d) {
     var fresh = d.mirror.filter(function (b) { return b.status === "new"; }).length;
-    var tabs = [["mirror", "«Зеркало»", fresh], ["groups", "Мои группы", 0], ["finance", "Финансы", 0], ["card", "Моя карточка", 0], ["materials", "Материалы", 0]];
-    var body = { mirror: mirrorTab, groups: groupsTab, finance: financeTab, card: cardTab, materials: function (x) { return materialsSection(x, "Материалы Мастера"); } }[state.tab](d);
+    var tabs = [["mirror", "«Зеркало»", fresh], ["groups", "Мои группы", 0], ["finance", "Финансы", 0], ["guide", "Инструкции", 0], ["card", "Моя карточка", 0], ["materials", "Материалы", 0]];
+    var body = { mirror: mirrorTab, groups: groupsTab, finance: financeTab, guide: guideTab, card: cardTab, materials: function (x) { return materialsSection(x, "Материалы Мастера"); } }[state.tab](d);
     return [
       h("section", { class: "m-hero", style: "min-height:280px" }, h("div", null,
         h("span", { class: "chip-status master", text: "Мастер многомерности" }),
@@ -228,6 +228,20 @@
     ];
   }
 
+  function guideTab(d) {
+    var sections = [["meetings", "Как проводить встречи многомерности"], ["circle", "Как проводить женский круг офлайн"], ["other", "Другое"]];
+    var list = d.instructions || [];
+    if (!list.length) return h("section", { class: "surface section" }, h("h2", { text: "Инструкции" }), h("p", { class: "empty", text: "Инструкции скоро появятся здесь." }));
+    return sections.map(function (sec) {
+      var items = list.filter(function (i) { return i.section === sec[0]; });
+      if (!items.length) return null;
+      return h("section", { class: "surface section" }, h("h2", { text: sec[1] }), items.map(function (i, n) {
+        return h("details", { class: "guide", open: n === 0 ? true : null }, h("summary", null, i.title),
+          i.text ? h("div", { class: "guide-text", text: i.text }) : null,
+          i.url ? h("button", { class: "cta small outline", type: "button", style: "margin-top:10px", onclick: function () { open(i.url); } }, "Открыть материал") : null);
+      }));
+    });
+  }
   function contractSection(f) {
     var p = f.payout || {};
     var legal = p.legal || "";

@@ -279,7 +279,8 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     { id: "platforms", label: "Площадки", perm: "os.workspace" },
     { id: "library", label: "Библиотека", perm: "os.workspace" },
     { id: "templates", label: "Шаблоны", perm: "crm.view", hidden: true },
-    { id: "training", label: "Материалы обучения", perm: "os.workspace", hidden: true }
+    { id: "training", label: "Материалы обучения", perm: "os.workspace", hidden: true },
+    { id: "instructions", label: "Инструкции для Мастеров", perm: "os.workspace", hidden: true }
   ];
   var MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
@@ -363,7 +364,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
     renderNav();
     var main = document.getElementById("view"); main.innerHTML = ""; main.appendChild(h("div", { class: "loading", text: "Загрузка…" }));
-    if (["content", "media", "platforms", "library", "templates", "training"].indexOf(view) !== -1) viewCollection(view);
+    if (["content", "media", "platforms", "library", "templates", "training", "instructions"].indexOf(view) !== -1) viewCollection(view);
     else ({ masters: viewMasters, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
     window.scrollTo(0, 0);
   }
@@ -869,6 +870,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     media: ["Медийность", "Target → contacted → replied → negotiation → booked → preparation → appearance → published → distribution → analytics"],
     platforms: ["Площадки", "Все действующие аккаунты, каналы, бот, сайт и страницы оплат — с ролью, CTA и маршрутом"],
     library: ["Библиотека", "Актуальные био, описания, фото, media kit, цены и отзывы — всё в одном месте"],
+    instructions: ["Инструкции для Мастеров", "Как проводить встречи многомерности и женский круг офлайн — Мастера видят это во вкладке «Инструкции» своего кабинета"],
     training: ["Материалы обучения", "Видео, документы, практики и задания для учениц и Мастеров. Задания ученицы отмечают в кабинете — это шаг пути к статусу Мастера"],
     templates: ["Шаблоны сообщений", "Готовые тексты для продаж. {имя} и {город} подставляются сами — в карточке женщины и в рассылке"]
   };
@@ -925,6 +927,17 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
               h("div", { class: "main" }, h("b", { text: it.title }), " ", it.kind ? h("span", { class: "tag" + (it.kind === "task" ? " followup" : ""), text: fieldText(fKind, it.kind) }) : null,
                 h("span", { class: "sub", text: [fieldText(fAud, it.audience) || "Ученицам", it.text ? it.text.slice(0, 120) : ""].filter(Boolean).join(" · ") })),
               it.url ? h("a", { class: "btn small", href: it.url, target: "_blank", rel: "noopener", text: "Открыть", onclick: function (e) { e.stopPropagation(); } }) : null);
+          })));
+      }));
+    } else if (name === "instructions") {
+      var fSec = s.fields.filter(function (f) { return f.id === "section"; })[0];
+      content = h("div", null, fSec.options.concat([{ value: "", label: "Без раздела" }]).map(function (o) {
+        var group = items.filter(function (it) { return (it.section || "") === o.value; }).sort(function (a, b) { return (Number(a.order) || 0) - (Number(b.order) || 0); });
+        if (!group.length) return null;
+        return h("section", { class: "panel", style: "margin-bottom:14px" }, h("div", { class: "panel-h" }, h("h2", { text: o.label }), h("span", { class: "tag", text: group.length })),
+          h("ul", { class: "rows" }, group.map(function (it) {
+            return h("li", { class: "click", onclick: function () { if (d.can_edit) openItem(name, it); } },
+              h("div", { class: "main" }, h("b", { text: it.title }), h("span", { class: "sub", style: "white-space:normal", text: (it.text || "").slice(0, 160) })));
           })));
       }));
     } else if (name === "templates") {
@@ -1156,8 +1169,8 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   function drawMasters(d) {
     if (!d.ok) return setView(errorsBox(d));
     state.mtab = state.mtab || "people";
-    var tabs = h("div", { class: "seg", style: "margin-bottom:14px" }, [["people", "Ученицы и Мастера"], ["trainings", "Потоки обучения"], ["payouts", "Выплаты"], ["mirror", "Записи «Зеркало»"], ["materials", "Материалы"]].map(function (t) {
-      return h("button", { type: "button", class: state.mtab === t[0] ? "on" : "", text: t[1], onclick: function () { if (t[0] === "materials") return go("training"); state.mtab = t[0]; drawMasters(d); } });
+    var tabs = h("div", { class: "seg", style: "margin-bottom:14px" }, [["people", "Ученицы и Мастера"], ["trainings", "Потоки обучения"], ["payouts", "Выплаты"], ["mirror", "Записи «Зеркало»"], ["materials", "Материалы"], ["instructions", "Инструкции"]].map(function (t) {
+      return h("button", { type: "button", class: state.mtab === t[0] ? "on" : "", text: t[1], onclick: function () { if (t[0] === "materials") return go("training"); if (t[0] === "instructions") return go("instructions"); state.mtab = t[0]; drawMasters(d); } });
     }));
     var right = d.can_edit ? (state.mtab === "trainings" ? h("button", { class: "btn gold", type: "button", text: "+ Поток обучения", onclick: function () { openTraining(null, d); } })
       : state.mtab === "people" ? h("button", { class: "btn gold", type: "button", text: "+ Добавить вручную", onclick: function () { openAddPerson(d); } }) : null) : null;
