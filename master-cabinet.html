@@ -223,10 +223,39 @@
         expectedLines.length ? [h("h3", { class: "fin-h3", text: "Ожидается — оплачено, встреча ещё впереди" }), expectedLines.map(line)] : null),
       h("section", { class: "surface section" }, h("h2", { text: "Выплаты" }),
         f.payouts.length ? f.payouts.map(function (p) { return h("div", { class: "fin-line" }, h("div", null, h("b", { text: new Date(p.at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }) }), p.note ? h("small", { text: p.note }) : null), h("div", { class: "fin-sum" }, h("b", { text: rub(p.amount) }))); })
-          : h("p", { class: "empty", text: "Выплат пока не было. Команда выплачивает заработанное раз в месяц." }),
-        h("div", { class: "form", style: "margin-top:14px" }, h("label", null, "Реквизиты для выплат (видит только команда)", details),
-          h("button", { class: "cta", type: "button", onclick: function () { this.disabled = true; api("payout_details", { details: details.value }).then(function (r) { update(r); alertBox("Реквизиты сохранены"); }); } }, "Сохранить реквизиты", h("span", { text: "→" }))))
+          : h("p", { class: "empty", text: "Выплат пока не было. Команда выплачивает заработанное раз в месяц." })),
+      contractSection(f)
     ];
+  }
+
+  function contractSection(f) {
+    var p = f.payout || {};
+    var legal = p.legal || "";
+    var seg = h("div", { class: "seg" }, Object.keys(f.legal_options).map(function (k) {
+      return h("label", null, h("input", { type: "radio", name: "legal", value: k, checked: legal === k, onchange: function () { legal = k; ogrnRow.hidden = k !== "ip"; } }), f.legal_options[k]);
+    }));
+    var name = h("input", { type: "text", value: p.full_name || "", placeholder: "Фамилия Имя Отчество" });
+    var inn = h("input", { type: "text", inputmode: "numeric", value: p.inn || "", placeholder: "12 цифр" });
+    var ogrn = h("input", { type: "text", inputmode: "numeric", value: p.ogrnip || "", placeholder: "15 цифр" });
+    var ogrnRow = h("label", { hidden: legal !== "ip" }, "ОГРНИП", ogrn);
+    var bank = h("textarea", { placeholder: "Банк, БИК, расчётный счёт (для ИП) или номер карты (для самозанятой)" }); bank.value = p.bank || f.payout_details || "";
+    var accepted = h("input", { type: "checkbox", checked: Boolean(p.accepted_at) });
+    var status = h("div", { class: "status" });
+    return h("section", { class: "surface section" }, h("h2", { text: "Договор и условия выплат" }),
+      h("div", { class: "hint" + (f.eligible ? " ok" : ""), text: f.eligible
+        ? "✓ Данные заполнены, договор принят " + new Date(p.accepted_at).toLocaleDateString("ru-RU") + ". Выплаты доступны."
+        : "Выплаты производятся только Мастерам со статусом самозанятой (НПД) или ИП — по договору с ИП Варвары Вебер. Заполните данные ниже и примите условия договора, чтобы получать выплаты." }),
+      f.contract_url ? h("button", { class: "cta outline", type: "button", style: "margin-top:14px", onclick: function () { open(f.contract_url); } }, "Открыть договор", h("span", { text: "→" }))
+        : h("p", { class: "sub", style: "margin-top:12px", text: "Текст договора скоро появится здесь." }),
+      h("div", { class: "form", style: "margin-top:16px" },
+        h("label", null, "Мой статус", seg), h("label", null, "ФИО полностью", name), h("label", null, "ИНН", inn), ogrnRow, h("label", null, "Реквизиты для выплат", bank),
+        h("label", { class: "agree" }, accepted, h("span", { text: "Я ознакомилась с договором и принимаю его условия. Подтверждаю, что я самозанятая или ИП и буду выдавать чек / закрывающие документы на каждую выплату." })),
+        h("button", { class: "cta", type: "button", onclick: function () {
+          var btn = this; btn.disabled = true; status.textContent = "";
+          api("payout_info", { payout: { legal: legal, full_name: name.value, inn: inn.value, ogrnip: ogrn.value, bank: bank.value, accepted: accepted.checked } }).then(function (r) {
+            btn.disabled = false; if (!r.ok) { status.textContent = r.error || "Не получилось сохранить"; return; } update(r); alertBox("Данные сохранены ✨");
+          });
+        } }, f.eligible ? "Обновить данные" : "Сохранить и принять договор", h("span", { text: "→" })), status));
   }
   function groupsTab(d) {
     if (!d.cycles.length) return h("section", { class: "surface section" }, h("h2", { text: "Мои группы" }), h("p", { class: "empty", text: "Когда команда назначит тебя Мастером цикла, группа появится здесь — с участницами и отметкой присутствующих." }));

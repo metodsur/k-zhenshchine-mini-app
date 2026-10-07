@@ -151,15 +151,22 @@ test('Master finance: referral link, 3500 / 2500 per participant per held meetin
   assert.equal(f.expected, 2500, 'meeting 2 not held yet');
   assert.deepEqual(f.stats, { came: 1, bought: 1 });
 
+  // No self-employed / IP data and no accepted contract → no payout.
+  let r = await os('masters', { action: 'payout', id: '7401', amount: 6000 }, owner);
+  assert.equal(r.status, 400);
+  const bad = await act('master', IRINA, { action: 'payout_info', payout: { legal: 'self', full_name: 'Ирина', inn: '123', bank: 'карта', accepted: false } });
+  assert.equal(bad.status, 400);
+  assert.match(bad.body.error, /12 цифр.*договора/s);
+  const okInfo = await act('master', IRINA, { action: 'payout_info', payout: { legal: 'self', full_name: 'Светлова Ирина Петровна', inn: '123456789012', bank: 'карта 2202', accepted: true } });
+  assert.equal(okInfo.status, 200, JSON.stringify(okInfo.body));
+  assert.equal(okInfo.body.finance.eligible, true);
   // Payout from the dashboard → balance and a bot message.
-  let r = await os('masters', { action: 'payout', id: '7401', amount: 6000, note: 'за октябрь' }, owner);
+  r = await os('masters', { action: 'payout', id: '7401', amount: 6000, note: 'за октябрь' }, owner);
   assert.equal(r.status, 200, JSON.stringify(r.body));
   assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '7401').pop().text, /выплачено 6/);
   const after = await finance.forMaster(await masters.getPerson('7401'), Date.now() + 2 * DAY);
   assert.equal(after.paid, 6000);
   assert.equal(after.due, 0);
-  cab = await act('master', IRINA, { action: 'payout_details', details: 'самозанятая, карта 2202' });
-  assert.equal(cab.body.finance.payout_details, 'самозанятая, карта 2202');
   assert.equal((await os('masters', { action: 'payout', id: '7401', amount: 0 }, owner)).status, 400);
   // CRM shows where she came from.
   const crm = require('../lib/crm');

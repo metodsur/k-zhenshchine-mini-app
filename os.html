@@ -1248,7 +1248,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   }
   function mastersPayouts(d) {
     var total = d.finance.reduce(function (a, f) { return a + f.due; }, 0);
-    var note = h("div", { class: "notice", style: "background:var(--info-bg);color:var(--info)", text: "Ставка: " + rub(d.rates.referral) + " за участницу на встрече, если она пришла по ссылке Мастера, и " + rub(d.rates.space) + " — если пришла от пространства. Начисляется после того, как встреча состоялась. К выплате сейчас всего: " + rub(total) });
+    var note = h("div", { class: "notice", style: "background:var(--info-bg);color:var(--info)", text: "Выплаты — только самозанятым или ИП, принявшим договор (данные Мастер заполняет в своём кабинете). Ставка: " + rub(d.rates.referral) + " за участницу на встрече, если она пришла по ссылке Мастера, и " + rub(d.rates.space) + " — если пришла от пространства. Начисляется после того, как встреча состоялась. К выплате сейчас всего: " + rub(total) });
     if (!d.finance.length) return [note, h("div", { class: "panel empty", text: "Мастеров со статусом пока нет." })];
     return [note, h("div", { class: "panel table-wrap" }, h("table", null,
       h("thead", null, h("tr", null, ["Мастер", "Заработано", "Ожидается", "Выплачено", "К выплате", "Реквизиты", ""].map(function (t) { return h("th", { text: t }); }))),
@@ -1259,7 +1259,8 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
           h("td", null, rub(f.paid), f.payouts[0] ? h("span", { class: "sub", text: "последняя: " + since(f.payouts[0].at) }) : null),
           h("td", null, h("b", { style: "font-weight:400;color:" + (f.due ? "var(--bad)" : "inherit"), text: rub(f.due) })),
           h("td", null, h("span", { class: "sub", style: "white-space:normal", text: f.payout_details || "не указаны" })),
-          h("td", null, d.can_edit && f.due ? h("button", { class: "btn small gold", type: "button", text: "Отметить выплату", onclick: function () {
+          h("td", null, d.can_edit && f.due && !f.eligible ? h("span", { class: "tag over", title: "Выплата возможна только самозанятой или ИП, принявшей договор", text: "нет ИП / НПД и договора" }) : null,
+            d.can_edit && f.due && f.eligible ? h("button", { class: "btn small gold", type: "button", text: "Отметить выплату", onclick: function () {
             var amount = prompt("Сумма выплаты, ₽", String(f.due)); if (!amount) return;
             var comment = prompt("Комментарий (например: за октябрь)", "") || "";
             api("masters", { action: "payout", id: f.id, amount: amount, note: comment }).then(function (r) { if (r.ok) { toast("Выплата записана, Мастер получила уведомление"); state.mtab = "payouts"; drawMasters(r); } else toast((r.errors || [])[0]); });
