@@ -56,7 +56,9 @@
 
   function draw() {
     var d = state.data;
-    if (!d.person) return render(noAccess(d));
+    if (!d.person) return render(h("section", { class: "surface section" }, h("div", { class: "eyebrow", text: "Кабинет Мастера" }), h("h2", { style: "margin-top:6px", text: "Кабинет откроется после оплаты обучения" }),
+      h("p", { class: "sub", text: "Здесь будут расписание, материалы, задания и путь к статусу Мастера многомерности." }),
+      h("a", { class: "cta", href: "/master.html", style: "margin-top:14px" }, "Как стать Мастером", h("span", { text: "→" }))));
     if (d.person.status === "master") return render(masterView(d));
     render(studentView(d));
   }

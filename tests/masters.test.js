@@ -41,7 +41,7 @@ test('Masters: buy training → student cabinet → tasks → certified Master �
 
   // Not a student yet: /master points to the Master path page.
   await say(LENA, '/master');
-  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === LENA.id).pop().text, /после покупки обучения/);
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === LENA.id).pop().text, /оплатил обучение Мастеров/);
   let cab = await act('master', LENA);
   assert.equal(cab.body.person, null);
   assert.equal(cab.body.on_sale[0].id, t.id);
