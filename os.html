@@ -260,6 +260,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     crm: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></svg>',
     cycles: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.4"/><circle cx="19.4" cy="16.3" r="1.4"/><circle cx="4.6" cy="16.3" r="1.4"/></svg>',
     calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+    masters: '<svg viewBox="0 0 24 24"><path d="M12 3.2 14.2 8l5.2.6-3.9 3.5 1.1 5.1L12 14.6l-4.6 2.6 1.1-5.1-3.9-3.5L9.8 8Z"/><path d="M8 21h8"/></svg>',
     rhythm: '<svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="18" rx="3"/><path d="M9 3.5V2.5h6v1M8 10l1.6 1.6L12.5 9M8 16l1.6 1.6 2.9-2.6M14.5 10.5H17M14.5 16.5H17"/></svg>',
     content: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="3"/><path d="m16 10 5-3v10l-5-3"/></svg>',
     media: '<svg viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7"/></svg>',
@@ -271,12 +272,14 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     { id: "rhythm", label: "Итоги", perm: "os.workspace" },
     { id: "crm", label: "CRM", perm: "crm.view" },
     { id: "cycles", label: "Циклы" },
+    { id: "masters", label: "Мастера", perm: "os.workspace" },
     { id: "calendar", label: "Календарь", perm: "os.workspace" },
     { id: "content", label: "Контент", perm: "os.workspace" },
     { id: "media", label: "Медийность", perm: "os.workspace" },
     { id: "platforms", label: "Площадки", perm: "os.workspace" },
     { id: "library", label: "Библиотека", perm: "os.workspace" },
-    { id: "templates", label: "Шаблоны", perm: "crm.view", hidden: true }
+    { id: "templates", label: "Шаблоны", perm: "crm.view", hidden: true },
+    { id: "training", label: "Материалы обучения", perm: "os.workspace", hidden: true }
   ];
   var MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
@@ -360,8 +363,8 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     if (location.hash !== "#" + view) history.replaceState(null, "", "#" + view);
     renderNav();
     var main = document.getElementById("view"); main.innerHTML = ""; main.appendChild(h("div", { class: "loading", text: "Загрузка…" }));
-    if (["content", "media", "platforms", "library", "templates"].indexOf(view) !== -1) viewCollection(view);
-    else ({ today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
+    if (["content", "media", "platforms", "library", "templates", "training"].indexOf(view) !== -1) viewCollection(view);
+    else ({ masters: viewMasters, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
     window.scrollTo(0, 0);
   }
   function setView(nodes) { var main = document.getElementById("view"); main.innerHTML = ""; add(main, nodes); }
@@ -866,6 +869,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     media: ["Медийность", "Target → contacted → replied → negotiation → booked → preparation → appearance → published → distribution → analytics"],
     platforms: ["Площадки", "Все действующие аккаунты, каналы, бот, сайт и страницы оплат — с ролью, CTA и маршрутом"],
     library: ["Библиотека", "Актуальные био, описания, фото, media kit, цены и отзывы — всё в одном месте"],
+    training: ["Материалы обучения", "Видео, документы, практики и задания для учениц и Мастеров. Задания ученицы отмечают в кабинете — это шаг пути к статусу Мастера"],
     templates: ["Шаблоны сообщений", "Готовые тексты для продаж. {имя} и {город} подставляются сами — в карточке женщины и в рассылке"]
   };
   function drawCollection(name) {
@@ -910,6 +914,19 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
         h("tbody", null, items.slice().sort(function (a, b) { return s.stage_order.indexOf(a.stage) - s.stage_order.indexOf(b.stage); }).map(function (it) {
           return h("tr", { onclick: function () { openItem(name, it); } }, [h("td", null, h("span", { class: "tag" + (overdue(it) ? " over" : ""), text: s.stages[it.stage] }))].concat(cols.map(function (f) { return h("td", { text: fieldText(f, it[f.id]) || "—" }); })));
         }))));
+    } else if (name === "training") {
+      var fAud = s.fields.filter(function (f) { return f.id === "audience"; })[0], fMod = s.fields.filter(function (f) { return f.id === "module"; })[0], fKind = s.fields.filter(function (f) { return f.id === "kind"; })[0];
+      content = h("div", null, fMod.options.concat([{ value: "", label: "Без раздела" }]).map(function (o) {
+        var group = items.filter(function (it) { return (it.module || "") === o.value; }).sort(function (a, b) { return (Number(a.order) || 0) - (Number(b.order) || 0); });
+        if (!group.length) return null;
+        return h("section", { class: "panel", style: "margin-bottom:14px" }, h("div", { class: "panel-h" }, h("h2", { text: o.label }), h("span", { class: "tag", text: group.length })),
+          h("ul", { class: "rows" }, group.map(function (it) {
+            return h("li", { class: "click", onclick: function () { openItem(name, it); } },
+              h("div", { class: "main" }, h("b", { text: it.title }), " ", it.kind ? h("span", { class: "tag" + (it.kind === "task" ? " followup" : ""), text: fieldText(fKind, it.kind) }) : null,
+                h("span", { class: "sub", text: [fieldText(fAud, it.audience) || "Ученицам", it.text ? it.text.slice(0, 120) : ""].filter(Boolean).join(" · ") })),
+              it.url ? h("a", { class: "btn small", href: it.url, target: "_blank", rel: "noopener", text: "Открыть", onclick: function (e) { e.stopPropagation(); } }) : null);
+          })));
+      }));
     } else if (name === "templates") {
       var catT = s.fields.filter(function (f) { return f.id === "category"; })[0];
       content = h("div", { class: "panel" }, h("ul", { class: "rows" }, items.map(function (it) {
@@ -1132,6 +1149,115 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       openDrawers.push(closeFn);
       document.body.appendChild(bg); document.body.appendChild(box);
     });
+  }
+
+  // ---------- Мастера: обучение, ученицы, статусы, «Зеркало» ----------
+  function viewMasters() { api("masters").then(drawMasters); }
+  function drawMasters(d) {
+    if (!d.ok) return setView(errorsBox(d));
+    state.mtab = state.mtab || "people";
+    var tabs = h("div", { class: "seg", style: "margin-bottom:14px" }, [["people", "Ученицы и Мастера"], ["trainings", "Потоки обучения"], ["mirror", "Записи «Зеркало»"], ["materials", "Материалы"]].map(function (t) {
+      return h("button", { type: "button", class: state.mtab === t[0] ? "on" : "", text: t[1], onclick: function () { if (t[0] === "materials") return go("training"); state.mtab = t[0]; drawMasters(d); } });
+    }));
+    var right = d.can_edit ? (state.mtab === "trainings" ? h("button", { class: "btn gold", type: "button", text: "+ Поток обучения", onclick: function () { openTraining(null, d); } })
+      : state.mtab === "people" ? h("button", { class: "btn gold", type: "button", text: "+ Добавить вручную", onclick: function () { openAddPerson(d); } }) : null) : null;
+    var content = { people: mastersPeople, trainings: mastersTrainings, mirror: mastersMirror }[state.mtab](d);
+    setView([
+      h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Путь Мастера" }), h("h1", { text: "Мастера" }),
+        h("p", { text: "Обучение Мастеров → ученицы → статус Мастера многомерности → практика «Зеркало» в клубе" })), right),
+      tabs, content
+    ]);
+  }
+  function mastersPeople(d) {
+    if (!d.people.length) return h("div", { class: "panel empty", text: "Пока никого. Ученицы появятся сами после оплаты обучения в приложении; добавить вручную можно кнопкой справа." });
+    var trainings = {}; d.trainings.forEach(function (t) { trainings[t.id] = t; });
+    function save(p, patch) { api("masters", { action: "person", id: p.id, patch: patch }).then(function (r) { if (r.ok) drawMasters(r); else toast((r.errors || [])[0]); }); }
+    return h("div", { class: "panel table-wrap" }, h("table", null,
+      h("thead", null, h("tr", null, ["Имя", "Статус", "Поток", "Встречи 1·2·3", "Задания", "Итоговая встреча", "Путь", ""].map(function (t) { return h("th", { text: t }); }))),
+      h("tbody", null, d.people.map(function (p) {
+        var tasks = p.path.steps.filter(function (s) { return s.id === "tasks"; })[0];
+        var master = p.status === "master";
+        return h("tr", { style: "cursor:default" },
+          h("td", null, h("b", { style: "font-weight:400", text: p.name || "Без имени" }), h("span", { class: "sub", text: [p.username ? "@" + p.username : "", "ID " + p.id].filter(Boolean).join(" · ") })),
+          h("td", null, h("span", { class: "tag " + (master ? "paid" : "new"), text: master ? "Мастер" : "Ученица" }), master && p.mirror_count ? h("span", { class: "sub", text: "«Зеркало»: " + p.mirror_count }) : null),
+          h("td", null, d.can_edit ? select([["", "—"]].concat(d.trainings.map(function (t) { return [t.id, t.title]; })), p.training_id || "", { onchange: function (e) { save(p, { training_id: e.target.value }); } }) : (trainings[p.training_id] || {}).title || "—"),
+          h("td", null, ["1", "2", "3"].map(function (m) {
+            return h("label", { style: "margin-right:6px;white-space:nowrap" }, h("input", { type: "checkbox", checked: (p.attendance || []).indexOf(m) !== -1, disabled: !d.can_edit, onchange: function () {
+              var att = (p.attendance || []).slice(); var i = att.indexOf(m); if (i === -1) att.push(m); else att.splice(i, 1); save(p, { attendance: att });
+            } }), " " + m);
+          })),
+          h("td", { text: tasks ? tasks.note : "—" }),
+          h("td", null, h("input", { type: "checkbox", checked: Boolean(p.final_review), disabled: !d.can_edit, onchange: function (e) { save(p, { final_review: e.target.checked }); } })),
+          h("td", null, h("div", { class: "bar", style: "width:90px" }, h("i", { style: "width:" + Math.round(100 * p.path.done_count / p.path.total) + "%" })), h("span", { class: "sub", text: p.path.ready && !master ? "готова к статусу" : p.path.done_count + " из " + p.path.total })),
+          h("td", null, d.can_edit && !master ? h("button", { class: "btn small" + (p.path.ready ? " gold" : ""), type: "button", text: "Сделать Мастером", onclick: function () {
+              if (!p.path.ready && !confirm("Не все шаги пути пройдены. Всё равно присвоить статус Мастера?")) return;
+              api("masters", { action: "certify", id: p.id }).then(function (r) { if (r.ok) { toast("Статус присвоен — бот поздравил её"); drawMasters(r); } });
+            } }) : null,
+            d.can_edit && master ? h("label", { class: "sub", style: "white-space:nowrap" }, h("input", { type: "checkbox", checked: p.profile.visible !== false, onchange: function (e) { save(p, { visible: e.target.checked }); } }), " карточка в клубе") : null));
+      }))));
+  }
+  function mastersTrainings(d) {
+    if (!d.trainings.length) return h("div", { class: "panel empty", text: "Создайте поток обучения: название, 3 даты, цена, чат группы и куратор. Отметьте «Продаётся в приложении» — и его можно будет купить на странице «Путь Мастера»." });
+    return h("div", { class: "cycles" }, d.trainings.map(function (t) {
+      return h("article", { class: "panel cycle" },
+        h("div", { class: "cycle-top" }, h("div", null, h("h3", { text: t.title }), h("div", { class: "sub", text: [t.city, t.format, t.curator && t.curator.name ? "Куратор: " + t.curator.name : ""].filter(Boolean).join(" · ") })),
+          h("div", { style: "display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end" }, t.sell ? h("span", { class: "tag inapp", text: "продаётся" }) : null, h("span", { class: "tag", text: d.statuses[t.status] }))),
+        h("div", { class: "dates", style: "grid-template-columns:repeat(3,1fr)" }, t.labels.map(function (l, i) { return h("div", null, i + 1, h("b", { text: l })); })),
+        h("div", { class: "fill" }, h("span", { text: "Учениц " + t.taken + " из " + t.capacity }), h("div", { class: "bar" }, h("i", { style: "width:" + Math.round(100 * t.taken / t.capacity) + "%" })), h("span", { text: rub(t.price) })),
+        d.can_edit ? h("div", { class: "actions", style: "justify-content:flex-start" }, h("button", { class: "btn small", type: "button", text: "Изменить", onclick: function () { openTraining(t, d); } })) : null);
+    }));
+  }
+  function openTraining(t, d) {
+    var body = h("div"), errBox = h("div");
+    t = t || { title: "", city: "", format: "", status: "planned", sell: false, price: "", capacity: 15, meetings: {}, venue: "", address: "", chat_url: "", curator: {}, about: "" };
+    var f = {
+      title: h("input", { value: t.title, placeholder: "Например: Осень 2026" }), city: h("input", { value: t.city || "", placeholder: "Город или «онлайн»" }), format: h("input", { value: t.format || "", placeholder: "Офлайн / онлайн" }),
+      status: select(Object.keys(d.statuses).map(function (k) { return [k, d.statuses[k]]; }), t.status), sell: h("input", { type: "checkbox", checked: t.sell }),
+      price: h("input", { type: "number", min: 1, value: t.price }), capacity: h("input", { type: "number", min: 1, max: 50, value: t.capacity }),
+      venue: h("input", { value: t.venue || "" }), address: h("input", { value: t.address || "" }), chat: h("input", { value: t.chat_url || "", placeholder: "https://t.me/+…" }),
+      curator: h("input", { value: (t.curator && t.curator.name) || "" }), curatorContact: h("input", { value: (t.curator && t.curator.contact) || "", placeholder: "@ник" }),
+      about: h("textarea", { text: t.about || "", placeholder: "Что важно знать ученицам о потоке" })
+    };
+    var dates = ["1", "2", "3"].map(function (m) { var x = (t.meetings && t.meetings[m]) || {}; return { m: m, date: h("input", { type: "date", value: x.date || "" }), time: h("input", { type: "time", value: x.time || "" }) }; });
+    var dr = drawer(t.id ? t.title : "Новый поток обучения", "Обучение Мастеров", body);
+    add(body, [h("div", { class: "form" }, field("Название", f.title), field("Город", f.city), field("Формат", f.format), field("Статус", f.status), field("Цена, ₽", f.price), field("Мест", f.capacity),
+        h("div", { class: "full checks" }, h("label", null, f.sell, "Продаётся в приложении (страница «Путь Мастера» и кабинет)"))),
+      h("div", { class: "section-t", text: "Встречи обучения" }), h("div", { class: "form" }, dates.map(function (x) { return field("Встреча " + x.m, h("div", { class: "dt" }, x.date, x.time)); })),
+      h("div", { class: "section-t", text: "Место, группа, куратор" }), h("div", { class: "form" }, field("Площадка", f.venue), field("Адрес", f.address), field("Ссылка на чат группы", f.chat, "full"), field("Куратор", f.curator), field("Контакт куратора", f.curatorContact), field("О потоке", f.about, "full")),
+      errBox, h("div", { class: "actions" }, h("button", { class: "btn gold", type: "button", text: "Сохранить", onclick: function () {
+        var meetings = {}; dates.forEach(function (x) { meetings[x.m] = { date: x.date.value, time: x.time.value }; });
+        api("masters", { action: "save_training", id: t.id || null, training: { title: f.title.value, city: f.city.value, format: f.format.value, status: f.status.value, sell: f.sell.checked, price: f.price.value, capacity: f.capacity.value, venue: f.venue.value, address: f.address.value, chat_url: f.chat.value, curator: { name: f.curator.value, contact: f.curatorContact.value }, about: f.about.value, meetings: meetings } }).then(function (r) {
+          errBox.innerHTML = ""; if (!r.ok) return errBox.appendChild(errorsBox(r));
+          dr.close(); toast("Сохранено"); state.mtab = "trainings"; drawMasters(r);
+        });
+      } }))]);
+  }
+  function openAddPerson(d) {
+    var body = h("div"), errBox = h("div");
+    var id = h("input", { placeholder: "Telegram ID (бот покажет его по команде /master)" }), name = h("input"), status = select([["student", "Ученица обучения"], ["master", "Мастер многомерности"]], "student");
+    var training = select([["", "—"]].concat(d.trainings.map(function (t) { return [t.id, t.title]; })), "");
+    var dr = drawer("Добавить вручную", "Мастера", body);
+    add(body, [h("p", { style: "margin:0 0 12px;color:var(--muted)", text: "Для особых случаев: обучение оплачено вне приложения или Мастер уже работает с вами." }),
+      h("div", { class: "form" }, field("Telegram ID", id), field("Имя", name), field("Статус", status), field("Поток", training)), errBox,
+      h("div", { class: "actions" }, h("button", { class: "btn gold", type: "button", text: "Добавить", onclick: function () {
+        api("masters", { action: "add", id: id.value, name: name.value, status: status.value, training_id: training.value }).then(function (r) {
+          errBox.innerHTML = ""; if (!r.ok) return errBox.appendChild(errorsBox(r));
+          dr.close(); toast("Добавлено. Кабинет откроется ей по команде /master"); drawMasters(r);
+        });
+      } }))]);
+  }
+  function mastersMirror(d) {
+    if (!d.mirror.length) return h("div", { class: "panel empty", text: "Записей на «Зеркало» пока нет. Участницы клуба записываются к Мастерам на странице «Зеркало» в приложении." });
+    return h("div", { class: "panel table-wrap" }, h("table", null,
+      h("thead", null, h("tr", null, ["Когда", "Участница", "Мастер", "Пожелания", "Статус"].map(function (t) { return h("th", { text: t }); }))),
+      h("tbody", null, d.mirror.map(function (b) {
+        return h("tr", { style: "cursor:default" }, h("td", { text: since(b.created_at) }),
+          h("td", null, b.client_name || "—", h("span", { class: "sub", text: [b.username ? "@" + b.username : "", b.contact].filter(Boolean).join(" · ") })),
+          h("td", { text: b.master_name }), h("td", null, b.wish || "—", h("span", { class: "sub", text: (b.format === "offline" ? "офлайн" : "онлайн") + (b.comment ? " · " + b.comment : "") })),
+          h("td", null, d.can_edit ? select(Object.keys(d.mirror_statuses).map(function (k) { return [k, d.mirror_statuses[k]]; }), b.status, { onchange: function (e) {
+            api("masters", { action: "mirror_status", id: b.id, status: e.target.value }).then(function (r) { if (r.ok) { toast("Статус обновлён"); drawMasters(r); } });
+          } }) : h("span", { class: "tag", text: d.mirror_statuses[b.status] })));
+      }))));
   }
 
   // ---------- Календарь ----------

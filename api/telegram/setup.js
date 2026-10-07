@@ -62,6 +62,7 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
   }).then((r) => r.json()).catch(() => ({ ok: false }));
   const commands = await call("setMyCommands", { commands: [
     { command: "space", description: "Открыть пространство" },
+    { command: "master", description: "Кабинет Мастера" },
     { command: "start", description: "Начать сначала" }
   ] });
   const menu = await call("setChatMenuButton", { menu_button: { type: "web_app", text: "Пространство", web_app: { url: `${baseUrl}/` } } });

@@ -195,7 +195,12 @@ const sections = {
       const view = await cycles.overview(contacts, masterOnly);
       const ratings = await require("../../lib/reviews").stats();
       for (const c of view.cycles) c.rating = ratings[c.id] || null;
-      const masters = canEdit ? (await team.listMembers()).filter((m) => m.role === "master").map((m) => ({ id: String(m.id), name: m.name })) : [];
+      let masters = [];
+      if (canEdit) {
+        const certified = (await require("../../lib/masters").listPeople()).filter((p) => p.status === "master").map((p) => ({ id: String(p.id), name: p.name }));
+        const teamMasters = (await team.listMembers()).filter((m) => m.role === "master").map((m) => ({ id: String(m.id), name: m.name }));
+        masters = [...certified, ...teamMasters.filter((m) => !certified.some((c) => c.id === m.id))];
+      }
       return { can_edit: canEdit, can_mark: canEdit || team.can(member, "attendance.mark"), masters, ...view };
     };
     if (action === "list") return { status: 200, body: { ok: true, ...(await listing()) } };
@@ -208,14 +213,21 @@ const sections = {
       return { status: 200, body: { ok: true, ...(await listing()) } };
     }
     if (!canEdit) return deny("циклы");
+    const prevMaster = body.id ? ((await cycles.loadCycles()).find((c) => c.id === body.id) || {}).master_id || null : null;
     if (action === "save") result = await cycles.saveCycle(body.cycle, body.id || null);
     else if (action === "publish") result = await cycles.publish(String(body.id || ""));
     else if (action === "unpublish") result = await cycles.unpublish(String(body.id || ""));
     else return { status: 400, body: { ok: false, errors: ["Неизвестное действие"] } };
     if (result.status !== 200) return fail(result);
-    if (action === "save" && result.cycle && result.cycle.master_id) {
+    if (action === "save" && result.cycle && result.cycle.master_id && result.cycle.master_id !== prevMaster) {
       const m = (await team.listMembers()).find((x) => String(x.id) === result.cycle.master_id);
       if (m && m.name) await notifyAssignee(m.name, member, `Вы — Мастер цикла: ${result.cycle.title || ""} (${result.cycle.city_id}). Группа и отметка присутствующих — в кабинете.`);
+      else if (await require("../../lib/masters").getPerson(result.cycle.master_id)) {
+        try {
+          const base = String(process.env.APP_BASE_URL || "").replace(/\/$/, "");
+          await require("../../lib/telegram").telegram("sendMessage", { chat_id: result.cycle.master_id, text: `Ты ведёшь цикл многомерности${result.cycle.title ? ` «${result.cycle.title}»` : ""} 🤍 Участницы и отметка присутствующих — в кабинете Мастера (/master).`, reply_markup: { inline_keyboard: [[{ text: "Открыть кабинет Мастера", web_app: { url: `${base}/master-cabinet.html` } }]] } });
+        } catch { /* never started the bot */ }
+      }
     }
     return { status: 200, body: { ok: true, notified: result.notified || 0, warning: result.warning || null, ...(await listing()) } };
   },
@@ -272,6 +284,59 @@ const sections = {
       : action === "plan" ? await rhythm.savePlan(body.key, body.plan || {})
       : { status: 400, errors: ["Неизвестное действие"] };
     return result.status === 200 ? { status: 200, body: { ok: true, ...(await rhythm.view(member)) } } : fail(result);
+  },
+
+  async masters(member, body) {
+    const masters = require("../../lib/masters");
+    const action = body.action || "list";
+    const listing = async () => {
+      const [trainings, people, materials, mirror] = await Promise.all([masters.loadTrainings(), masters.listPeople(), collections.load("training"), masters.listMirror()]);
+      return {
+        ok: true, can_edit: team.can(member, "masters.edit"), statuses: masters.TRAINING_STATUSES, mirror_statuses: masters.MIRROR_STATUSES,
+        trainings: trainings.map((t) => ({ ...t, taken: people.filter((p) => p.training_id === t.id).length, labels: masters.MEETING_IDS.map((m) => masters.meetingLabel(t.meetings[m])) })),
+        people: people.map((p) => ({ ...p, path: masters.pathOf(p, trainings.find((t) => t.id === p.training_id), materials), mirror_count: mirror.filter((b) => b.master_id === p.id).length }))
+          .sort((a, b) => (a.status === b.status ? a.name.localeCompare(b.name, "ru") : a.status === "master" ? 1 : -1)),
+        mirror: mirror.slice(0, 100)
+      };
+    };
+    if (action === "list") return { status: 200, body: await listing() };
+    if (!team.can(member, "masters.edit")) return deny("Мастера");
+    if (action === "save_training") {
+      const r = await masters.saveTraining(body.training, body.id || null);
+      if (r.status !== 200) return fail(r);
+    } else if (action === "person") {
+      const p = await masters.getPerson(String(body.id || ""));
+      if (!p) return { status: 404, body: { ok: false, errors: ["Не найдена"] } };
+      const patch = body.patch || {};
+      if (Array.isArray(patch.attendance)) p.attendance = patch.attendance.filter((m) => masters.MEETING_IDS.includes(String(m))).map(String);
+      if ("final_review" in patch) p.final_review = Boolean(patch.final_review);
+      if ("training_id" in patch) p.training_id = patch.training_id || null;
+      if ("visible" in patch) p.profile = { ...p.profile, visible: Boolean(patch.visible) };
+      if ("status" in patch && patch.status === "student") p.status = "student";
+      await masters.savePerson(p);
+    } else if (action === "add") {
+      const id = String(body.id || "").trim();
+      if (!/^\d{3,15}$/.test(id)) return { status: 400, body: { ok: false, errors: ["Telegram ID — только цифры (его показывает бот по команде /master)"] } };
+      const name = String(body.name || "").trim().slice(0, 80);
+      if (!name) return { status: 400, body: { ok: false, errors: ["Укажите имя"] } };
+      const p = (await masters.getPerson(id)) || masters.emptyPerson(id, { name, source: "manual" });
+      p.name = name;
+      if (body.training_id) p.training_id = body.training_id;
+      if (body.status === "master") { p.status = "master"; p.certified_at = p.certified_at || new Date().toISOString(); }
+      await masters.savePerson(p);
+    } else if (action === "certify") {
+      const p = await masters.certify(String(body.id || ""));
+      if (!p) return { status: 404, body: { ok: false, errors: ["Не найдена"] } };
+      try {
+        const base = String(process.env.APP_BASE_URL || "").replace(/\/$/, "");
+        await require("../../lib/telegram").telegram("sendMessage", { chat_id: p.id, text: `Поздравляем! Тебе присвоен статус Мастера многомерности пространства «к Женщине» ✨\n\nВ кабинете Мастера заполни свою карточку — её увидят участницы клуба и смогут записываться к тебе на практику «Зеркало». Фото для карточки просто пришли сюда, в бот.`, reply_markup: { inline_keyboard: [[{ text: "Открыть кабинет Мастера", web_app: { url: `${base}/master-cabinet.html` } }]] } });
+      } catch { /* never started the bot */ }
+      await crm.safeTouch({ id: p.id }, { type: "master", force: true, interest: "master", text: "Присвоен статус Мастера многомерности" });
+    } else if (action === "mirror_status") {
+      const r = await masters.setMirrorStatus(String(body.id || ""), String(body.status || ""), null, body.note);
+      if (r.status !== 200) return fail(r);
+    } else return { status: 400, body: { ok: false, errors: ["Неизвестное действие"] } };
+    return { status: 200, body: await listing() };
   },
 
   async tasks(member, body) {

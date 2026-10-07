@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#faf9f6">
+<title>Практика «Зеркало» — к Женщине</title>
+<link rel="stylesheet" href="/masters.css">
+<script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
+<script src="/access-guard.js"></script>
+</head>
+<body>
+<main class="app">
+  <a class="back" href="/space.html">← В пространство</a>
+  <section class="m-hero" style="background-image:url('/img/ka_asset_11-17ad5f6a49.webp')"><div>
+    <div class="eyebrow">Клуб «к Женщине»</div>
+    <h1>Практика «Зеркало»</h1>
+    <p>Авторская практика Варвары. Другая женщина не определяет меня — через встречу с ней я могу увидеть больше собственного объёма. Выбери Мастера многомерности, с которой хочешь пройти практику.</p>
+  </div></section>
+  <div id="root"><div class="loading">Загружаем Мастеров…</div></div>
+</main>
+<script>
+(function () {
+  "use strict";
+  var wa = window.Telegram && window.Telegram.WebApp;
+  var initData = wa && wa.initData;
+  var root = document.getElementById("root");
+  var CLUB_URL = "https://t.me/tribute/app?startapp=s17IJ";
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) for (var k in attrs) { var v = attrs[k]; if (v === null || v === undefined || v === false) continue;
+      if (k === "class") el.className = v; else if (k === "text") el.textContent = v; else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v); else if (k === "value") el.value = v; else el.setAttribute(k, v === true ? "" : v); }
+    for (var i = 2; i < arguments.length; i++) add(el, arguments[i]);
+    return el;
+  }
+  function add(el, c) { if (c === null || c === undefined || c === false) return; if (Array.isArray(c)) return c.forEach(function (x) { add(el, x); }); el.appendChild(typeof c === "string" || typeof c === "number" ? document.createTextNode(String(c)) : c); }
+  function api(extra) {
+    return fetch("/api/meetings/mirror", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", body: JSON.stringify(Object.assign({ initData: initData }, extra || {})) }).then(function (r) { return r.json(); });
+  }
+  function render(n) { root.innerHTML = ""; add(root, n); }
+
+  if (!initData) { render(h("div", { class: "surface section", text: "Откройте страницу из Telegram." })); return; }
+  api().then(draw).catch(function () { render(h("div", { class: "surface section", text: "Не получилось загрузить. Попробуйте ещё раз." })); });
+
+  function draw(d) {
+    if (!d || !d.ok) return render(h("div", { class: "surface section", text: (d && d.error) || "Не получилось загрузить." }));
+    var nodes = [];
+    if (d.bookings.length) nodes.push(h("section", { class: "surface section" }, h("h2", { text: "Мои записи" }), d.bookings.map(function (b) {
+      return h("div", { class: "booking-top", style: "padding:8px 0;border-top:1px solid var(--line)" }, h("span", { text: "Мастер " + b.master_name }), h("span", { class: "st " + b.status, text: b.status_label }));
+    })));
+    if (!d.club_member) nodes.push(h("section", { class: "surface section" }, h("h2", { text: "Практика — для участниц клуба" }),
+      h("p", { class: "sub", text: "Запись к Мастерам на «Зеркало» открыта участницам клуба «к Женщине». В клубе каждый день — ритуалы наполнения, ритуалы в паре и Дни коллабораций." }),
+      h("button", { class: "cta", type: "button", style: "margin-top:14px", onclick: function () { if (wa && wa.openTelegramLink) wa.openTelegramLink(CLUB_URL); else window.open(CLUB_URL); } }, "Вступить в клуб · 999 ₽/месяц", h("span", { text: "→" }))));
+    if (!d.masters.length) nodes.push(h("section", { class: "surface section" }, h("p", { class: "sub", text: "Мастера скоро появятся здесь — первые Мастерицы как раз проходят обучение 🤍" })));
+    else nodes.push(h("div", { class: "grid-cards" }, d.masters.map(function (m) { return card(m, d.club_member); })));
+    render(nodes);
+  }
+  function card(m, member) {
+    var initials = String(m.name || "").split(" ").map(function (x) { return x[0] || ""; }).join("").slice(0, 2).toUpperCase();
+    return h("article", { class: "mcard" },
+      h("div", { class: "mcard-photo", style: m.photo ? "background-image:url('" + m.photo + "')" : null }, m.photo ? null : h("span", { class: "mcard-initials", text: initials })),
+      h("div", { class: "mcard-body" }, h("span", { class: "mcard-badge", text: "Мастер многомерности" }), h("h3", { text: m.name }),
+        m.city ? h("div", { class: "city", text: m.city }) : null, m.about ? h("p", { text: m.about }) : null,
+        m.specialties.length ? h("div", { class: "chips" }, m.specialties.map(function (s) { return h("span", { text: s }); })) : null,
+        !m.accepting ? h("div", { class: "paused", text: "Сейчас не принимает записи" })
+          : member ? h("button", { class: "cta", type: "button", onclick: function () { book(m); } }, "Записаться на «Зеркало»", h("span", { text: "→" })) : null));
+  }
+  function book(m) {
+    var bg = h("div", { class: "sheet-bg" });
+    var me = wa.initDataUnsafe && wa.initDataUnsafe.user;
+    var wish = h("input", { type: "text", placeholder: "Например: будни после 19:00" });
+    var contact = h("input", { type: "text", value: me && me.username ? "@" + me.username : "", placeholder: "@ник или телефон" });
+    var comment = h("textarea", { placeholder: "Что хочется увидеть или прожить (по желанию)" });
+    var status = h("div", { class: "status" });
+    var sheet = h("div", { class: "sheet", role: "dialog", "aria-modal": "true" },
+      h("div", { class: "eyebrow", text: "Практика «Зеркало»" }), h("h2", { text: "Запись к Мастеру " + m.name }),
+      h("div", { class: "form" },
+        h("label", null, "Когда тебе удобно", wish),
+        h("label", null, "Формат", h("div", { class: "seg" }, h("label", null, h("input", { type: "radio", name: "fmt", value: "online", checked: true }), "Онлайн"), h("label", null, h("input", { type: "radio", name: "fmt", value: "offline" }), "Офлайн"))),
+        h("label", null, "Как с тобой связаться", contact),
+        h("label", null, "Комментарий", comment),
+        h("button", { class: "cta", type: "button", onclick: function () {
+          var btn = this; btn.disabled = true; status.textContent = "";
+          var fmt = sheet.querySelector("input[name=fmt]:checked").value;
+          api({ action: "book", master_id: m.id, wish: wish.value, format: fmt, contact: contact.value, comment: comment.value }).then(function (r) {
+            if (!r.ok) { btn.disabled = false; status.textContent = r.error || "Не получилось"; return; }
+            sheet.innerHTML = "";
+            add(sheet, [h("div", { class: "eyebrow", text: "Готово" }), h("h2", { text: "Ты записалась к Мастеру " + m.name + " 🤍" }),
+              h("p", { class: "sub", text: "Мастер уже получила уведомление и скоро подтвердит время. Мы пришлём сообщение в бот." }),
+              h("button", { class: "cta", type: "button", style: "margin-top:16px", onclick: function () { close(); api().then(draw); } }, "Хорошо", h("span", { text: "→" }))]);
+          }).catch(function () { btn.disabled = false; status.textContent = "Нет связи. Попробуйте ещё раз."; });
+        } }, "Записаться", h("span", { text: "→" })), status));
+    function close() { bg.remove(); sheet.remove(); }
+    bg.addEventListener("click", close);
+    document.body.appendChild(bg); document.body.appendChild(sheet);
+  }
+})();
+</script>
+</body>
+</html>

@@ -21,6 +21,19 @@ async function checkoutReminder(orderId) {
   if (paidLater) return { skipped: "paid" };
   const item = await resolvePurchase({ cityId: order.city_id, kind: order.kind, meeting: order.meeting });
   if (item.error) return { skipped: "closed" };
+  if (order.kind === "training") {
+    const t = await require("../../lib/masters").findTraining(order.meeting);
+    const base0 = String(process.env.APP_BASE_URL || "").replace(/\/$/, "");
+    await telegram("sendMessage", { chat_id: order.user_id, text: `Ты начала запись на обучение Мастеров многомерности${t ? ` «${t.title}»` : ""}, но оплата не завершилась.\nМесто в потоке пока свободно — можно продолжить, когда будет удобно 🤍`,
+      reply_markup: { inline_keyboard: [[{ text: "Продолжить запись", web_app: { url: `${base0}/master.html` } }]] } });
+    await require("../../lib/conversations").open(order.user_id, "checkout");
+    await crm.safeTouch({ id: order.user_id, first_name: order.name || undefined, username: order.username || undefined }, {
+      type: "checkout", interest: "master", stage_min: "offer",
+      next_step: { date: new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Moscow", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()), action: "Не завершила оплату обучения Мастеров — помочь" },
+      text: `Не завершила оплату обучения Мастеров (${order.amount} ₽). Бот отправил напоминание.`
+    });
+    return { sent: 1 };
+  }
   const doc = await schedule.loadSchedule();
   const city = schedule.findCity(doc, order.city_id);
   const what = order.kind === "package" ? "полный путь из 6 встреч" : `встречу «${schedule.MEETINGS[order.meeting].title}»`;

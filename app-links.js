@@ -53,6 +53,12 @@
       .then(function (access) {
         if (!access || !access.club || !access.club.member) return;
         clubButtons.forEach(function (el) {
+          // Some club cards lead members to their own page (e.g. «Зеркало» → choose a Master).
+          if (el.getAttribute("data-member-href")) {
+            el.setAttribute("data-url", el.getAttribute("data-member-href"));
+            setLabel(el, el.getAttribute("data-member-label") || "Открыть");
+            return;
+          }
           el.setAttribute("data-url", access.club.url || CLUB_PAYMENT_URL);
           setLabel(el, access.club.url ? "Перейти в клуб" : "Я в клубе");
         });

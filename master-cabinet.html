@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#faf9f6">
+<title>Кабинет Мастера — к Женщине</title>
+<link rel="stylesheet" href="/masters.css">
+<script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
+<script src="/access-guard.js"></script>
+</head>
+<body>
+<main class="app">
+  <a class="back" href="/space.html">← В пространство</a>
+  <div id="root"><div class="loading">Загружаем кабинет…</div></div>
+</main>
+<script>
+(function () {
+  "use strict";
+  var wa = window.Telegram && window.Telegram.WebApp;
+  var initData = wa && wa.initData;
+  var root = document.getElementById("root");
+  var state = { tab: "mirror", data: null };
+  var KIND_ICON = { video: "▶", doc: "❒", practice: "✦", task: "✓" };
+  var MODULES = { "1": "Встреча 1", "2": "Встреча 2", "3": "Встреча 3", extra: "Дополнительно", method: "Методика ведения" };
+
+  function h(tag, attrs) {
+    var el = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      var v = attrs[k]; if (v === null || v === undefined || v === false) continue;
+      if (k === "class") el.className = v; else if (k === "text") el.textContent = v;
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+      else if (k === "value") el.value = v; else el.setAttribute(k, v === true ? "" : v);
+    }
+    for (var i = 2; i < arguments.length; i++) add(el, arguments[i]);
+    return el;
+  }
+  function add(el, c) { if (c === null || c === undefined || c === false) return; if (Array.isArray(c)) return c.forEach(function (x) { add(el, x); }); el.appendChild(typeof c === "string" || typeof c === "number" ? document.createTextNode(String(c)) : c); }
+  function api(action, extra) {
+    return fetch("/api/meetings/master", { method: "POST", headers: { "Content-Type": "application/json" }, cache: "no-store", body: JSON.stringify(Object.assign({ initData: initData, action: action }, extra || {})) })
+      .then(function (r) { return r.json().catch(function () { return {}; }); });
+  }
+  function open(url) {
+    if (!url) return;
+    if (wa && /^https:\/\/t\.me\//.test(url) && wa.openTelegramLink) return wa.openTelegramLink(url);
+    if (wa && wa.openLink) return wa.openLink(url);
+    window.open(url, "_blank", "noopener");
+  }
+  function rub(n) { return Number(n || 0).toLocaleString("ru-RU").replace(/ /g, " ") + " ₽"; }
+  function render(nodes) { root.innerHTML = ""; add(root, nodes); }
+  function update(d) { if (d && d.ok) { state.data = d; draw(); } else if (d && d.error) alertBox(d.error); }
+  function alertBox(text) { var n = document.querySelector(".status"); if (n) n.textContent = text; }
+
+  if (!initData) { render(h("div", { class: "surface section" }, h("h2", { text: "Откройте кабинет из Telegram" }), h("p", { class: "sub", text: "Напишите боту @K_zhenshcine_bot команду /master." }))); return; }
+  api("get").then(update).catch(function () { render(h("div", { class: "surface section", text: "Не получилось загрузить кабинет. Попробуйте ещё раз." })); });
+
+  function draw() {
+    var d = state.data;
+    if (!d.person) return render(noAccess(d));
+    if (d.person.status === "master") return render(masterView(d));
+    render(studentView(d));
+  }
+
+  // ---------- no access: training on sale ----------
+  function noAccess(d) {
+    return [
+      h("section", { class: "m-hero" }, h("div", null, h("div", { class: "eyebrow", text: "Путь Мастера" }), h("h1", { text: "Кабинет Мастера многомерности" }),
+        h("p", { text: "Кабинет открывается после покупки обучения Мастеров: здесь будут расписание, материалы, задания и твой путь к статусу Мастера." }))),
+      d.on_sale.length ? d.on_sale.map(function (t) {
+        return h("section", { class: "surface section" }, h("div", { class: "eyebrow", text: "Обучение Мастеров · набор открыт" }), h("h2", { style: "margin-top:6px", text: t.title + (t.city ? " · " + t.city : "") }),
+          h("div", { class: "meets" }, t.meetings.map(function (m, i) { return h("div", { class: "meet" }, h("span", { class: "n", text: i + 1 }), h("div", null, h("b", { text: "Встреча " + (i + 1) }), h("small", { text: m }))); })),
+          h("p", { style: "margin:14px 0 4px;font-size:1.4rem;font-weight:300", text: rub(t.price) }),
+          h("button", { class: "cta", type: "button", onclick: function () { buy(t, this); } }, "Купить обучение", h("span", { text: "→" })),
+          h("div", { class: "status" }));
+      }) : h("section", { class: "surface section" }, h("p", { class: "sub", text: "Набор в новый поток скоро откроется." }),
+        h("a", { class: "cta outline", href: "/master.html", style: "margin-top:14px" }, "Оставить заявку на обучение", h("span", { text: "→" })))
+    ];
+  }
+  function buy(t, btn) {
+    btn.disabled = true;
+    var st = btn.parentNode.querySelector(".status");
+    fetch("/api/meetings/invoice", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ initData: initData, kind: "training", meeting: t.id }) })
+      .then(function (r) { return r.json(); }).then(function (r) {
+        btn.disabled = false;
+        if (!r.ok) { st.textContent = r.error || "Не получилось создать оплату"; return; }
+        wa.openInvoice(r.invoice_link, function (status) {
+          if (status === "paid") { st.textContent = "Оплата прошла! Открываем кабинет…"; setTimeout(function () { api("get").then(update); }, 2500); }
+          else if (status === "failed") st.textContent = "Оплата не прошла. Попробуйте ещё раз.";
+        });
+      }).catch(function () { btn.disabled = false; st.textContent = "Нет связи. Попробуйте ещё раз."; });
+  }
+
+  // ---------- student ----------
+  function studentView(d) {
+    var p = d.path, t = d.training;
+    return [
+      h("section", { class: "m-hero" }, h("div", null,
+        h("span", { class: "chip-status", text: "Ученица обучения Мастеров" }),
+        h("h1", { text: d.person.name || "Мой кабинет" }),
+        h("p", { text: t ? "Поток «" + t.title + "»" + (t.city ? " · " + t.city : "") : "Поток скоро будет назначен" }),
+        h("div", { class: "bar" }, h("i", { style: "width:" + Math.round(100 * p.done_count / p.total) + "%" })),
+        h("div", { class: "bar-label", text: "Путь к статусу Мастера: " + p.done_count + " из " + p.total }))),
+      h("section", { class: "surface section" }, h("h2", { text: "Путь к статусу Мастера" }),
+        h("ul", { class: "steps" }, p.steps.map(function (s, i) { return h("li", { class: s.done ? "done" : "" }, h("span", { class: "dot", text: s.done ? "✓" : i + 1 }), h("div", null, h("b", { text: s.title }), s.note ? h("small", { text: s.note }) : null)); })),
+        p.ready && d.person.status !== "master" ? h("p", { class: "hint", style: "margin-top:14px", text: "Все шаги пройдены 🤍 Команда скоро присвоит тебе статус Мастера." }) : null),
+      t ? h("section", { class: "surface section" }, h("h2", { text: "Расписание обучения" }),
+        h("div", { class: "meets" }, t.meetings.map(function (m) {
+          return h("div", { class: "meet" }, h("span", { class: "n", text: m.id }), h("div", null, h("b", { text: "Встреча " + m.id }), h("small", { text: m.label })), m.attended ? h("span", { class: "tag-ok", text: "пройдена" }) : null);
+        })),
+        t.venue || t.address ? h("p", { class: "sub", style: "margin-top:12px", text: "📍 " + [t.venue, t.address].filter(Boolean).join(", ") }) : null,
+        t.format ? h("p", { class: "sub", text: "Формат: " + t.format }) : null) : null,
+      t && (t.chat_url || (t.curator && t.curator.name)) ? h("section", { class: "surface section" }, h("h2", { text: "Группа и куратор" }),
+        t.curator && t.curator.name ? h("p", { text: "Куратор: " + t.curator.name + (t.curator.contact ? " — " + t.curator.contact : "") }) : null,
+        h("div", { class: "row-actions" },
+          t.chat_url ? h("button", { class: "cta", type: "button", onclick: function () { open(t.chat_url); } }, "Чат группы", h("span", { text: "→" })) : null,
+          t.curator && /^@\w+/.test(t.curator.contact || "") ? h("button", { class: "cta outline", type: "button", onclick: function () { open("https://t.me/" + t.curator.contact.replace("@", "")); } }, "Написать куратору", h("span", { text: "→" })) : null)) : null,
+      materialsSection(d, "Материалы и задания"),
+      h("div", { class: "status" })
+    ];
+  }
+
+  function materialsSection(d, title) {
+    if (!d.materials.length) return h("section", { class: "surface section" }, h("h2", { text: title }), h("p", { class: "empty", text: "Материалы появятся здесь, как только команда их добавит." }));
+    var groups = {};
+    d.materials.forEach(function (m) { var k = m.module || "extra"; (groups[k] = groups[k] || []).push(m); });
+    var order = ["1", "2", "3", "extra", "method"];
+    return h("section", { class: "surface section" }, h("h2", { text: title }),
+      order.concat(Object.keys(groups).filter(function (k) { return order.indexOf(k) === -1; })).filter(function (k) { return groups[k]; }).map(function (k) {
+        return h("div", { class: "mat-group" }, h("h3", { text: MODULES[k] || k }), groups[k].map(function (m) { return materialCard(d, m); }));
+      }));
+  }
+  function materialCard(d, m) {
+    var mine = d.person.tasks[m.id];
+    var isTask = m.kind === "task";
+    var answer = isTask ? h("textarea", { placeholder: "Твой ответ или ссылка на результат (по желанию)" }) : null;
+    if (answer && mine) answer.value = mine.answer || "";
+    return h("div", { class: "mat" + (isTask && mine ? " done" : "") },
+      h("div", { class: "mat-head" }, h("span", { class: "mat-ico", text: KIND_ICON[m.kind] || "•" }),
+        h("div", null, h("b", { text: m.title }), h("small", { text: isTask ? (mine ? "Задание выполнено" : "Задание") : ({ video: "Видео", doc: "Документ", practice: "Практика" }[m.kind] || "Материал") })),
+        m.url ? h("button", { class: "cta small outline go", type: "button", onclick: function () { open(m.url); } }, "Открыть") : null),
+      m.text ? h("p", { text: m.text }) : null,
+      answer,
+      isTask ? h("div", { class: "row-actions" }, mine
+        ? [h("span", { class: "done-mark", text: "✓ Выполнено" }), h("button", { class: "cta small outline", type: "button", onclick: function () { api("task", { material_id: m.id, done: true, answer: answer.value }).then(update); } }, "Обновить ответ"),
+           h("button", { class: "cta small outline", type: "button", onclick: function () { api("task", { material_id: m.id, done: false }).then(update); } }, "Снять отметку")]
+        : h("button", { class: "cta small", type: "button", onclick: function () { this.disabled = true; api("task", { material_id: m.id, done: true, answer: answer.value }).then(update); } }, "Отметить выполненным")) : null);
+  }
+
+  // ---------- Master ----------
+  function masterView(d) {
+    var fresh = d.mirror.filter(function (b) { return b.status === "new"; }).length;
+    var tabs = [["mirror", "«Зеркало»", fresh], ["groups", "Мои группы", 0], ["card", "Моя карточка", 0], ["materials", "Материалы", 0]];
+    var body = { mirror: mirrorTab, groups: groupsTab, card: cardTab, materials: function (x) { return materialsSection(x, "Материалы Мастера"); } }[state.tab](d);
+    return [
+      h("section", { class: "m-hero", style: "min-height:280px" }, h("div", null,
+        h("span", { class: "chip-status master", text: "Мастер многомерности" }),
+        h("h1", { text: d.person.name || "Кабинет Мастера" }),
+        h("p", { text: fresh ? "Новых записей на «Зеркало»: " + fresh : "Пространство «к Женщине» 🤍" }))),
+      h("div", { class: "tabs", role: "tablist" }, tabs.map(function (t) {
+        return h("button", { type: "button", class: state.tab === t[0] ? "on" : "", onclick: function () { state.tab = t[0]; draw(); } }, t[1], t[2] ? h("span", { class: "cnt", text: t[2] }) : null);
+      })),
+      body, h("div", { class: "status" })
+    ];
+  }
+
+  function mirrorTab(d) {
+    if (!d.mirror.length) return h("section", { class: "surface section" }, h("h2", { text: "Записи на «Зеркало»" }),
+      h("p", { class: "empty", text: d.person.profile.accepting ? "Пока записей нет. Когда участница клуба запишется к тебе, бот сразу пришлёт уведомление." : "Сейчас ты не принимаешь записи — включить можно во вкладке «Моя карточка»." }));
+    return h("section", { class: "surface section" }, h("h2", { text: "Записи на «Зеркало»" }), d.mirror.map(function (b) {
+      var note = h("input", { class: "note-in", placeholder: "Сообщение девушке: время, ссылка, адрес" });
+      var tg = b.username ? "https://t.me/" + b.username : null;
+      return h("div", { class: "booking " + b.status },
+        h("div", { class: "booking-top" }, h("div", null, h("b", { text: b.client_name || "Участница клуба" }), b.username ? h("div", { class: "sub", text: "@" + b.username }) : null), h("span", { class: "st " + b.status, text: d.mirror_statuses[b.status] })),
+        h("dl", null, b.wish ? [h("dt", { text: "Когда удобно" }), h("dd", { text: b.wish })] : null, [h("dt", { text: "Формат" }), h("dd", { text: b.format === "offline" ? "офлайн" : "онлайн" })],
+          [h("dt", { text: "Контакт" }), h("dd", { text: b.contact })], b.comment ? [h("dt", { text: "Комментарий" }), h("dd", { text: b.comment })] : null,
+          b.master_note ? [h("dt", { text: "Ты написала" }), h("dd", { text: b.master_note })] : null),
+        b.status === "new" || b.status === "confirmed" ? note : null,
+        h("div", { class: "row-actions" },
+          b.status === "new" ? h("button", { class: "cta small", type: "button", onclick: function () { api("mirror_status", { id: b.id, status: "confirmed", note: note.value }).then(update); } }, "Подтвердить") : null,
+          b.status === "confirmed" ? h("button", { class: "cta small", type: "button", onclick: function () { api("mirror_status", { id: b.id, status: "done", note: note.value || undefined }).then(update); } }, "Практика проведена") : null,
+          b.status === "new" || b.status === "confirmed" ? h("button", { class: "cta small outline", type: "button", onclick: function () { if (confirm("Отменить запись? Девушка получит сообщение и сможет выбрать другого Мастера.")) api("mirror_status", { id: b.id, status: "cancelled", note: note.value }).then(update); } }, "Отменить") : null,
+          tg ? h("button", { class: "cta small outline", type: "button", onclick: function () { open(tg); } }, "Написать") : null));
+    }));
+  }
+
+  function groupsTab(d) {
+    if (!d.cycles.length) return h("section", { class: "surface section" }, h("h2", { text: "Мои группы" }), h("p", { class: "empty", text: "Когда команда назначит тебя Мастером цикла, группа появится здесь — с участницами и отметкой присутствующих." }));
+    var mids = ["1", "2", "3", "4", "5", "6"];
+    return d.cycles.map(function (c) {
+      return h("section", { class: "surface section" }, h("div", { class: "eyebrow", text: c.city_name + (c.venue ? " · " + c.venue : "") }), h("h2", { style: "margin-top:6px", text: c.title || "Цикл многомерности" }),
+        h("div", { class: "sub", text: mids.map(function (m) { return c.meetings[m] && c.meetings[m].date ? m + ": " + c.meetings[m].date.slice(8, 10) + "." + c.meetings[m].date.slice(5, 7) : null; }).filter(Boolean).join(" · ") || "Даты скоро появятся" }),
+        c.participants.length ? h("div", { style: "overflow-x:auto" }, h("table", { class: "att" },
+          h("thead", null, h("tr", null, h("th", { text: "Участница" }), mids.map(function (m) { return h("th", { text: m }); }))),
+          h("tbody", null, c.participants.map(function (p) {
+            return h("tr", null, h("td", null, p.name || (p.username ? "@" + p.username : "Без имени"), p.phone ? h("small", { text: p.phone }) : null),
+              mids.map(function (m) {
+                if (p.meetings.indexOf(m) === -1) return h("td", { class: "na", text: "—" });
+                return h("td", null, h("input", { type: "checkbox", checked: (p.attended || []).indexOf(m) !== -1, "aria-label": "Встреча " + m, onchange: function (e) {
+                  var present = c.participants.filter(function (x) { return (x.attended || []).indexOf(m) !== -1 && x.user_id !== p.user_id; }).map(function (x) { return x.user_id; });
+                  if (e.target.checked) present.push(p.user_id);
+                  api("attendance", { cycle_id: c.id, meeting: m, present: present }).then(update);
+                } }));
+              }));
+          })))) : h("p", { class: "empty", style: "margin-top:10px", text: "Оплат пока нет." }));
+    });
+  }
+
+  function cardPreview(card) {
+    var initials = String(card.name || "").split(" ").map(function (x) { return x[0] || ""; }).join("").slice(0, 2).toUpperCase();
+    return h("article", { class: "mcard" },
+      h("div", { class: "mcard-photo", style: card.photo ? "background-image:url('" + card.photo + "')" : null }, card.photo ? null : h("span", { class: "mcard-initials", text: initials })),
+      h("div", { class: "mcard-body" }, h("span", { class: "mcard-badge", text: "Мастер многомерности" }), h("h3", { text: card.name }),
+        card.city ? h("div", { class: "city", text: card.city }) : null, card.about ? h("p", { text: card.about }) : null,
+        card.specialties && card.specialties.length ? h("div", { class: "chips" }, card.specialties.map(function (s) { return h("span", { text: s }); })) : null,
+        card.accepting ? null : h("div", { class: "paused", text: "Сейчас не принимает записи" })));
+  }
+  function cardTab(d) {
+    var pr = d.person.profile;
+    var chosen = (pr.specialties || []).slice();
+    var city = h("input", { type: "text", value: pr.city || "", placeholder: "Город" });
+    var about = h("textarea", { placeholder: "Пара тёплых предложений о себе и о том, как ты ведёшь практику" }); about.value = pr.about || "";
+    var contact = h("input", { type: "text", value: pr.contact || "", placeholder: "@ник в Telegram или телефон" });
+    var accepting = h("input", { type: "checkbox", checked: pr.accepting !== false });
+    var visible = h("input", { type: "checkbox", checked: pr.visible !== false });
+    var chips = h("div", { class: "toggles" }, d.specialties.map(function (s) {
+      return h("button", { type: "button", class: chosen.indexOf(s) !== -1 ? "on" : "", onclick: function () { var i = chosen.indexOf(s); if (i === -1) chosen.push(s); else chosen.splice(i, 1); this.classList.toggle("on"); } }, s);
+    }));
+    return [
+      h("section", { class: "surface section" }, h("h2", { text: "Так тебя видят в клубе" }), cardPreview(d.card),
+        h("p", { class: "hint", style: "margin-top:14px", text: "Фото для карточки: просто отправь фотографию боту @K_zhenshcine_bot — она сразу появится здесь." })),
+      h("section", { class: "surface section" }, h("h2", { text: "Моя карточка" }),
+        h("div", { class: "form" }, h("label", null, "Город", city), h("label", null, "О себе", about), h("label", null, "Контакт для участниц (виден после подтверждения записи)", contact),
+          h("label", null, "Что я веду", chips),
+          h("div", { class: "switch" }, h("span", { text: "Принимаю записи на «Зеркало»" }), accepting),
+          h("div", { class: "switch" }, h("span", { text: "Показывать карточку в клубе" }), visible),
+          h("button", { class: "cta", type: "button", onclick: function () {
+            this.disabled = true;
+            api("profile", { profile: { city: city.value, about: about.value, contact: contact.value, specialties: chosen, accepting: accepting.checked, visible: visible.checked } }).then(function (r) { update(r); alertBox("Сохранено ✨"); });
+          } }, "Сохранить", h("span", { text: "→" }))))
+    ];
+  }
+})();
+</script>
+</body>
+</html>

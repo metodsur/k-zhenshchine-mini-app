@@ -5,7 +5,11 @@ const actions = {
   invoice: require("../../lib/handlers/invoice"),
   waitlist: require("../../lib/handlers/waitlist"),
   "circle-request": require("../../lib/handlers/circle-request"),
-  application: require("../../lib/handlers/application")
+  application: require("../../lib/handlers/application"),
+  // Masters cabinet, «Зеркало» bookings and Master photos (lib/handlers/master.js).
+  master: (req, res) => require("../../lib/handlers/master").masterAction(req, res),
+  mirror: (req, res) => require("../../lib/handlers/master").mirrorAction(req, res),
+  "master-photo": (req, res) => require("../../lib/handlers/master").photoAction(req, res)
 };
 
 module.exports = async function handler(req, res) {

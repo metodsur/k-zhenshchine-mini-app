@@ -13,9 +13,11 @@ module.exports = async function handler(req, res) {
     try { clubEvents = events.upcoming(await events.loadEvents()); } catch { clubEvents = []; }
     let links = {};
     try { links = await settings.loadSettings(); } catch { /* buttons show "скоро" */ }
+    let masters = [];
+    try { masters = await require("../lib/masters").publicMasters(); } catch { masters = []; }
     let clubStats = null;
     try { clubStats = await clubActivity.summary(); } catch { clubStats = null; }
-    return send(res, 200, { ok: true, ...schedule.publicView(doc, counts), events: clubEvents, links, club_stats: clubStats });
+    return send(res, 200, { ok: true, ...schedule.publicView(doc, counts), events: clubEvents, links, club_stats: clubStats, masters });
   } catch (error) {
     console.error("Schedule read failed", error.message);
     // Storage outage: still show the meetings, all as "date coming soon".

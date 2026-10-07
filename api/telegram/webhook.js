@@ -96,6 +96,9 @@ module.exports = async function handler(req, res) {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });
     try {
+      if (await require("../../lib/handlers/master").handleBot(update.message)) return send(res, 200, { ok: true });
+    } catch (error) { console.error("Master bot handling failed", error.message); }
+    try {
       if (await require("../../lib/conversations").handleReply(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Reply handling failed", error.message); }
     const message = update.message;

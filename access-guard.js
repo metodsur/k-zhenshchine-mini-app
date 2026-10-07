@@ -4,6 +4,7 @@
   var ENTRY = ["/", "/index"];
   var START_PAGES = ["/welcome-personal-telegram-ready", "/welcome-mission", "/welcome-rituals"];
   var RITUAL_PAGE = "/rituals";
+  var OPEN_PAGES = ["/master-cabinet"];
   var kind = ENTRY.indexOf(path) !== -1 ? "entry" : START_PAGES.indexOf(path) !== -1 ? "start" : path === RITUAL_PAGE ? "ritual" : "app";
   var MAIN_PAGE = "/space.html";
   var FIRST_START_PAGE = "/welcome-personal-telegram-ready.html";
@@ -68,6 +69,8 @@
     if (!response.ok) return;
     var access = await response.json();
     if (access.consent === false) { showConsent(access.policy_url, initData); return; }
+    // The Masters cabinet is paid access of its own: no channel requirement, only consent.
+    if (OPEN_PAGES.indexOf(path) !== -1) return;
     if (access.full_access === false) {
       if (kind !== "entry") go("/index.html?access=subscription_required");
       return;

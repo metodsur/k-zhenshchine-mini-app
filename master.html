@@ -79,6 +79,7 @@
 .progress-dots{display:flex;gap:6px}
 .progress-dots i{width:22px;height:6px;border-radius:3px;background:#ece5d8}
 .progress-dots i.on{background:linear-gradient(90deg,#b87321,#e2b766)}
+#training[hidden]{display:none}
 </style>
 
   <script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
@@ -106,6 +107,7 @@
       <li><b>Личная встреча</b>Знакомимся и обсуждаем формат обучения.</li>
       <li><b>Старт на пути Мастера</b>Начинаешь вести практики вместе с «к Женщине».</li></ol>
       <p class="dev-note">Формат обучения и условия обсуждаем лично.</p></section>
+    <section class="dev-section surface" id="training" hidden></section>
     <section class="dev-section surface" id="apply"><h2>Заявка на путь Мастера</h2>
       <form class="dev-form" data-application="master">
         <label>Имя<input name="name" autocomplete="name" required maxlength="80" placeholder="Как к вам обращаться"></label>
@@ -146,6 +148,38 @@
     if(n>=6){document.getElementById('mp-text').textContent='Все шесть встреч пройдены — путь Мастера открыт. Оставь заявку ниже.';link.setAttribute('href','#apply');link.innerHTML='К заявке <span>→</span>'}
     else{var next=(p.tickets.items||[]).find(function(t){return t.status==='upcoming'});
       document.getElementById('mp-text').textContent=next?'Следующая встреча: «'+next.title+'» — '+next.date_label+'. Заявку можно оставить уже сейчас.':'Мастером можно стать после всех шести встреч. Заявку можно оставить уже сейчас.'}
+  }).catch(function(){});
+})();
+</script>
+<script>
+(function masterTraining(){
+  // Training on sale → buy right here; already a student or Master → open the cabinet.
+  var wa=window.Telegram&&window.Telegram.WebApp;var initData=wa&&wa.initData;if(!initData)return;
+  var box=document.getElementById('training');
+  function el(t,c,txt){var e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e}
+  fetch('/api/meetings/master',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData:initData,action:'get'})}).then(function(r){return r.json()}).then(function(d){
+    if(!d||!d.ok)return;
+    if(d.person){box.appendChild(el('h2',null,d.person.status==='master'?'Ты — Мастер многомерности':'Ты в обучении Мастеров'));
+      box.appendChild(el('p','dev-note',d.person.status==='master'?'Записи на «Зеркало», группы и твоя карточка — в кабинете Мастера.':'Расписание, материалы, задания и путь к статусу Мастера — в кабинете.'));
+      var a=el('a','cta');a.href='/master-cabinet.html';a.innerHTML='Открыть кабинет Мастера <span>→</span>';box.appendChild(a);box.hidden=false;return}
+    if(!d.on_sale.length)return;
+    box.appendChild(el('h2',null,'Обучение Мастеров'));
+    d.on_sale.forEach(function(t){
+      var card=el('div');card.style.marginTop='10px';
+      card.appendChild(el('div','eyebrow','Набор открыт'+(t.city?' · '+t.city:'')));
+      card.appendChild(el('p',null,'Поток «'+t.title+'» · 3 встречи: '+t.meetings.join(' · ')));
+      var price=el('p',null,Number(t.price).toLocaleString('ru-RU').replace(/\u00a0/g,' ')+' ₽');price.style.cssText='margin:10px 0 0;font-size:1.5rem;font-weight:200';card.appendChild(price);
+      var btn=el('button','cta');btn.type='button';btn.innerHTML='Купить обучение <span>→</span>';var st=el('div','dev-status');
+      btn.addEventListener('click',function(){btn.disabled=true;st.textContent='';
+        fetch('/api/meetings/invoice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({initData:initData,kind:'training',meeting:t.id})}).then(function(r){return r.json()}).then(function(r){
+          btn.disabled=false;if(!r.ok){st.textContent=r.error||'Не получилось создать оплату';return}
+          wa.openInvoice(r.invoice_link,function(status){if(status==='paid'){st.textContent='Оплата прошла! Открываем кабинет…';setTimeout(function(){location.href='/master-cabinet.html'},2000)}else if(status==='failed')st.textContent='Оплата не прошла. Попробуйте ещё раз.'});
+        }).catch(function(){btn.disabled=false;st.textContent='Нет связи. Попробуйте ещё раз.'});
+      });
+      card.appendChild(btn);card.appendChild(st);box.appendChild(card);
+    });
+    box.appendChild(el('p','dev-note','Остались вопросы? Оставь заявку ниже — обсудим лично.'));
+    box.hidden=false;
   }).catch(function(){});
 })();
 </script>
