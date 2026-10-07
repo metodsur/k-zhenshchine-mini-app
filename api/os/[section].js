@@ -296,7 +296,9 @@ const sections = {
         trainings: trainings.map((t) => ({ ...t, taken: people.filter((p) => p.training_id === t.id).length, labels: masters.MEETING_IDS.map((m) => masters.meetingLabel(t.meetings[m])) })),
         people: people.map((p) => ({ ...p, path: masters.pathOf(p, trainings.find((t) => t.id === p.training_id), materials), mirror_count: mirror.filter((b) => b.master_id === p.id).length }))
           .sort((a, b) => (a.status === b.status ? a.name.localeCompare(b.name, "ru") : a.status === "master" ? 1 : -1)),
-        mirror: mirror.slice(0, 100)
+        mirror: mirror.slice(0, 100),
+        finance: await require("../../lib/master-finance").overview(),
+        rates: { referral: require("../../lib/master-finance").RATE_REFERRAL, space: require("../../lib/master-finance").RATE_SPACE }
       };
     };
     if (action === "list") return { status: 200, body: await listing() };
@@ -332,6 +334,10 @@ const sections = {
         await require("../../lib/telegram").telegram("sendMessage", { chat_id: p.id, text: `Поздравляем! Тебе присвоен статус Мастера многомерности пространства «к Женщине» ✨\n\nВ кабинете Мастера заполни свою карточку — её увидят участницы клуба и смогут записываться к тебе на практику «Зеркало». Фото для карточки просто пришли сюда, в бот.`, reply_markup: { inline_keyboard: [[{ text: "Открыть кабинет Мастера", web_app: { url: `${base}/master-cabinet.html` } }]] } });
       } catch { /* never started the bot */ }
       await crm.safeTouch({ id: p.id }, { type: "master", force: true, interest: "master", text: "Присвоен статус Мастера многомерности" });
+    } else if (action === "payout") {
+      const r = await require("../../lib/master-finance").addPayout(String(body.id || ""), body.amount, body.note, who(member));
+      if (r.status !== 200) return fail(r);
+      try { await require("../../lib/telegram").telegram("sendMessage", { chat_id: String(body.id), text: `Вам выплачено ${Number(body.amount).toLocaleString("ru-RU")} ₽ за встречи многомерности 🤍\nПодробности — в кабинете Мастера (/master), вкладка «Финансы».` }); } catch { /* never started the bot */ }
     } else if (action === "mirror_status") {
       const r = await masters.setMirrorStatus(String(body.id || ""), String(body.status || ""), null, body.note);
       if (r.status !== 200) return fail(r);

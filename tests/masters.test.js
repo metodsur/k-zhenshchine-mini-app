@@ -112,3 +112,56 @@ test('Masters: buy training → student cabinet → tasks → certified Master �
   await say(LENA, '/master');
   assert.match(world.sent('sendMessage').filter((m) => m.chat_id === LENA.id).pop().reply_markup.inline_keyboard[0][0].web_app.url, /master-cabinet/);
 });
+
+test('Master finance: referral link, 3500 / 2500 per participant per held meeting, payouts', async () => {
+  const world = createWorld();
+  const owner = await ownerCookie(world);
+  const masters = require('../lib/masters');
+  const finance = require('../lib/master-finance');
+  await os('masters', { action: 'add', id: '7401', name: 'Ирина', status: 'master' }, owner);
+  const IRINA = { id: 7401, first_name: 'Ирина' };
+  let cab = await act('master', IRINA);
+  const link = cab.body.finance.link;
+  assert.match(link, /^https:\/\/t\.me\/K_zhenshcine_bot\?start=m_[a-f0-9]{8}$/);
+  const param = link.split('start=')[1];
+
+  // Anna comes by Irina's link; Olga comes on her own; another Master's link does not override.
+  const OLGA = { id: 7403, first_name: 'Ольга' };
+  await say(ANNA, `/start ${param}`);
+  await say(OLGA, '/start');
+  await os('masters', { action: 'add', id: '7402', name: 'Другая', status: 'master' }, owner);
+  const other = await masters.getPerson('7402');
+  await say(ANNA, `/start m_${await finance.ensureCode(other)}`);
+  await say(IRINA, `/start ${param}`); // own link: ignored
+  assert.equal(world.kv.get('user:7202').includes('"ref_master":"7401"'), true);
+  assert.equal(world.kv.has('user:7401') && world.kv.get('user:7401').includes('ref_master'), false);
+
+  // Irina leads a published Moscow cycle; meeting 1 already happened, meeting 2 ahead.
+  const meetings = Object.fromEntries(['1', '2', '3', '4', '5', '6'].map((m, i) => [m, { date: inDays(i === 0 ? 1 : 2 + i * 7), time: '12:00' }]));
+  const c = (await os('cycles', { action: 'save', cycle: { city_id: 'moscow', status: 'selling', capacity: 15, master: { name: 'Ирина' }, master_id: '7401', meetings } }, owner)).body.cycles[0];
+  await os('cycles', { action: 'publish', id: c.id }, owner);
+  for (const [u, kind, meeting] of [[ANNA, 'single', '1'], [OLGA, 'single', '1'], [OLGA, 'single', '2']]) {
+    const inv = await act('invoice', u, { city: 'moscow', kind, meeting });
+    await deliver({ pre_checkout_query: { id: 'q', from: { id: u.id }, currency: 'RUB', total_amount: 555500, invoice_payload: inv.body.order_id } });
+    await deliver({ message: { chat: { id: u.id, type: 'private' }, from: u, successful_payment: { invoice_payload: inv.body.order_id, total_amount: 555500, currency: 'RUB', order_info: {} } } });
+  }
+  const person = await masters.getPerson('7401');
+  const f = await finance.forMaster(person, Date.now() + 2 * DAY);
+  assert.equal(f.earned, 3500 + 2500, 'meeting 1: Anna by link + Olga from the space');
+  assert.equal(f.expected, 2500, 'meeting 2 not held yet');
+  assert.deepEqual(f.stats, { came: 1, bought: 1 });
+
+  // Payout from the dashboard → balance and a bot message.
+  let r = await os('masters', { action: 'payout', id: '7401', amount: 6000, note: 'за октябрь' }, owner);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '7401').pop().text, /выплачено 6/);
+  const after = await finance.forMaster(await masters.getPerson('7401'), Date.now() + 2 * DAY);
+  assert.equal(after.paid, 6000);
+  assert.equal(after.due, 0);
+  cab = await act('master', IRINA, { action: 'payout_details', details: 'самозанятая, карта 2202' });
+  assert.equal(cab.body.finance.payout_details, 'самозанятая, карта 2202');
+  assert.equal((await os('masters', { action: 'payout', id: '7401', amount: 0 }, owner)).status, 400);
+  // CRM shows where she came from.
+  const crm = require('../lib/crm');
+  assert.equal((await crm.getCard('tg7202')).source, 'Мастер: Ирина');
+});

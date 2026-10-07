@@ -1156,12 +1156,12 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   function drawMasters(d) {
     if (!d.ok) return setView(errorsBox(d));
     state.mtab = state.mtab || "people";
-    var tabs = h("div", { class: "seg", style: "margin-bottom:14px" }, [["people", "Ученицы и Мастера"], ["trainings", "Потоки обучения"], ["mirror", "Записи «Зеркало»"], ["materials", "Материалы"]].map(function (t) {
+    var tabs = h("div", { class: "seg", style: "margin-bottom:14px" }, [["people", "Ученицы и Мастера"], ["trainings", "Потоки обучения"], ["payouts", "Выплаты"], ["mirror", "Записи «Зеркало»"], ["materials", "Материалы"]].map(function (t) {
       return h("button", { type: "button", class: state.mtab === t[0] ? "on" : "", text: t[1], onclick: function () { if (t[0] === "materials") return go("training"); state.mtab = t[0]; drawMasters(d); } });
     }));
     var right = d.can_edit ? (state.mtab === "trainings" ? h("button", { class: "btn gold", type: "button", text: "+ Поток обучения", onclick: function () { openTraining(null, d); } })
       : state.mtab === "people" ? h("button", { class: "btn gold", type: "button", text: "+ Добавить вручную", onclick: function () { openAddPerson(d); } }) : null) : null;
-    var content = { people: mastersPeople, trainings: mastersTrainings, mirror: mastersMirror }[state.mtab](d);
+    var content = { people: mastersPeople, trainings: mastersTrainings, payouts: mastersPayouts, mirror: mastersMirror }[state.mtab](d);
     setView([
       h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Путь Мастера" }), h("h1", { text: "Мастера" }),
         h("p", { text: "Обучение Мастеров → ученицы → статус Мастера многомерности → практика «Зеркало» в клубе" })), right),
@@ -1245,6 +1245,26 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
           dr.close(); toast("Добавлено. Кабинет откроется ей по команде /master"); drawMasters(r);
         });
       } }))]);
+  }
+  function mastersPayouts(d) {
+    var total = d.finance.reduce(function (a, f) { return a + f.due; }, 0);
+    var note = h("div", { class: "notice", style: "background:var(--info-bg);color:var(--info)", text: "Ставка: " + rub(d.rates.referral) + " за участницу на встрече, если она пришла по ссылке Мастера, и " + rub(d.rates.space) + " — если пришла от пространства. Начисляется после того, как встреча состоялась. К выплате сейчас всего: " + rub(total) });
+    if (!d.finance.length) return [note, h("div", { class: "panel empty", text: "Мастеров со статусом пока нет." })];
+    return [note, h("div", { class: "panel table-wrap" }, h("table", null,
+      h("thead", null, h("tr", null, ["Мастер", "Заработано", "Ожидается", "Выплачено", "К выплате", "Реквизиты", ""].map(function (t) { return h("th", { text: t }); }))),
+      h("tbody", null, d.finance.map(function (f) {
+        return h("tr", { style: "cursor:default" },
+          h("td", null, h("b", { style: "font-weight:400", text: f.name }), h("span", { class: "sub", text: "участниц-встреч: " + f.lines + " · по ссылке: " + f.referral_lines })),
+          h("td", { text: rub(f.earned) }), h("td", { text: rub(f.expected) }),
+          h("td", null, rub(f.paid), f.payouts[0] ? h("span", { class: "sub", text: "последняя: " + since(f.payouts[0].at) }) : null),
+          h("td", null, h("b", { style: "font-weight:400;color:" + (f.due ? "var(--bad)" : "inherit"), text: rub(f.due) })),
+          h("td", null, h("span", { class: "sub", style: "white-space:normal", text: f.payout_details || "не указаны" })),
+          h("td", null, d.can_edit && f.due ? h("button", { class: "btn small gold", type: "button", text: "Отметить выплату", onclick: function () {
+            var amount = prompt("Сумма выплаты, ₽", String(f.due)); if (!amount) return;
+            var comment = prompt("Комментарий (например: за октябрь)", "") || "";
+            api("masters", { action: "payout", id: f.id, amount: amount, note: comment }).then(function (r) { if (r.ok) { toast("Выплата записана, Мастер получила уведомление"); state.mtab = "payouts"; drawMasters(r); } else toast((r.errors || [])[0]); });
+          } }) : null));
+      }))))];
   }
   function mastersMirror(d) {
     if (!d.mirror.length) return h("div", { class: "panel empty", text: "Записей на «Зеркало» пока нет. Участницы клуба записываются к Мастерам на странице «Зеркало» в приложении." });

@@ -151,8 +151,8 @@
   // ---------- Master ----------
   function masterView(d) {
     var fresh = d.mirror.filter(function (b) { return b.status === "new"; }).length;
-    var tabs = [["mirror", "«Зеркало»", fresh], ["groups", "Мои группы", 0], ["card", "Моя карточка", 0], ["materials", "Материалы", 0]];
-    var body = { mirror: mirrorTab, groups: groupsTab, card: cardTab, materials: function (x) { return materialsSection(x, "Материалы Мастера"); } }[state.tab](d);
+    var tabs = [["mirror", "«Зеркало»", fresh], ["groups", "Мои группы", 0], ["finance", "Финансы", 0], ["card", "Моя карточка", 0], ["materials", "Материалы", 0]];
+    var body = { mirror: mirrorTab, groups: groupsTab, finance: financeTab, card: cardTab, materials: function (x) { return materialsSection(x, "Материалы Мастера"); } }[state.tab](d);
     return [
       h("section", { class: "m-hero", style: "min-height:280px" }, h("div", null,
         h("span", { class: "chip-status master", text: "Мастер многомерности" }),
@@ -185,6 +185,49 @@
     }));
   }
 
+
+  function financeTab(d) {
+    var f = d.finance;
+    function share() {
+      var text = "Приглашаю тебя в пространство «к Женщине» 🤍";
+      var url = "https://t.me/share/url?url=" + encodeURIComponent(f.link) + "&text=" + encodeURIComponent(text);
+      if (wa && wa.openTelegramLink) wa.openTelegramLink(url); else window.open(url, "_blank");
+    }
+    function copy() {
+      var done = function () { alertBox("Ссылка скопирована ✨"); };
+      if (navigator.clipboard) navigator.clipboard.writeText(f.link).then(done, function () { prompt("Скопируйте ссылку", f.link); }); else prompt("Скопируйте ссылку", f.link);
+    }
+    var details = h("textarea", { placeholder: "Например: самозанятая, карта Сбер 2202 …, Иванова Мария" }); details.value = f.payout_details || "";
+    var earnedLines = f.lines.filter(function (l) { return l.state === "earned"; });
+    var expectedLines = f.lines.filter(function (l) { return l.state === "expected"; });
+    function line(l) {
+      var date = l.date ? new Date(l.date).toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) : "дата скоро";
+      return h("div", { class: "fin-line" }, h("div", null, h("b", { text: l.participant }), h("small", { text: l.cycle + " · встреча " + l.meeting + " · " + date })),
+        h("div", { class: "fin-sum" }, h("b", { text: rub(l.amount) }), h("small", { text: l.referral ? "по вашей ссылке" : "от пространства" })));
+    }
+    return [
+      h("section", { class: "surface section" }, h("h2", { text: "Мои финансы" }),
+        h("div", { class: "fin-kpis" },
+          h("div", { class: "fin-kpi main" }, h("small", { text: "К выплате" }), h("b", { text: rub(f.due) })),
+          h("div", { class: "fin-kpi" }, h("small", { text: "Заработано" }), h("b", { text: rub(f.earned) })),
+          h("div", { class: "fin-kpi" }, h("small", { text: "Ожидается" }), h("b", { text: rub(f.expected) })),
+          h("div", { class: "fin-kpi" }, h("small", { text: "Выплачено" }), h("b", { text: rub(f.paid) }))),
+        h("p", { class: "hint", style: "margin-top:14px", text: "За каждую участницу на каждой состоявшейся встрече вашего цикла: " + rub(f.rates.referral) + ", если она пришла по вашей ссылке, и " + rub(f.rates.space) + ", если пришла от пространства." })),
+      h("section", { class: "surface section" }, h("h2", { text: "Моя реферальная ссылка" }),
+        h("p", { class: "sub", text: "Девушка, которая пришла по вашей ссылке, закрепляется за вами — и встречи с ней в ваших циклах оплачиваются по ставке " + rub(f.rates.referral) + "." }),
+        h("div", { class: "ref-link", text: f.link }),
+        h("div", { class: "row-actions" }, h("button", { class: "cta small", type: "button", onclick: share }, "Поделиться"), h("button", { class: "cta small outline", type: "button", onclick: copy }, "Скопировать")),
+        h("div", { class: "fin-kpis", style: "margin-top:14px" }, h("div", { class: "fin-kpi" }, h("small", { text: "Перешли по ссылке" }), h("b", { text: f.stats.came })), h("div", { class: "fin-kpi" }, h("small", { text: "Пришли на встречи" }), h("b", { text: f.stats.bought })))),
+      h("section", { class: "surface section" }, h("h2", { text: "Начисления" }),
+        earnedLines.length ? earnedLines.map(line) : h("p", { class: "empty", text: "Начисления появятся после первых встреч ваших циклов." }),
+        expectedLines.length ? [h("h3", { class: "fin-h3", text: "Ожидается — оплачено, встреча ещё впереди" }), expectedLines.map(line)] : null),
+      h("section", { class: "surface section" }, h("h2", { text: "Выплаты" }),
+        f.payouts.length ? f.payouts.map(function (p) { return h("div", { class: "fin-line" }, h("div", null, h("b", { text: new Date(p.at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }) }), p.note ? h("small", { text: p.note }) : null), h("div", { class: "fin-sum" }, h("b", { text: rub(p.amount) }))); })
+          : h("p", { class: "empty", text: "Выплат пока не было. Команда выплачивает заработанное раз в месяц." }),
+        h("div", { class: "form", style: "margin-top:14px" }, h("label", null, "Реквизиты для выплат (видит только команда)", details),
+          h("button", { class: "cta", type: "button", onclick: function () { this.disabled = true; api("payout_details", { details: details.value }).then(function (r) { update(r); alertBox("Реквизиты сохранены"); }); } }, "Сохранить реквизиты", h("span", { text: "→" }))))
+    ];
+  }
   function groupsTab(d) {
     if (!d.cycles.length) return h("section", { class: "surface section" }, h("h2", { text: "Мои группы" }), h("p", { class: "empty", text: "Когда команда назначит тебя Мастером цикла, группа появится здесь — с участницами и отметкой присутствующих." }));
     var mids = ["1", "2", "3", "4", "5", "6"];

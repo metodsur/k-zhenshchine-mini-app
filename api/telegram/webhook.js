@@ -116,7 +116,11 @@ module.exports = async function handler(req, res) {
     if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) {
       await stats.trackStart(message.from.id);
       const source = crm.startParam(message.text);
-      await crm.safeTouch(message.from, { type: "start", onlyIfNew: true, source: source || "bot", text: `Нажала «Старт» в боте · источник: ${crm.sourceLabel(source)}` });
+      let ref = null;
+      try { ref = await require("../../lib/master-finance").attach(message.from.id, source); } catch (error) { console.error("Referral attach failed"); }
+      const label = ref ? `Мастер: ${ref.master.name}` : crm.sourceLabel(source);
+      await crm.safeTouch(message.from, { type: "start", onlyIfNew: true, source: source || "bot", source_label: ref ? label : null, text: `Нажала «Старт» в боте · источник: ${label}` });
+      if (ref && ref.first) await crm.safeTouch(message.from, { type: "referral", text: `Закреплена за Мастером ${ref.master.name} (реферальная ссылка)` });
     }
     if (message?.chat?.type === "private" && typeof message.text === "string" && /^\/space(@\w+)?(\s|$)/.test(message.text)) {
       if (await isMemberSafe(message.from.id)) {
