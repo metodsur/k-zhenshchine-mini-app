@@ -229,7 +229,7 @@
   }
 
   function guideTab(d) {
-    var sections = [["meetings", "Как проводить встречи многомерности"], ["circle", "Как проводить женский круг офлайн"], ["other", "Другое"]];
+    var sections = [["ideology", "Идеология экосистемы"], ["possibilities", "Возможности экосистемы"], ["meetings", "Как проводить встречи многомерности"], ["circle", "Как проводить женский круг офлайн"], ["other", "Другое"]];
     var list = d.instructions || [];
     if (!list.length) return h("section", { class: "surface section" }, h("h2", { text: "Инструкции" }), h("p", { class: "empty", text: "Инструкции скоро появятся здесь." }));
     return sections.map(function (sec) {

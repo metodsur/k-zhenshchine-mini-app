@@ -110,7 +110,7 @@ test('Masters: buy training → student cabinet → tasks → certified Master �
 
   // Instructions tab: starter structure for meetings and the women's circle.
   cab = await act('master', LENA);
-  assert.deepEqual([...new Set(cab.body.instructions.map((i) => i.section))], ['meetings', 'circle']);
+  assert.deepEqual([...new Set(cab.body.instructions.map((i) => i.section))], ['ideology', 'possibilities', 'meetings', 'circle']);
   // /master now opens the cabinet.
   await say(LENA, '/master');
   assert.match(world.sent('sendMessage').filter((m) => m.chat_id === LENA.id).pop().reply_markup.inline_keyboard[0][0].web_app.url, /master-cabinet/);
