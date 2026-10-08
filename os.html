@@ -261,6 +261,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     cycles: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.4"/><circle cx="19.4" cy="16.3" r="1.4"/><circle cx="4.6" cy="16.3" r="1.4"/></svg>',
     calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
     masters: '<svg viewBox="0 0 24 24"><path d="M12 3.2 14.2 8l5.2.6-3.9 3.5 1.1 5.1L12 14.6l-4.6 2.6 1.1-5.1-3.9-3.5L9.8 8Z"/><path d="M8 21h8"/></svg>',
+    tasks: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="m7.5 12 3 3 6-6.5"/></svg>',
     rhythm: '<svg viewBox="0 0 24 24"><rect x="4" y="3.5" width="16" height="18" rx="3"/><path d="M9 3.5V2.5h6v1M8 10l1.6 1.6L12.5 9M8 16l1.6 1.6 2.9-2.6M14.5 10.5H17M14.5 16.5H17"/></svg>',
     content: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="13" height="14" rx="3"/><path d="m16 10 5-3v10l-5-3"/></svg>',
     media: '<svg viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7"/></svg>',
@@ -269,6 +270,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   };
   var VIEWS = [
     { id: "today", label: "Сегодня", perm: "os.workspace" },
+    { id: "tasks", label: "Задачи", perm: "os.workspace" },
     { id: "rhythm", label: "Итоги", perm: "os.workspace" },
     { id: "crm", label: "CRM", perm: "crm.view" },
     { id: "cycles", label: "Циклы" },
@@ -365,7 +367,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     renderNav();
     var main = document.getElementById("view"); main.innerHTML = ""; main.appendChild(h("div", { class: "loading", text: "Загрузка…" }));
     if (["content", "media", "platforms", "library", "templates", "training", "instructions"].indexOf(view) !== -1) viewCollection(view);
-    else ({ masters: viewMasters, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
+    else ({ tasks: viewTasks, masters: viewMasters, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
     window.scrollTo(0, 0);
   }
   function setView(nodes) { var main = document.getElementById("view"); main.innerHTML = ""; add(main, nodes); }
@@ -484,7 +486,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       form = h("form", { class: "add-task", onsubmit: function (e) { e.preventDefault(); if (!title.value.trim()) return; save({ title: title.value, owner: owner.value, due: due.value, blocker: blocker.checked }); title.value = ""; blocker.checked = false; } },
         title, owner, due, h("label", null, blocker, "блокер"), h("button", { class: "btn small", type: "submit", text: "Добавить" }));
     }
-    return h("section", { class: "panel" }, h("div", { class: "panel-h" }, h("h2", { text: "Задачи и блокеры" }), mineToggle(function () { draw(all); })), body, form);
+    return h("section", { class: "panel" }, h("div", { class: "panel-h" }, h("h2", { text: "Задачи и блокеры" }), h("div", { style: "display:flex;gap:8px;align-items:center" }, mineToggle(function () { draw(all); }), h("button", { class: "btn small ghost", type: "button", text: "Все задачи →", onclick: function () { go("tasks"); } }))), body, form);
   }
 
   // ---------- CRM ----------
@@ -1292,6 +1294,108 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
             api("masters", { action: "mirror_status", id: b.id, status: e.target.value }).then(function (r) { if (r.ok) { toast("Статус обновлён"); drawMasters(r); } });
           } }) : h("span", { class: "tag", text: d.mirror_statuses[b.status] })));
       }))));
+  }
+
+  // ---------- Задачи команды ----------
+  function viewTasks() { api("tasks").then(function (d) { if (!d.ok) return setView(errorsBox(d)); state.tasksData = d; drawTasks(); }); }
+  function drawTasks() {
+    var d = state.tasksData, st = state.tf = state.tf || { q: "", area: "", mode: "board" }, today = iso(new Date());
+    var all = d.tasks;
+    var areas = []; all.forEach(function (t) { if (t.area && areas.indexOf(t.area) === -1) areas.push(t.area); });
+    var q = st.q.trim().toLowerCase();
+    var items = all.filter(function (t) {
+      if (st.area && t.area !== st.area) return false;
+      if (state.mine && !isMine(t.owner)) return false;
+      if (q && (t.title + " " + (t.description || "") + " " + (t.owner || "")).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    function late(t) { return t.due && t.due < today && t.status !== "done"; }
+    function card(t) {
+      var cl = t.checklist || [], cd = cl.filter(function (c) { return c.done; }).length;
+      return h("div", { class: "kcard", onclick: function () { openTask(t); } }, h("b", { text: t.title }),
+        h("span", { class: "sub", text: [t.area, t.owner].filter(Boolean).join(" · ") }),
+        h("span", { class: "sub" }, t.due ? (late(t) ? h("span", { class: "tag over", text: "просрочено · " + dayLabel(t.due) }) : "Дедлайн: " + dayLabel(t.due)) : "без дедлайна",
+          cl.length ? " · ✓ " + cd + "/" + cl.length : "", (t.comments || []).length ? " · 💬 " + t.comments.length : ""));
+    }
+    var search = h("input", { type: "search", placeholder: "Поиск по задачам", value: st.q, oninput: function () { st.q = search.value; var pos = search.selectionStart; drawTasks(); var again = document.querySelector("main input[type=search]"); if (again) { again.focus(); again.setSelectionRange(pos, pos); } } });
+    var area = select([["", "Все направления"]].concat(areas.sort().map(function (a) { return [a, a]; })), st.area, { onchange: function (e) { st.area = e.target.value; drawTasks(); } });
+    var seg = h("div", { class: "seg" }, [["board", "Доска"], ["list", "Список"]].map(function (m) { return h("button", { type: "button", class: st.mode === m[0] ? "on" : "", text: m[1], onclick: function () { st.mode = m[0]; drawTasks(); } }); }));
+    var openCount = all.filter(function (t) { return t.status !== "done"; }).length, lateCount = all.filter(late).length, noDue = all.filter(function (t) { return t.status !== "done" && !t.due; }).length;
+    var content;
+    if (!all.length) content = h("div", { class: "panel empty", text: "Задач пока нет. Добавьте первую кнопкой справа." });
+    else if (st.mode === "board") content = h("div", { class: "kanban", style: "grid-auto-columns:minmax(280px,1fr)" }, ["todo", "doing", "done"].map(function (s) {
+      var col = items.filter(function (t) { return t.status === s; }).sort(function (a, b) { return Number(late(b)) - Number(late(a)) || String(a.due || "9").localeCompare(String(b.due || "9")); });
+      return h("div", { class: "col" }, h("h3", null, h("span", { text: d.statuses[s] }), h("span", { text: col.length })), col.map(card));
+    }));
+    else content = h("div", { class: "panel table-wrap" }, h("table", null,
+      h("thead", null, h("tr", null, ["Задача", "Направление", "Ответственный", "Дедлайн", "Статус", "Чек-лист"].map(function (x) { return h("th", { text: x }); }))),
+      h("tbody", null, items.slice().sort(function (a, b) { return ({ doing: 0, todo: 1, done: 2 })[a.status] - ({ doing: 0, todo: 1, done: 2 })[b.status]; }).map(function (t) {
+        var cl = t.checklist || [];
+        return h("tr", { onclick: function () { openTask(t); } }, h("td", null, h("b", { style: "font-weight:400", text: t.title }), (t.comments || []).length ? h("span", { class: "sub", text: "💬 " + t.comments.slice(-1)[0].by + ": " + t.comments.slice(-1)[0].text.slice(0, 80) }) : null),
+          h("td", { text: t.area || "—" }), h("td", { text: t.owner || "—" }),
+          h("td", null, t.due ? h("span", { class: late(t) ? "tag over" : "", text: dayLabel(t.due) }) : "—"),
+          h("td", null, h("span", { class: "tag " + (t.status === "done" ? "paid" : t.status === "doing" ? "contact" : "new"), text: d.statuses[t.status] })),
+          h("td", { text: cl.length ? cl.filter(function (c) { return c.done; }).length + "/" + cl.length : "—" }));
+      }))));
+    setView([
+      h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Команда" }), h("h1", { text: "Задачи" }),
+        h("p", { text: "Открыто: " + openCount + (lateCount ? " · просрочено: " + lateCount : "") + (noDue ? " · без дедлайна: " + noDue : "") + " · в боте: /tasks" })),
+        can("tasks.edit") ? h("button", { class: "btn gold", type: "button", text: "+ Задача", onclick: function () { openTask(null); } }) : null),
+      h("div", { class: "toolbar" }, search, area, seg, mineToggle(drawTasks)), content
+    ]);
+  }
+  function openTask(t) {
+    var d = state.tasksData, isNew = !t, ro = !can("tasks.edit"), body = h("div"), errBox = h("div");
+    t = t || { title: "", area: "", owner: "", due: "", status: "todo", description: "", checklist: [], comments: [], history: [] };
+    var areas = []; d.tasks.forEach(function (x) { if (x.area && areas.indexOf(x.area) === -1) areas.push(x.area); });
+    var f = {
+      title: h("input", { value: t.title, disabled: ro }), area: h("input", { value: t.area || "", list: "task-areas", disabled: ro }),
+      owner: h("input", { value: t.owner || "", list: "team-names", disabled: ro }), due: h("input", { type: "date", value: t.due || "", disabled: ro }),
+      status: select(Object.keys(d.statuses).map(function (k) { return [k, d.statuses[k]]; }), t.status, { disabled: ro }),
+      description: h("textarea", { disabled: ro, style: "min-height:110px" })
+    };
+    f.description.value = t.description || "";
+    var checklist = (t.checklist || []).map(function (c) { return { text: c.text, done: c.done }; });
+    var clBox = h("div");
+    function drawCl() {
+      clBox.innerHTML = "";
+      checklist.forEach(function (c, i) {
+        clBox.appendChild(h("div", { class: "task", style: "padding:5px 4px" },
+          h("input", { type: "checkbox", checked: c.done, disabled: ro, onchange: function (e) { c.done = e.target.checked; } }),
+          h("div", { class: "main", text: c.text }),
+          ro ? null : h("button", { class: "del", type: "button", style: "visibility:visible", text: "×", onclick: function () { checklist.splice(i, 1); drawCl(); } })));
+      });
+      if (!ro) { var inp = h("input", { placeholder: "Новый пункт и Enter" }); inp.addEventListener("keydown", function (e) { if (e.key === "Enter" && inp.value.trim()) { e.preventDefault(); checklist.push({ text: inp.value.trim(), done: false }); drawCl(); clBox.querySelector("input:last-of-type").focus(); } }); clBox.appendChild(h("div", { class: "add-task", style: "padding:6px 0" }, inp)); }
+    }
+    drawCl();
+    var dr = drawer(isNew ? "Новая задача" : t.title, isNew ? "Задачи" : (t.area || "Задачи") + " · " + d.statuses[t.status], body);
+    function payload() { return { id: t.id || null, title: f.title.value, area: f.area.value, owner: f.owner.value, due: f.due.value, status: f.status.value, description: f.description.value, checklist: checklist }; }
+    var comment = h("textarea", { placeholder: "Комментарий — придёт в бот ответственной и автору задачи", style: "width:100%;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:10px" });
+    add(body, [
+      !isNew && !ro && t.status !== "done" ? h("div", { class: "actions", style: "justify-content:flex-start;margin:0 0 8px" },
+        t.status === "todo" ? h("button", { class: "btn small", type: "button", text: "▶ В работу", onclick: function () { quick("doing"); } }) : null,
+        h("button", { class: "btn small gold", type: "button", text: "✓ Выполнено", onclick: function () { quick("done"); } })) : null,
+      h("datalist", { id: "task-areas" }, areas.map(function (a) { return h("option", { value: a }); })),
+      h("div", { class: "form" }, field("Задача", f.title, "full"), field("Направление", f.area), field("Ответственный", f.owner), field("Дедлайн", f.due), field("Статус", f.status), field("Описание", f.description, "full")),
+      h("div", { class: "section-t", text: "Чек-лист" }), clBox, errBox,
+      ro ? null : h("div", { class: "actions" },
+        !isNew ? h("button", { class: "btn ghost", type: "button", text: "Удалить", onclick: function () { if (!confirm("Удалить задачу?")) return; api("tasks", { action: "remove", id: t.id }).then(function (r) { if (r.ok) { dr.close(); toast("Удалено"); viewTasks(); } }); } }) : null,
+        h("button", { class: "btn gold", type: "button", text: "Сохранить", onclick: function () {
+          api("tasks", { action: "save", task: payload() }).then(function (r) { errBox.innerHTML = ""; if (!r.ok) return errBox.appendChild(errorsBox(r)); dr.close(); toast(isNew ? "Задача создана" : "Сохранено"); viewTasks(); });
+        } })),
+      isNew ? null : [h("div", { class: "section-t", text: "Комментарии" }),
+        (t.comments || []).length ? h("ul", { class: "history" }, t.comments.map(function (c) { return h("li", null, h("time", { text: new Date(c.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · " + c.by }), h("span", { text: c.text })); })) : h("p", { class: "sub", style: "color:var(--muted)", text: "Комментариев пока нет." }),
+        comment, h("div", { class: "actions" }, h("button", { class: "btn", type: "button", text: "Отправить комментарий", onclick: function () {
+          if (!comment.value.trim()) return;
+          api("tasks", { action: "comment", id: t.id, text: comment.value }).then(function (r) { if (r.ok) { dr.close(); state.tasksData.tasks = r.tasks; openTask(r.task); toast("Комментарий отправлен"); } else toast((r.errors || [])[0]); });
+        } })),
+        (t.history || []).length ? [h("div", { class: "section-t", text: "История" }), h("ul", { class: "history" }, t.history.slice().reverse().map(function (e) { return h("li", null, h("time", { text: new Date(e.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + (e.by ? " · " + e.by : "") }), h("span", { text: e.text })); }))] : null]
+    ]);
+    function quick(status) {
+      var c = status === "done" ? prompt("Коротко о результате (необязательно)", "") : "";
+      if (c === null) return;
+      api("tasks", { action: "status", id: t.id, status: status, comment: c || undefined }).then(function (r) { if (r.ok) { dr.close(); toast(status === "done" ? "Выполнено — Варвара получит уведомление" : "В работе"); viewTasks(); } else toast((r.errors || [])[0]); });
+    }
   }
 
   // ---------- Календарь ----------

@@ -3,7 +3,12 @@ const { send } = require("../../lib/http");
 
 // One function for all daily jobs (keeps the deployment within Vercel Hobby function limits).
 const jobs = {
-  "club-reminders": require("../../lib/handlers/club-reminders").runReminders,
+  // Evening job (18:00 Moscow): club renewal reminders and, on Fridays, the weekly tasks summary.
+  "club-reminders": async () => {
+    const result = await require("../../lib/handlers/club-reminders").runReminders();
+    try { result.tasks_summary = await require("../../lib/tasks").runWeeklySummary(); } catch (error) { console.error("Tasks summary failed", error.message); }
+    return result;
+  },
   // The morning job: meeting reminders, automatic follow-ups, review requests, checklists, weekly report, digest.
   "meeting-reminders": () => require("../../lib/morning").runMorning()
 };

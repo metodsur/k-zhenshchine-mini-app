@@ -94,6 +94,13 @@ module.exports = async function handler(req, res) {
   const update = req.body || {};
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
+    if (update.callback_query) {
+      try { await require("../../lib/tasks").handleCallback(update.callback_query); } catch (error) { console.error("Callback failed", error.message); }
+      return send(res, 200, { ok: true });
+    }
+    try {
+      if (await require("../../lib/tasks").handleCommand(update.message)) return send(res, 200, { ok: true });
+    } catch (error) { console.error("Tasks command failed", error.message); }
     if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });
     try {
       if (await require("../../lib/handlers/master").handleBot(update.message)) return send(res, 200, { ok: true });

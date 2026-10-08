@@ -135,7 +135,7 @@ test('assignments notify, «Моё» digest in the morning', async () => {
   const note = world.sent('sendMessage').filter((m) => String(m.chat_id) === '5002').pop();
   assert.match(note.text, /Вам передана карточка в CRM: Анна/);
   await os('tasks', { action: 'save', task: { title: 'Найти площадку', owner: 'Ирина', due: inDays(0) } }, valeria);
-  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '5002').pop().text, /Задача: Найти площадку/);
+  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '5002').pop().text, /Вам назначена задача: «Найти площадку»/);
 
   const { runDigest } = require('../lib/digest');
   const weekdayNoon = (() => { let t = Date.now(); while ([0, 6].includes(new Date(t).getUTCDay())) t += DAY; return t; })();

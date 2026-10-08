@@ -347,15 +347,20 @@ const sections = {
 
   async tasks(member, body) {
     const action = body.action || "list";
-    if (action === "list") return { status: 200, body: { ok: true, tasks: await board.loadTasks() } };
-    if (!team.can(member, "tasks.edit")) return deny("задачи");
-    const task = body.task || {};
-    const prev = task.id ? (await board.loadTasks()).find((t) => t.id === task.id) : null;
-    const result = action === "save" ? await board.saveTask(task, who(member)) : action === "remove" ? await board.removeTask(String(body.id || "")) : { status: 400, errors: ["Неизвестное действие"] };
-    if (result.status === 200 && action === "save" && task.owner && !task.done && (!prev || prev.owner !== task.owner)) {
-      await notifyAssignee(task.owner, member, `Задача: ${String(task.title || "").slice(0, 200)}${task.blocker ? " (блокер)" : ""}${task.due ? `\nСрок: ${task.due}` : ""}`);
+    const tasks = require("../../lib/tasks");
+    const actor = { name: who(member), id: member.id };
+    if (action === "list") {
+      if (team.can(member, "tasks.edit")) { try { await require("../../lib/seed-plan").importOnce(actor); } catch (e) { console.error("Plan import failed", e.message); } }
+      return { status: 200, body: { ok: true, tasks: await tasks.load(), statuses: tasks.STATUSES } };
     }
-    return result.status === 200 ? { status: 200, body: { ok: true, tasks: result.tasks } } : fail(result);
+    if (!team.can(member, "tasks.edit")) return deny("задачи");
+    let result;
+    if (action === "save") result = await tasks.saveTask(body.task || {}, actor);
+    else if (action === "status") result = await tasks.setStatus(String(body.id || ""), String(body.status || ""), actor, body.comment);
+    else if (action === "comment") result = await tasks.addComment(String(body.id || ""), body.text, actor);
+    else if (action === "remove") result = await tasks.removeTask(String(body.id || ""));
+    else result = { status: 400, errors: ["Неизвестное действие"] };
+    return result.status === 200 ? { status: 200, body: { ok: true, task: result.task || null, tasks: result.tasks || await tasks.load(), statuses: tasks.STATUSES } } : fail(result);
   }
 };
 

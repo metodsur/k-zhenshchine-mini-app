@@ -50,7 +50,7 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
     body: JSON.stringify({
       url: `${baseUrl}/api/telegram/webhook`,
       secret_token: webhookSecret,
-      allowed_updates: ["message", "chat_member", "pre_checkout_query"]
+      allowed_updates: ["message", "chat_member", "pre_checkout_query", "callback_query"]
     })
   });
   const data = await response.json();
@@ -63,6 +63,7 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
   const commands = await call("setMyCommands", { commands: [
     { command: "space", description: "Открыть пространство" },
     { command: "master", description: "Кабинет Мастера" },
+    { command: "tasks", description: "Мои задачи (для команды)" },
     { command: "start", description: "Начать сначала" }
   ] });
   const menu = await call("setChatMenuButton", { menu_button: { type: "web_app", text: "Пространство", web_app: { url: `${baseUrl}/` } } });
