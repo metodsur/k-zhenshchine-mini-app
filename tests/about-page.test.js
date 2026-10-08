@@ -44,6 +44,24 @@ test('profile: vision, facets and resources are saved on the server', async () =
   assert.deepEqual(after.resources, []);
 });
 
+test('profile: own resources and «Мои задачи» with done marks', async () => {
+  createWorld();
+  await profileOf(ANNA, { action: 'save_profile', profile: { custom_resources: ['Няня', 'Няня', ' '], resources: ['Няня'], tasks: [
+    { id: 'a1', text: 'Записаться на встречу', done: false },
+    { id: 'a2', text: 'Написать подруге', done: true },
+    { id: 'a2', text: 'Дубль id', done: false },
+    { text: '   ' }
+  ] } });
+  const p = (await profileOf(ANNA)).body.profile;
+  assert.deepEqual(p.custom_resources, ['Няня']);
+  assert.deepEqual(p.resources, ['Няня']);
+  assert.equal(p.tasks.length, 3);
+  assert.equal(p.tasks[1].done, true);
+  assert.ok(p.tasks[1].done_at);
+  assert.equal(p.tasks[0].done_at, null);
+  assert.notEqual(p.tasks[2].id, 'a2', 'duplicate id gets a new one');
+});
+
 test('my meetings: tickets with dates, package rows and passed count', async () => {
   createWorld();
   const doc = (await admin(OWNER, 'schedule')).body.schedule;

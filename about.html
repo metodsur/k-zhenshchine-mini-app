@@ -23,6 +23,9 @@
 .vision .rule{background:linear-gradient(90deg,rgba(255,255,255,.9),transparent)}.vision time{color:rgba(255,255,255,.78)}.vision p{text-shadow:0 1px 1px rgba(83,47,7,.22)}.edit-button{background:rgba(255,255,255,.14);color:#fff;padding:5px 9px;border-radius:50%}.vision textarea{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.9)}
 .resources{padding:23px 25px}.resource-intro{margin:0 0 17px;color:#6f777b;font-size:.86rem;line-height:1.5}.resource-options{display:flex;flex-wrap:wrap;gap:9px}.resource-chip{border:1px solid rgba(183,122,43,.28);border-radius:999px;padding:10px 15px;background:rgba(255,255,255,.72);color:#555d61;cursor:pointer;transition:.2s ease}.resource-chip:hover{border-color:rgba(183,122,43,.56)}.resource-chip.active{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d);box-shadow:0 8px 19px rgba(145,91,27,.2)}.resource-chip.active:before{content:"✓ ";font-weight:400}.resource-action{margin-top:19px;width:min(100%,430px);cursor:pointer}.resource-status{min-height:1.2em;margin:12px 4px 0;color:#777f84;font-size:.76rem}
 @media(max-width:680px){.hero{min-height:0;background:#eef3f5}.hero-copy{position:absolute;width:66%;padding:30px 19px}.profile{left:20px;right:15px;bottom:22px;grid-template-columns:112px 1fr;gap:17px}.portrait-wrap,.portrait{width:112px;height:112px}.profile h2{font-size:1.8rem}.profile p{font-size:.88rem}.profile blockquote{font-size:.72rem;max-width:210px}.avatar-upload{width:34px;height:34px}}
+.resource-chip.resource-add{border-style:dashed;color:#9a611c;background:transparent}.resource-chip.resource-add:before{content:none}.resource-custom{position:relative;display:inline-flex}.resource-custom .resource-remove{position:absolute;top:-7px;right:-6px;width:20px;height:20px;border-radius:50%;border:0;background:#fff;color:#a0522d;box-shadow:0 2px 8px rgba(0,0,0,.14);font-size:.78rem;line-height:20px;padding:0;cursor:pointer}.resource-add-form{display:flex;gap:8px;margin-top:12px}.resource-add-form[hidden]{display:none}.resource-add-form input,.todo-add input{flex:1;min-width:0;min-height:44px;padding:10px 14px;border:1px solid rgba(183,122,43,.28);border-radius:14px;background:rgba(255,255,255,.9);font:300 .95rem "Helvetica Neue",Arial,sans-serif;color:#3f474b}.resource-add-form input:focus,.todo-add input:focus{outline:none;border-color:#b77a2b;box-shadow:0 0 0 3px rgba(183,122,43,.14)}.resource-add-form button{border:0;border-radius:14px;padding:0 16px;background:#b77a2b;color:#fff;font:300 .9rem "Helvetica Neue",Arial,sans-serif;cursor:pointer}
+.todo{padding:20px 22px}.todo-add{display:flex;gap:9px}.todo-add button{flex:none;width:46px;height:46px;border:1px solid rgba(255,232,176,.8);border-radius:50%;color:#fff;font:300 1.5rem/1 "Helvetica Neue",Arial,sans-serif;background:linear-gradient(125deg,#8f5818,#c38831 30%,#f1d083 52%,#b87321 75%,#925818);box-shadow:0 6px 16px rgba(128,78,20,.22);cursor:pointer}.todo-empty{margin:14px 4px 2px;color:#7d8589;font-size:.84rem;line-height:1.5}.todo-empty[hidden]{display:none}.todo-list{list-style:none;margin:10px 0 0;padding:0}.todo-item{display:flex;align-items:flex-start;gap:12px;padding:12px 2px;border-top:1px solid rgba(183,122,43,.13)}.todo-item:first-child{border-top:0}.todo-check{flex:none;width:24px;height:24px;margin-top:-1px;border-radius:50%;border:1.5px solid rgba(183,122,43,.55);background:#fff;color:#fff;font-size:.8rem;line-height:1;padding:0;cursor:pointer;transition:.2s ease}.todo-item.is-done .todo-check{border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}.todo-text{flex:1;min-width:0;color:#3f474b;font-size:.95rem;line-height:1.45;overflow-wrap:anywhere}.todo-item.is-done .todo-text{color:#9aa1a4}.todo-item.is-done .todo-text span{text-decoration:line-through;text-decoration-color:rgba(168,108,33,.5)}.todo-text small{display:block;margin-top:2px;color:#a0a7aa;font-size:.72rem;text-decoration:none}.todo-del{flex:none;border:0;background:none;color:#b3b9bc;font-size:1.1rem;line-height:1;padding:2px 4px;cursor:pointer}.todo-del:hover{color:#a0522d}.todo-done{margin-top:12px;border-top:1px solid rgba(183,122,43,.18);padding-top:10px}.todo-done[hidden]{display:none}.todo-done summary{cursor:pointer;color:#9a611c;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;list-style:none}.todo-done summary::-webkit-details-marker{display:none}.todo-done summary:after{content:" ›";display:inline-block;transition:transform .2s}.todo-done[open] summary:after{transform:rotate(90deg)}
+@media(max-width:430px){.todo{padding:18px 16px}}
 @media(max-width:430px){.hero h1{font-size:2.35rem}.hero-lead{font-size:.7rem}.profile{grid-template-columns:94px 1fr}.portrait-wrap,.portrait{width:94px;height:94px}.profile h2{font-size:1.55rem}.profile blockquote{display:none}.resources{padding:21px 18px}.resource-chip{padding:9px 12px;font-size:.82rem}}
 /* Enlarged identity block */
 .profile{grid-template-columns:284px minmax(0,1fr);gap:28px;left:32px;right:26px;bottom:34px;align-items:end}
@@ -148,8 +151,10 @@
   </section>
     <div class="section-title"><h2>МОИ РЕСУРСЫ</h2><small>Отметьте золотым то, что нужно сейчас</small></div>
   <section class="resources surface" aria-label="Выбор нужных ресурсов"><p class="resource-intro">Выберите один или несколько ресурсов — клуб поможет найти женщин, опыт и возможности для следующего шага.</p><div class="resource-options" id="resource-options">
-    <button class="resource-chip" type="button">Поддержка</button><button class="resource-chip" type="button">Окружение</button><button class="resource-chip" type="button">Подруги</button><button class="resource-chip" type="button">Наставничество</button><button class="resource-chip" type="button">Партнёрство</button><button class="resource-chip" type="button">Команда</button><button class="resource-chip" type="button">Инвестиции</button><button class="resource-chip" type="button">Клиенты</button><button class="resource-chip" type="button">Экспертиза</button><button class="resource-chip" type="button">Продвижение</button><button class="resource-chip" type="button">Продажи</button><button class="resource-chip" type="button">Дизайн</button><button class="resource-chip" type="button">Маркетинг</button><button class="resource-chip" type="button">Финансы</button><button class="resource-chip" type="button">Юридическая помощь</button><button class="resource-chip" type="button">Пространство</button><button class="resource-chip" type="button">Нетворкинг</button><button class="resource-chip" type="button">Идеи</button><button class="resource-chip" type="button">Время</button><button class="resource-chip" type="button">Энергия</button><button class="resource-chip" type="button">Вдохновение</button>
-  </div><button class="cta resource-action" id="find-resources" type="button">Найти ресурсы в клубе <span>→</span></button><p class="resource-status" id="resource-status" aria-live="polite"></p></section>
+    <button class="resource-chip" type="button">Поддержка</button><button class="resource-chip" type="button">Окружение</button><button class="resource-chip" type="button">Подруги</button><button class="resource-chip" type="button">Наставничество</button><button class="resource-chip" type="button">Партнёрство</button><button class="resource-chip" type="button">Команда</button><button class="resource-chip" type="button">Инвестиции</button><button class="resource-chip" type="button">Клиенты</button><button class="resource-chip" type="button">Экспертиза</button><button class="resource-chip" type="button">Продвижение</button><button class="resource-chip" type="button">Продажи</button><button class="resource-chip" type="button">Дизайн</button><button class="resource-chip" type="button">Маркетинг</button><button class="resource-chip" type="button">Финансы</button><button class="resource-chip" type="button">Юридическая помощь</button><button class="resource-chip" type="button">Пространство</button><button class="resource-chip" type="button">Нетворкинг</button><button class="resource-chip" type="button">Идеи</button><button class="resource-chip" type="button">Время</button><button class="resource-chip" type="button">Энергия</button><button class="resource-chip" type="button">Вдохновение</button><button class="resource-chip resource-add" id="add-resource" type="button" aria-expanded="false">+ Добавить ресурс</button>
+  </div><form class="resource-add-form" id="resource-form" hidden><input id="resource-input" maxlength="40" placeholder="Например: няня, бухгалтер, площадка" aria-label="Новый ресурс" enterkeyhint="done"><button type="submit">Добавить</button></form><button class="cta resource-action" id="find-resources" type="button">Найти ресурсы в клубе <span>→</span></button><p class="resource-status" id="resource-status" aria-live="polite"></p></section>
+    <div class="section-title"><h2>МОИ ЗАДАЧИ</h2><small>Что важно сделать сейчас</small></div>
+  <section class="todo surface" id="todo" aria-label="Мои задачи"><form class="todo-add" id="todo-form"><input id="todo-input" maxlength="200" placeholder="Новая задача…" aria-label="Новая задача" enterkeyhint="done" autocomplete="off"><button type="submit" aria-label="Добавить задачу">+</button></form><p class="todo-empty" id="todo-empty">Запишите, что хотите сделать, и отмечайте, когда готово.</p><ul class="todo-list" id="todo-list"></ul><details class="todo-done" id="todo-done" hidden><summary>Выполнено · <span id="todo-done-count">0</span></summary><ul class="todo-list" id="todo-done-list"></ul></details></section>
     <div class="closing">— ТЫ УЖЕ ДОСТАТОЧНА, ЧТОБЫ БЫТЬ ЗДЕСЬ —</div>
 </main>
 <nav class="app-nav" aria-label="Основная навигация"><a href="space.html"><span class="icon"><svg class="line-icon" viewBox="-4 -4 56 56" aria-hidden="true"><g transform="translate(24 24)"><path d="M0-27 1.5-8 0-4.8-1.5-8ZM0 27-1.5 8 0 4.8 1.5 8ZM-27 0-8-1.5-4.8 0-8 1.5ZM27 0 8 1.5 4.8 0 8-1.5ZM-19.1-19.1-5.8-7.8-4.1-4.1-7.8-5.8ZM19.1 19.1 5.8 7.8 4.1 4.1 7.8 5.8ZM19.1-19.1 7.8-5.8 4.1-4.1 5.8-7.8ZM-19.1 19.1-7.8 5.8-4.1 4.1-5.8 7.8Z" fill="currentColor" stroke="none"/><path d="M-10.3-24.8-3.1-9.1M10.3 24.8 3.1 9.1M10.3-24.8 3.1-9.1M-10.3 24.8-3.1 9.1M-24.8-10.3-9.1-3.1M24.8 10.3 9.1 3.1M24.8-10.3 9.1-3.1M-24.8 10.3-9.1 3.1" stroke-width="1.15"/><circle r="3.2" stroke-width="1.35"/><circle r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Пространство</span></a><a href="path.html"><span class="icon"><svg class="line-icon" viewBox="-2 -2 52 52" aria-hidden="true"><g transform="translate(24 24)"><ellipse rx="24" ry="10.4" transform="rotate(-13)" stroke-width="1.35"/><ellipse rx="21.5" ry="9" transform="rotate(48)" stroke-width="1.05"/><path d="M-18.5 12.5C-9.5 19.6 7.8 19 18.7 8.3" stroke-width="1.05"/><circle r="6.7" stroke-width="1.25"/><circle cx="21.5" cy="-5.5" r="1.55" fill="currentColor" stroke="none"/><circle cx="-15.8" cy="13.2" r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Путь</span></a><a href="meetings.html"><span class="icon"><svg class="line-icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(24 24)"><path d="M-6 16C-10.3 11.6-20.5 4.4-20.5-4.6-20.5-13.3-10.5-17-5.2-9.7-.1-17 10-13.3 10-4.6 10 4.2.2 11.6-6 16Z" stroke-width="1.35"/><path d="M6 16C1.7 11.6-8.5 4.4-8.5-4.6-8.5-13.3 1.5-17 6.8-9.7 11.9-17 22-13.3 22-4.6 22 4.2 12.2 11.6 6 16Z" stroke-width="1.35"/><circle cx="-6" cy="16" r=".95" fill="currentColor" stroke="none"/><circle cx="6" cy="16" r=".95" fill="currentColor" stroke="none"/></g></svg></span><span>Встречи</span></a><a href="about.html" class="active" aria-current="page"><span class="icon"><svg class="fill-icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M241.251 145.056c-39.203-17.423-91.472 17.423-104.54 60.982-13.068 43.558 8.712 117.608 65.337 143.742 56.626 26.135 108.896-8.712 87.117-39.202-74.049-8.712-121.963-87.117-100.184-126.319s91.472-21.78 52.27-39.203zM337.079 271.375c47.914-39.202 21.779-126.319-17.423-135.031-39.202-8.712-56.626 13.068-26.135 39.202 39.203 30.491-8.712 91.472-39.202 87.117 0 0 34.847 47.914 82.76 8.712zM254.318 119.788c43.558-17.423 74.049-9.579 100.184 16.556 13.068-39.202-30.491-104.54-108.896-113.252S93.153 118.921 127.999 171.191c8.712-17.424 60.982-64.47 126.319-51.403zM110.576 245.24C36.527 262.663 28.87 335.248 45.239 380.27c17.423 47.914 4.356 82.761 26.135 91.472 20.622 8.253 91.472 13.068 152.454 17.423 60.982 4.356 108.896-47.914 91.472-108.896-174.233 30.492-204.724-95.827-204.724-135.029zM93.883 235.796s2.178-28.313 10.89-43.558c-4.356-4.356-8.712-21.779-8.712-21.779s-4.356-19.601-4.356-34.846c-32.669-6.534-89.295 34.846-91.472 41.38-2.178 6.534 10.889 80.583 39.202 82.761 30.492-23.958 54.448-23.958 54.448-23.958zM489.533 175.546c-39.202-82.761-113.252-65.337-113.252-65.337s4.356 21.779-4.356 34.846c43.558 47.914 13.067 146.643-24.681 158.265 130.675 56.626 159.712-58.081 164.068-75.504 4.356-17.423-13.067-30.49-21.779-52.27zM454.108 332.076c-22.359 15.841-85.663 11.613-121.964-7.265 1.446 14.514-13.067 37.756-20.325 39.202 27.59 11.621 53.725 62.436 7.265 116.161 18.878 18.87 95.828 4.356 140.842-24.689 7.325-4.722 18.869-52.27 21.779-79.851 3.855-36.531 7.258-68.247-27.597-43.558zM257.227 213.294c-18.928 5.164-30.439-6.27-23.234-18.869 5.811-10.167 5.266-20.69-8.712-13.068-29.044 17.423-11.612 66.784 24.689 62.428 49.36-17.423 27.581-62.428 14.514-60.982-13.067 1.446 8.712 26.135-7.257 30.491z"/></svg></span><span>Обо мне</span></a></nav>
@@ -215,9 +220,65 @@ avatarInput.addEventListener('change',()=>{const file=avatarInput.files&&avatarI
 try{const savedAvatar=localStorage.getItem('profileAvatar');if(savedAvatar){avatar.src=savedAvatar;customAvatar=true}}catch(e){}
 
 // ---------- Мои ресурсы ----------
-const resourceChips=[...document.querySelectorAll('.resource-chip')],resourceStatus=$('resource-status');
-const selectedResources=()=>resourceChips.filter(c=>c.classList.contains('active')).map(c=>c.textContent.trim());
-resourceChips.forEach(chip=>chip.addEventListener('click',()=>{chip.classList.toggle('active');chip.setAttribute('aria-pressed',chip.classList.contains('active')?'true':'false');resourceStatus.textContent='';saveProfile({resources:selectedResources()})}));
+const resourceBox=$('resource-options'),resourceStatus=$('resource-status'),addResource=$('add-resource'),resourceForm=$('resource-form'),resourceInput=$('resource-input');
+const defaultResources=[...resourceBox.querySelectorAll('.resource-chip:not(.resource-add)')].map(c=>c.textContent.trim());
+let customResources=[];
+const allChips=()=>[...resourceBox.querySelectorAll('.resource-chip:not(.resource-add)')];
+const selectedResources=()=>allChips().filter(c=>c.classList.contains('active')).map(c=>c.textContent.trim());
+function wireChip(chip){chip.addEventListener('click',()=>{chip.classList.toggle('active');chip.setAttribute('aria-pressed',chip.classList.contains('active')?'true':'false');resourceStatus.textContent='';saveProfile({resources:selectedResources()})})}
+allChips().forEach(wireChip);
+function renderCustomResources(selected){
+  const keep=selected||selectedResources();
+  resourceBox.querySelectorAll('.resource-custom').forEach(n=>n.remove());
+  customResources.forEach((name,i)=>{
+    const wrap=document.createElement('span');wrap.className='resource-custom';
+    const chip=document.createElement('button');chip.type='button';chip.className='resource-chip';chip.textContent=name;
+    const on=keep.includes(name);chip.classList.toggle('active',on);chip.setAttribute('aria-pressed',on?'true':'false');wireChip(chip);
+    const x=document.createElement('button');x.type='button';x.className='resource-remove';x.textContent='×';x.setAttribute('aria-label','Убрать ресурс '+name);
+    x.addEventListener('click',()=>{customResources.splice(i,1);renderCustomResources(selectedResources().filter(r=>r!==name));saveProfile({custom_resources:customResources,resources:selectedResources()})});
+    wrap.append(chip,x);resourceBox.insertBefore(wrap,addResource);
+  });
+}
+addResource.addEventListener('click',()=>{resourceForm.hidden=!resourceForm.hidden;addResource.setAttribute('aria-expanded',String(!resourceForm.hidden));if(!resourceForm.hidden)resourceInput.focus()});
+resourceForm.addEventListener('submit',e=>{e.preventDefault();const v=resourceInput.value.replace(/\s+/g,' ').trim();if(!v)return;
+  const exists=defaultResources.concat(customResources).find(r=>r.toLowerCase()===v.toLowerCase());
+  const name=exists||v;if(!exists)customResources.push(v);
+  renderCustomResources(selectedResources().concat(name));
+  resourceInput.value='';resourceForm.hidden=true;addResource.setAttribute('aria-expanded','false');resourceStatus.textContent='';
+  saveProfile({custom_resources:customResources,resources:selectedResources()});
+});
+
+// ---------- Мои задачи ----------
+const todoForm=$('todo-form'),todoInput=$('todo-input'),todoList=$('todo-list'),todoDoneBox=$('todo-done'),todoDoneList=$('todo-done-list'),todoEmpty=$('todo-empty');
+let todos=[];
+const shortDate=iso=>{const d=new Date(iso);return d.getDate()+' '+MONTHS_GEN[d.getMonth()]};
+function todoRow(t){
+  const li=document.createElement('li');li.className='todo-item'+(t.done?' is-done':'');
+  const check=document.createElement('button');check.type='button';check.className='todo-check';check.textContent=t.done?'✓':'';
+  check.setAttribute('aria-pressed',t.done?'true':'false');check.setAttribute('aria-label',t.done?'Вернуть в работу':'Отметить выполненной');
+  check.addEventListener('click',()=>{t.done=!t.done;t.done_at=t.done?new Date().toISOString():null;
+    if(t.done&&webApp&&webApp.HapticFeedback)try{webApp.HapticFeedback.notificationOccurred('success')}catch(e){}
+    renderTodos();saveProfile({tasks:todos})});
+  const text=document.createElement('div');text.className='todo-text';const label=document.createElement('span');label.textContent=t.text;text.appendChild(label);
+  if(t.done&&t.done_at){const s=document.createElement('small');s.textContent='Выполнено '+shortDate(t.done_at);text.appendChild(s)}
+  const del=document.createElement('button');del.type='button';del.className='todo-del';del.textContent='×';del.setAttribute('aria-label','Удалить задачу');
+  del.addEventListener('click',()=>{todos=todos.filter(x=>x!==t);renderTodos();saveProfile({tasks:todos})});
+  li.append(check,text,del);return li;
+}
+function renderTodos(){
+  const open=todos.filter(t=>!t.done),done=todos.filter(t=>t.done).sort((a,b)=>String(b.done_at).localeCompare(String(a.done_at)));
+  todoList.replaceChildren(...open.map(todoRow));todoDoneList.replaceChildren(...done.map(todoRow));
+  todoDoneBox.hidden=!done.length;$('todo-done-count').textContent=done.length;
+  todoEmpty.hidden=Boolean(todos.length);
+  todoEmpty.textContent='Запишите, что хотите сделать, и отмечайте, когда готово.';
+  if(!open.length&&done.length){todoEmpty.hidden=false;todoEmpty.textContent='Все задачи выполнены ✨'}
+}
+todoForm.addEventListener('submit',e=>{e.preventDefault();const v=todoInput.value.replace(/\s+/g,' ').trim();if(!v)return;
+  if(todos.length>=60){todoEmpty.hidden=false;todoEmpty.textContent='Список полный: удалите выполненные, чтобы добавить новые.';return}
+  todos.unshift({id:Math.random().toString(36).slice(2,10),text:v,done:false,created_at:new Date().toISOString(),done_at:null});
+  todoInput.value='';renderTodos();saveProfile({tasks:todos});
+});
+renderTodos();
 
 // ---------- Мой путь ----------
 function setStep(n,{state,stateClass,text:t,link,linkText,href,soon}){
@@ -278,7 +339,11 @@ function renderProfile(p){
   if(p.profile){
     showVision(p.profile.vision,p.profile.vision_updated_at);
     customFacets=(p.profile.facets||[]).filter(f=>!defaultFacets.includes(f));renderCustomFacets();
-    resourceChips.forEach(c=>{const on=(p.profile.resources||[]).includes(c.textContent.trim());c.classList.toggle('active',on);c.setAttribute('aria-pressed',on?'true':'false')});
+    const chosen=p.profile.resources||[];
+    customResources=(p.profile.custom_resources||[]).filter(r=>!defaultResources.includes(r));
+    allChips().forEach(c=>{const on=chosen.includes(c.textContent.trim());c.classList.toggle('active',on);c.setAttribute('aria-pressed',on?'true':'false')});
+    renderCustomResources(chosen);
+    todos=Array.isArray(p.profile.tasks)?p.profile.tasks:[];renderTodos();
   }
 }
 const profileData=(async()=>{try{
