@@ -50,8 +50,9 @@ test('tasks: plan import, statuses, comments, bot buttons, notifications, Friday
   // /tasks in the bot.
   await say(NASTYA, '/tasks');
   const listed = world.sent('sendMessage').filter((m) => m.chat_id === 5101);
-  assert.ok(listed.some((m) => /Ваши открытые задачи: 19/.test(m.text)));
-  assert.ok(listed.some((m) => /И ещё 4/.test(m.text)));
+  const picker = listed.find((m) => /Нажмите на задачу/.test(m.text));
+  assert.equal(picker.reply_markup.inline_keyboard.length, 20, '19 tasks + «Новая задача»');
+  assert.match(picker.reply_markup.inline_keyboard[0][0].callback_data, /^t:o:[a-f0-9]{10}$/);
   // Owner: team overview by person.
   await say(OWNER, '/tasks');
   const ov = world.sent('sendMessage').filter((m) => m.chat_id === 900).map((m) => m.text).join('\n');
@@ -110,4 +111,43 @@ test('bot: owner-only /setup refreshes webhook updates, commands and menu', asyn
   assert.ok(hook.allowed_updates.includes('callback_query'));
   assert.ok(world.sent('setMyCommands').pop().commands.some((c) => c.command === 'tasks'));
   assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /Готово/);
+});
+
+test('tasks in the bot: create with /task, assign, deadline, comment by reply, all visible in the dashboard', async () => {
+  const world = createWorld();
+  await call(adminRoute, { method: 'POST', query: { section: 'team' }, body: { initData: initData(OWNER), action: 'save', members: [{ id: '5101', name: 'Анастасия', role: 'director' }] } });
+  const nastya = await login(world, NASTYA);
+  await os('tasks', {}, nastya); // plan import happens on first open
+  // Owner: /task with text → created, asked whom to assign.
+  await say(OWNER, '/task Снять рилс про клуб\nВертикально, 30 сек');
+  let msg = world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop();
+  assert.match(msg.text, /Задача создана/);
+  const btn = msg.reply_markup.inline_keyboard.flat().find((b) => b.text === 'Анастасия');
+  assert.ok(btn, 'team members as buttons');
+  const id = btn.callback_data.split(':')[2];
+  await deliver({ callback_query: { id: 'q1', from: OWNER, data: btn.callback_data, message: { chat: { id: 900 }, message_id: 50 } } });
+  // Анастасия notified; the owner's message now asks for the deadline.
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5101').pop().text, /Вам назначена задача: «Снять рилс про клуб»/);
+  const asked = world.sent('editMessageText').pop();
+  assert.match(asked.text, /Какой срок/);
+  await deliver({ callback_query: { id: 'q2', from: OWNER, data: `t:u:${id}:1`, message: { chat: { id: 900 }, message_id: 50 } } });
+  let t = (await tasks.load()).find((x) => x.id === id);
+  assert.equal(t.owner, 'Анастасия');
+  assert.ok(t.due);
+  assert.equal(t.description, 'Вертикально, 30 сек');
+  // The dashboard sees it.
+  assert.ok((await os('tasks', {}, nastya)).body.tasks.some((x) => x.id === id));
+  // Comment = a plain reply to the task message (message 50 is mapped to the task).
+  await deliver({ message: { chat: { id: 900, type: 'private' }, from: OWNER, text: 'Добавь субтитры', reply_to_message: { message_id: 50 } } });
+  t = (await tasks.load()).find((x) => x.id === id);
+  assert.equal(t.comments[0].text, 'Добавь субтитры');
+  assert.equal(t.comments[0].by, 'Варвара');
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5101').pop().text, /Варвара: Добавь субтитры/);
+  // Button «Новая задача» → next message becomes a task.
+  await deliver({ callback_query: { id: 'q3', from: NASTYA, data: 't:n', message: { chat: { id: 5101 }, message_id: 7 } } });
+  await say(NASTYA, 'Забронировать зал на ноябрь');
+  assert.ok((await tasks.load()).some((x) => x.title === 'Забронировать зал на ноябрь' && x.created_by === 'Анастасия'));
+  // Open a task from the /tasks picker.
+  await deliver({ callback_query: { id: 'q4', from: OWNER, data: `t:o:${id}`, message: { chat: { id: 900 }, message_id: 51 } } });
+  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /💬 Варвара: Добавь субтитры/);
 });
