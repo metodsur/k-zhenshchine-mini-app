@@ -99,6 +99,9 @@ module.exports = async function handler(req, res) {
       return send(res, 200, { ok: true });
     }
     try {
+      if (await require("../../lib/bot-setup").handleCommand(update.message)) return send(res, 200, { ok: true });
+    } catch (error) { console.error("Setup command failed", error.message); }
+    try {
       if (await require("../../lib/tasks").handleCommand(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Tasks command failed", error.message); }
     if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });

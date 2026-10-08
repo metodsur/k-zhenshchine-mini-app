@@ -100,3 +100,14 @@ test('HR: only the owner sees and edits it', async () => {
   assert.equal((await os('collection', { name: 'hr', action: 'save', item: { title: 'x' } }, nastya)).status, 403);
   assert.ok(!(await os('me', {}, nastya)).body.perms.includes('hr.view'));
 });
+
+test('bot: owner-only /setup refreshes webhook updates, commands and menu', async () => {
+  const world = createWorld();
+  await say(NASTYA, '/setup');
+  assert.equal(world.sent('setWebhook').length, 0, 'not for others');
+  await say(OWNER, '/setup');
+  const hook = world.sent('setWebhook').pop();
+  assert.ok(hook.allowed_updates.includes('callback_query'));
+  assert.ok(world.sent('setMyCommands').pop().commands.some((c) => c.command === 'tasks'));
+  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /Готово/);
+});

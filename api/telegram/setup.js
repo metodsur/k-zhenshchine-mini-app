@@ -45,29 +45,6 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
   const supplied = req.headers["x-setup-secret"] || body.setup_secret;
   if (!safeEqualString(supplied, setupSecret)) return send(res, 403, { ok: false });
 
-  const response = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      url: `${baseUrl}/api/telegram/webhook`,
-      secret_token: webhookSecret,
-      allowed_updates: ["message", "chat_member", "pre_checkout_query", "callback_query"]
-    })
-  });
-  const data = await response.json();
-
-  // Bot menu: commands list and the button next to the message field.
-  // The button opens the app root, which sends returning members straight to "Пространство".
-  const call = (method, payload) => fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
-  }).then((r) => r.json()).catch(() => ({ ok: false }));
-  const commands = await call("setMyCommands", { commands: [
-    { command: "space", description: "Открыть пространство" },
-    { command: "master", description: "Кабинет Мастера" },
-    { command: "tasks", description: "Мои задачи (для команды)" },
-    { command: "start", description: "Начать сначала" }
-  ] });
-  const menu = await call("setChatMenuButton", { menu_button: { type: "web_app", text: "Пространство", web_app: { url: `${baseUrl}/` } } });
-
-  return send(res, response.ok && data.ok ? 200 : 502,
-    { ok: Boolean(data.ok), description: data.description || null, commands: Boolean(commands.ok), menu_button: Boolean(menu.ok) });
+  const result = await require("../../lib/bot-setup").apply();
+  return send(res, result.ok ? 200 : 502, result);
 };
