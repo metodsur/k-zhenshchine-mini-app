@@ -250,6 +250,7 @@ const sections = {
     if (!collections.SCHEMAS[name]) return { status: 404, body: { ok: false, errors: ["Раздел не найден"] } };
     const schema = collections.SCHEMAS[name];
     const action = body.action || "list";
+    if (schema.view_perm && !team.can(member, schema.view_perm)) return deny(schema.title);
     if (action === "list") {
       const items = await collections.load(name);
       let extras = null;

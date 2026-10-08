@@ -87,3 +87,16 @@ test('tasks: plan import, statuses, comments, bot buttons, notifications, Friday
   assert.equal((await tasks.runWeeklySummary(friday)).skipped, 'sent');
   assert.equal((await tasks.runWeeklySummary(Date.parse('2026-10-08T15:00:00Z'))).skipped, 'not friday');
 });
+
+test('HR: only the owner sees and edits it', async () => {
+  const world = createWorld();
+  await call(adminRoute, { method: 'POST', query: { section: 'team' }, body: { initData: initData(OWNER), action: 'save', members: [{ id: '5101', name: 'Анастасия', role: 'director' }] } });
+  const owner = await login(world, OWNER);
+  const nastya = await login(world, NASTYA);
+  const r = await os('collection', { name: 'hr', action: 'save', item: { title: 'Петрова Анастасия', position: 'Операционный директор', status: 'active', start_date: '2026-10-07', form: 'self', pay_amount: 80000, duties: 'Вся операционка' } }, owner);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  assert.equal((await os('collection', { name: 'hr', action: 'list' }, owner)).body.items.length, 1);
+  assert.equal((await os('collection', { name: 'hr', action: 'list' }, nastya)).status, 403);
+  assert.equal((await os('collection', { name: 'hr', action: 'save', item: { title: 'x' } }, nastya)).status, 403);
+  assert.ok(!(await os('me', {}, nastya)).body.perms.includes('hr.view'));
+});
