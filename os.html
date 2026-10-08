@@ -49,6 +49,9 @@ main{min-width:0;padding:30px 36px 60px}
 .icon-btn:hover{border-color:#d7c6ad}
 .vmeta{margin-top:12px;font-size:.75rem;color:var(--muted)}
 .vnotes{margin-top:10px;font-size:.85rem;color:#555;white-space:pre-wrap}
+.tcomment{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fbf1de;border-left:3px solid #b77a2b}
+.tcomment small{display:block;font-size:.74rem;color:#8a6a3c;margin-bottom:3px}
+.tcomment p{margin:0;font-size:1.02rem;font-weight:600;line-height:1.4;color:#2c2a26;white-space:pre-wrap;overflow-wrap:anywhere}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-size:.88rem;white-space:nowrap}
 .btn:hover{border-color:#d7c6ad}
 .btn.gold{border-color:transparent;background:linear-gradient(115deg,#8c5517,#b0722a 55%,#c9944a);color:#fff;font-weight:400}
@@ -1543,12 +1546,18 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       return true;
     });
     function late(t) { return t.due && t.due < today && t.status !== "done"; }
+    function lastComment(t) {
+      var c = (t.comments || []).slice(-1)[0];
+      if (!c) return null;
+      return h("div", { class: "tcomment" }, h("small", { text: "💬 " + c.by + (t.comments.length > 1 ? " · комментариев: " + t.comments.length : "") }), h("p", { text: c.text.length > 220 ? c.text.slice(0, 219) + "…" : c.text }));
+    }
     function card(t) {
       var cl = t.checklist || [], cd = cl.filter(function (c) { return c.done; }).length;
       return h("div", { class: "kcard", onclick: function () { openTask(t); } }, h("b", { text: t.title }),
         h("span", { class: "sub", text: [t.area, t.owner].filter(Boolean).join(" · ") }),
         h("span", { class: "sub" }, t.due ? (late(t) ? h("span", { class: "tag over", text: "просрочено · " + dayLabel(t.due) }) : "Дедлайн: " + dayLabel(t.due)) : "без дедлайна",
-          cl.length ? " · ✓ " + cd + "/" + cl.length : "", (t.comments || []).length ? " · 💬 " + t.comments.length : ""));
+          cl.length ? " · ✓ " + cd + "/" + cl.length : ""),
+        lastComment(t));
     }
     var search = h("input", { type: "search", placeholder: "Поиск по задачам", value: st.q, oninput: function () { st.q = search.value; var pos = search.selectionStart; drawTasks(); var again = document.querySelector("main input[type=search]"); if (again) { again.focus(); again.setSelectionRange(pos, pos); } } });
     var area = select([["", "Все направления"]].concat(areas.sort().map(function (a) { return [a, a]; })), st.area, { onchange: function (e) { st.area = e.target.value; drawTasks(); } });
@@ -1564,7 +1573,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       h("thead", null, h("tr", null, ["Задача", "Направление", "Ответственный", "Дедлайн", "Статус", "Чек-лист"].map(function (x) { return h("th", { text: x }); }))),
       h("tbody", null, items.slice().sort(function (a, b) { return ({ doing: 0, todo: 1, done: 2 })[a.status] - ({ doing: 0, todo: 1, done: 2 })[b.status]; }).map(function (t) {
         var cl = t.checklist || [];
-        return h("tr", { onclick: function () { openTask(t); } }, h("td", null, h("b", { style: "font-weight:400", text: t.title }), (t.comments || []).length ? h("span", { class: "sub", text: "💬 " + t.comments.slice(-1)[0].by + ": " + t.comments.slice(-1)[0].text.slice(0, 80) }) : null),
+        return h("tr", { onclick: function () { openTask(t); } }, h("td", null, h("b", { style: "font-weight:400", text: t.title }), lastComment(t)),
           h("td", { text: t.area || "—" }), h("td", { text: t.owner || "—" }),
           h("td", null, t.due ? h("span", { class: late(t) ? "tag over" : "", text: dayLabel(t.due) }) : "—"),
           h("td", null, h("span", { class: "tag " + (t.status === "done" ? "paid" : t.status === "doing" ? "contact" : "new"), text: d.statuses[t.status] })),
@@ -1617,7 +1626,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
           api("tasks", { action: "save", task: payload() }).then(function (r) { errBox.innerHTML = ""; if (!r.ok) return errBox.appendChild(errorsBox(r)); dr.close(); toast(isNew ? "Задача создана" : "Сохранено"); viewTasks(); });
         } })),
       isNew ? null : [h("div", { class: "section-t", text: "Комментарии" }),
-        (t.comments || []).length ? h("ul", { class: "history" }, t.comments.map(function (c) { return h("li", null, h("time", { text: new Date(c.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · " + c.by }), h("span", { text: c.text })); })) : h("p", { class: "sub", style: "color:var(--muted)", text: "Комментариев пока нет." }),
+        (t.comments || []).length ? h("div", { style: "margin-bottom:12px" }, t.comments.slice().reverse().map(function (c) { return h("div", { class: "tcomment" }, h("small", { text: new Date(c.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " · " + c.by }), h("p", { text: c.text })); })) : h("p", { class: "sub", style: "color:var(--muted)", text: "Комментариев пока нет." }),
         comment, h("div", { class: "actions" }, h("button", { class: "btn", type: "button", text: "Отправить комментарий", onclick: function () {
           if (!comment.value.trim()) return;
           api("tasks", { action: "comment", id: t.id, text: comment.value }).then(function (r) { if (r.ok) { dr.close(); state.tasksData.tasks = r.tasks; openTask(r.task); toast("Комментарий отправлен"); } else toast((r.errors || [])[0]); });

@@ -73,7 +73,7 @@ test('tasks: plan import, statuses, comments, bot buttons, notifications, Friday
   // Comment from the dashboard → assignee notified.
   const other = (await tasks.load())[0];
   await os('tasks', { action: 'comment', id: other.id, text: 'Варвара: посмотри референсы' }, owner);
-  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5101').pop().text, /Комментарий к задаче/);
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5101').pop().text, /комментарий к задаче/);
   // Status via dashboard.
   r = await os('tasks', { action: 'status', id: other.id, status: 'doing' }, nastya);
   assert.equal(r.body.task.status, 'doing');
@@ -149,7 +149,7 @@ test('tasks in the bot: create with /task, assign, deadline, comment by reply, a
   assert.ok((await tasks.load()).some((x) => x.title === 'Забронировать зал на ноябрь' && x.created_by === 'Анастасия'));
   // Open a task from the /tasks picker.
   await deliver({ callback_query: { id: 'q4', from: OWNER, data: `t:o:${id}`, message: { chat: { id: 900 }, message_id: 51 } } });
-  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /💬 Варвара: Добавь субтитры/);
+  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /💬 <b>Варвара: Добавь субтитры<\/b>/);
 });
 
 test('vault: passwords encrypted at rest, revealed on request with a log, visibility by access list', async () => {
