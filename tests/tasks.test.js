@@ -52,6 +52,12 @@ test('tasks: plan import, statuses, comments, bot buttons, notifications, Friday
   const listed = world.sent('sendMessage').filter((m) => m.chat_id === 5101);
   assert.ok(listed.some((m) => /Ваши открытые задачи: 19/.test(m.text)));
   assert.ok(listed.some((m) => /И ещё 4/.test(m.text)));
+  // Owner: team overview by person.
+  await say(OWNER, '/tasks');
+  const ov = world.sent('sendMessage').filter((m) => m.chat_id === 900).map((m) => m.text).join('\n');
+  assert.match(ov, /Задачи команды/);
+  assert.match(ov, /👤 Анастасия — 19 задач/);
+  assert.match(ov, /Снять «Зеркало» — 10 октября/);
 
   // Button «Выполнено» → status, owner notified, comment prompt; next text = comment.
   await deliver({ callback_query: { id: 'cb1', from: NASTYA, data: `t:d:${t.id}`, message: { chat: { id: 5101 }, message_id: 7 } } });
