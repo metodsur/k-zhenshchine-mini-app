@@ -37,6 +37,18 @@ main{min-width:0;padding:30px 36px 60px}
 .head h1{margin:0;font-weight:200;font-size:2rem;letter-spacing:-.01em}
 .head p{margin:4px 0 0;color:var(--muted)}
 .eyebrow{font-size:.7rem;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px}@media(max-width:700px){.vault-grid{grid-template-columns:1fr}}
+.vcard{padding:18px 20px 16px}
+.vcard h3{margin:0;font-size:1.12rem;font-weight:400;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.vcard .open{font-size:.82rem;color:var(--gold);text-decoration:none;word-break:break-all}
+.vrow{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:center;margin-top:10px;font-size:.9rem}
+.vrow .k{color:var(--muted);font-size:.78rem}
+.vrow code{font:.92rem ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--soft);padding:4px 8px;border-radius:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.vrow .acts{display:flex;gap:4px}
+.icon-btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:4px 8px;font-size:.78rem;cursor:pointer;white-space:nowrap}
+.icon-btn:hover{border-color:#d7c6ad}
+.vmeta{margin-top:12px;font-size:.75rem;color:var(--muted)}
+.vnotes{margin-top:10px;font-size:.85rem;color:#555;white-space:pre-wrap}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-size:.88rem;white-space:nowrap}
 .btn:hover{border-color:#d7c6ad}
 .btn.gold{border-color:transparent;background:linear-gradient(115deg,#8c5517,#b0722a 55%,#c9944a);color:#fff;font-weight:400}
@@ -260,6 +272,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     crm: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.3-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .7 3.2 2.5 3.5 5.2"/></svg>',
     cycles: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.4"/><circle cx="19.4" cy="16.3" r="1.4"/><circle cx="4.6" cy="16.3" r="1.4"/></svg>',
     calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+    vault: '<svg viewBox="0 0 24 24"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.4"/></svg>',
     pairs: '<svg viewBox="0 0 24 24"><circle cx="8.5" cy="12" r="5.5"/><circle cx="15.5" cy="12" r="5.5"/></svg>',
     masters: '<svg viewBox="0 0 24 24"><path d="M12 3.2 14.2 8l5.2.6-3.9 3.5 1.1 5.1L12 14.6l-4.6 2.6 1.1-5.1-3.9-3.5L9.8 8Z"/><path d="M8 21h8"/></svg>',
     hr: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="11.5" r="2.4"/><path d="M5.6 17c.5-1.8 1.8-2.8 3.4-2.8s2.9 1 3.4 2.8M14.5 10h4M14.5 13.5h3"/></svg>',
@@ -279,6 +292,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     { id: "cycles", label: "Циклы" },
     { id: "masters", label: "Мастера", perm: "os.workspace" },
     { id: "pairs", label: "Пары", perm: "pairs.edit" },
+    { id: "vault", label: "Доступы", perm: "os.workspace" },
     { id: "calendar", label: "Календарь", perm: "os.workspace" },
     { id: "content", label: "Контент", perm: "os.workspace" },
     { id: "media", label: "Медийность", perm: "os.workspace" },
@@ -371,7 +385,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     renderNav();
     var main = document.getElementById("view"); main.innerHTML = ""; main.appendChild(h("div", { class: "loading", text: "Загрузка…" }));
     if (["content", "media", "platforms", "library", "templates", "training", "instructions", "hr"].indexOf(view) !== -1) viewCollection(view);
-    else ({ tasks: viewTasks, masters: viewMasters, pairs: viewPairs, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
+    else ({ tasks: viewTasks, masters: viewMasters, pairs: viewPairs, vault: viewVault, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
     window.scrollTo(0, 0);
   }
   function setView(nodes) { var main = document.getElementById("view"); main.innerHTML = ""; add(main, nodes); }
@@ -1194,6 +1208,105 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   }
 
   // ---------- Мастера: обучение, ученицы, статусы, «Зеркало» ----------
+  // ---------- Доступы ----------
+  function viewVault() { api("vault").then(drawVault); }
+  function copyText(text, what) {
+    function done() { toast((what || "Скопировано") + " ✓"); }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, function () { fallback(); });
+    else fallback();
+    function fallback() { var t = h("textarea", { style: "position:fixed;opacity:0" }); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Не получилось скопировать"); } t.remove(); }
+  }
+  function drawVault(d) {
+    if (!d.ok) return setView(errorsBox(d));
+    state.vault = d;
+    var q = state.vaultQ || "", cat = state.vaultCat || "";
+    var search = h("input", { type: "search", placeholder: "Поиск: сервис, логин, у кого доступ", value: q, oninput: function (e) { state.vaultQ = e.target.value; draw(); } });
+    var cats = h("div", { class: "seg" }, [["", "Все"]].concat(Object.keys(d.categories).map(function (k) { return [k, d.categories[k]]; })).map(function (c) {
+      return h("button", { type: "button", class: cat === c[0] ? "on" : "", text: c[1], onclick: function () { state.vaultCat = c[0]; drawVault(d); } });
+    }));
+    var box = h("div", { class: "vault-grid" });
+    function draw() {
+      var qq = (state.vaultQ || "").toLowerCase();
+      var items = d.items.filter(function (e) { return (!cat || e.category === cat) && (!qq || [e.title, e.login, e.url, (e.access || []).join(" "), e.notes].join(" ").toLowerCase().indexOf(qq) !== -1); });
+      box.innerHTML = "";
+      if (!items.length) { box.appendChild(h("div", { class: "panel empty", text: d.items.length ? "Ничего не найдено" : "Пока пусто. Добавьте первый сервис: название, ссылку на личный кабинет, логин, пароль и у кого есть доступ." })); return; }
+      items.forEach(function (e) { box.appendChild(vaultCard(e)); });
+    }
+    setView([
+      h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Команда" }), h("h1", { text: "Доступы" }),
+        h("p", { text: d.sees_all ? "Логины и пароли от личных кабинетов сервисов. Пароли зашифрованы и показываются по запросу — каждый просмотр записывается." : "Доступы, которые выданы вам. Пароли показываются по запросу — каждый просмотр записывается." })),
+        h("button", { class: "btn gold", type: "button", text: "+ Доступ", onclick: function () { vaultForm({}); } })),
+      h("div", { class: "toolbar" }, search, cats), box
+    ]);
+    draw();
+  }
+  function vaultCard(e) {
+    var cats = state.vault.categories;
+    var pass = h("code", { text: e.has_password ? "••••••••••" : "—" }), shown = false;
+    function getPass(then) {
+      api("vault", { action: "reveal", id: e.id }).then(function (r) { if (r.ok) then(r.password); else toast((r.errors || [])[0] || "Не получилось"); });
+    }
+    var showBtn = h("button", { class: "icon-btn", type: "button", text: "Показать", onclick: function () {
+      if (shown) { pass.textContent = "••••••••••"; showBtn.textContent = "Показать"; shown = false; return; }
+      getPass(function (p) { pass.textContent = p || "—"; showBtn.textContent = "Скрыть"; shown = true; setTimeout(function () { if (shown) { pass.textContent = "••••••••••"; showBtn.textContent = "Показать"; shown = false; } }, 30000); });
+    } });
+    return h("article", { class: "panel vcard" },
+      h("h3", null, h("span", { text: e.title }), h("span", { class: "tag", text: cats[e.category] || "Другое" })),
+      e.url ? h("a", { class: "open", href: e.url, target: "_blank", rel: "noopener noreferrer", text: e.url.replace(/^https?:\/\//, "") + " ↗" }) : null,
+      h("div", { class: "vrow" }, h("span", { class: "k", text: "Логин" }), h("code", { text: e.login || "—" }),
+        h("div", { class: "acts" }, e.login ? h("button", { class: "icon-btn", type: "button", text: "Копировать", onclick: function () { copyText(e.login, "Логин скопирован"); } }) : null)),
+      h("div", { class: "vrow" }, h("span", { class: "k", text: "Пароль" }), pass,
+        e.has_password ? h("div", { class: "acts" }, showBtn, h("button", { class: "icon-btn", type: "button", text: "Копировать", onclick: function () { getPass(function (p) { copyText(p, "Пароль скопирован"); }); } })) : h("span")),
+      h("div", { class: "vrow" }, h("span", { class: "k", text: "Доступ" }),
+        h("div", { class: "chips", style: "margin:0" }, (e.access || []).length ? e.access.map(function (n) { return h("span", { class: "chip", text: n }); }) : h("span", { style: "color:var(--muted);font-size:.85rem", text: "не указано" })), h("span")),
+      e.notes ? h("div", { class: "vnotes", text: e.notes }) : null,
+      h("div", { class: "vmeta" }, "Изменено " + since(e.updated_at) + (e.updated_by ? " · " + e.updated_by : "") + (e.last_view ? " · пароль смотрел(а): " + e.last_view.by + ", " + since(e.last_view.at) : ""),
+        " · ", h("a", { href: "#", style: "color:var(--gold)", text: "Изменить", onclick: function (ev) { ev.preventDefault(); vaultForm(e); } }))
+    );
+  }
+  function vaultForm(e) {
+    var d = state.vault, isNew = !e.id;
+    var f = {
+      title: h("input", { value: e.title || "", placeholder: "Например: Tribute, ЮKassa, Instagram" }),
+      category: select(Object.keys(d.categories).map(function (k) { return [k, d.categories[k]]; }), e.category || "other"),
+      url: h("input", { value: e.url || "", placeholder: "Ссылка на вход в личный кабинет" }),
+      login: h("input", { value: e.login || "", autocomplete: "off", placeholder: "Логин, email или телефон" }),
+      password: h("input", { type: "password", style: "flex:1;min-width:0", autocomplete: "new-password", placeholder: isNew ? "Пароль" : "Оставьте пустым, чтобы не менять" }),
+      access: h("input", { value: (e.access || []).join(", "), placeholder: "Имена через запятую" }),
+      notes: h("textarea", { rows: 3, placeholder: "Например: 2FA на телефоне Варвары, код приходит в WhatsApp" })
+    };
+    f.notes.value = e.notes || "";
+    var eye = h("button", { class: "icon-btn", type: "button", text: "👁", onclick: function () { f.password.type = f.password.type === "password" ? "text" : "password"; } });
+    var names = (state.me.team || []).map(function (m) { return m.name; }).filter(Boolean);
+    var quick = names.length ? h("div", { class: "chips", style: "margin-top:6px" }, names.map(function (n) {
+      return h("button", { type: "button", class: "chip", text: "+ " + n, onclick: function () {
+        var cur = f.access.value.split(",").map(function (x) { return x.trim(); }).filter(Boolean);
+        if (cur.indexOf(n) === -1) cur.push(n); f.access.value = cur.join(", ");
+      } });
+    })) : null;
+    var err = h("div");
+    var dr = drawer(isNew ? "Новый доступ" : e.title, "Доступы", h("div", null,
+      h("div", { class: "form" },
+        field("Сервис", f.title), field("Категория", f.category),
+        field("Ссылка на личный кабинет", f.url, "full"),
+        field("Логин", f.login), field("Пароль", h("div", { style: "display:flex;gap:6px" }, f.password, eye)),
+        h("label", { class: "field full" }, h("span", { text: "У кого есть доступ" }), f.access, quick),
+        field("Заметки", f.notes, "full")),
+      err,
+      h("div", { class: "actions", style: "margin-top:16px;display:flex;gap:8px;justify-content:space-between" },
+        !isNew && state.vault.sees_all ? h("button", { class: "btn ghost", type: "button", text: "Удалить", onclick: function () {
+          if (!confirm("Удалить доступ «" + e.title + "»?")) return;
+          api("vault", { action: "remove", id: e.id }).then(function (r) { if (r.ok) { dr.close(); toast("Удалено"); viewVault(); } else toast((r.errors || [])[0]); });
+        } }) : h("span"),
+        h("button", { class: "btn gold", type: "button", text: "Сохранить", onclick: function () {
+          var item = { id: e.id, title: f.title.value, category: f.category.value, url: f.url.value, login: f.login.value, password: f.password.value, access: f.access.value, notes: f.notes.value };
+          api("vault", { action: "save", item: item }).then(function (r) {
+            if (r.ok) { dr.close(); toast("Сохранено"); state.vault.items = r.items; drawVault(state.vault); }
+            else { err.innerHTML = ""; err.appendChild(errorsBox(r)); }
+          });
+        } }))));
+  }
+
   // ---------- Пары на ритуал ----------
   function viewPairs() { api("pairs").then(drawPairs); }
   function plural(n, one, few, many) { var a = n % 10, b = n % 100; return n + " " + (a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many); }

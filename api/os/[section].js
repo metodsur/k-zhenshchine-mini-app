@@ -245,6 +245,20 @@ const sections = {
     return result.status === 200 ? { status: 200, body: { ok: true } } : fail(result);
   },
 
+  // «Доступы»: service logins and passwords (password only on request, every reveal logged).
+  async vault(member, body) {
+    const vault = require("../../lib/vault");
+    const action = body.action || "list";
+    let r;
+    if (action === "list") return { status: 200, body: { ok: true, items: await vault.list(member), categories: vault.CATEGORIES, sees_all: team.can(member, "vault.all") } };
+    if (action === "save") r = await vault.save(body.item || {}, member);
+    else if (action === "reveal") r = await vault.reveal(String(body.id || ""), member);
+    else if (action === "remove") r = await vault.remove(String(body.id || ""), member);
+    else r = { status: 400, errors: ["Неизвестное действие"] };
+    if (r.status !== 200) return fail(r);
+    return { status: 200, body: { ok: true, entry: r.entry || null, password: r.password, items: action === "reveal" ? undefined : await vault.list(member) } };
+  },
+
   // Club: pairs for the ritual after every online call.
   async pairs(member, body) {
     if (!team.can(member, "pairs.edit")) return deny("пары");

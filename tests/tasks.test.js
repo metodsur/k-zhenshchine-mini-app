@@ -151,3 +151,31 @@ test('tasks in the bot: create with /task, assign, deadline, comment by reply, a
   await deliver({ callback_query: { id: 'q4', from: OWNER, data: `t:o:${id}`, message: { chat: { id: 900 }, message_id: 51 } } });
   assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /💬 Варвара: Добавь субтитры/);
 });
+
+test('vault: passwords encrypted at rest, revealed on request with a log, visibility by access list', async () => {
+  const world = createWorld();
+  await call(adminRoute, { method: 'POST', query: { section: 'team' }, body: { initData: initData(OWNER), action: 'save', members: [{ id: '5101', name: 'Анастасия', role: 'director' }, { id: '5102', name: 'Лена', role: 'content' }] } });
+  const owner = await login(world, OWNER);
+  const lena = await login(world, { id: 5102, first_name: 'Лена' });
+  let r = await os('vault', { action: 'save', item: { title: 'Tribute', url: 'tribute.tg', login: 'kz@mail.ru', password: 'S3cret!pass', access: 'Варвара, Анастасия' } }, owner);
+  assert.equal(r.status, 200);
+  assert.equal(r.body.items[0].url, 'https://tribute.tg');
+  assert.equal(r.body.items[0].password, undefined, 'never in the list');
+  assert.ok(![...world.kv.values()].some((v) => String(v).includes('S3cret!pass')), 'not stored in plain text');
+  await os('vault', { action: 'save', item: { title: 'Canva', login: 'design@kz', password: 'canva1', access: ['Лена'] } }, owner);
+  // Лена sees only Canva; she cannot open Tribute or delete.
+  const lenaList = (await os('vault', {}, lena)).body.items;
+  assert.deepEqual(lenaList.map((x) => x.title), ['Canva']);
+  const tributeId = r.body.items.find((x) => x.title === 'Tribute').id;
+  assert.equal((await os('vault', { action: 'reveal', id: tributeId }, lena)).status, 404);
+  assert.equal((await os('vault', { action: 'reveal', id: lenaList[0].id }, lena)).body.password, 'canva1');
+  assert.equal((await os('vault', { action: 'remove', id: lenaList[0].id }, lena)).status, 403);
+  // Owner reveals; the view is logged; editing with an empty password keeps it.
+  assert.equal((await os('vault', { action: 'reveal', id: tributeId }, owner)).body.password, 'S3cret!pass');
+  r = await os('vault', { action: 'save', item: { id: tributeId, title: 'Tribute', login: 'new@mail.ru', password: '' } }, owner);
+  assert.equal(r.body.items.find((x) => x.id === tributeId).last_view.by, 'Варвара');
+  assert.equal((await os('vault', { action: 'reveal', id: tributeId }, owner)).body.password, 'S3cret!pass');
+  // Лена adds her own service → she keeps access to it.
+  r = await os('vault', { action: 'save', item: { title: 'CapCut', password: 'x' } }, lena);
+  assert.deepEqual(r.body.items.find((x) => x.title === 'CapCut').access, ['Лена']);
+});
