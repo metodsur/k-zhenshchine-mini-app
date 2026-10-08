@@ -92,6 +92,10 @@ module.exports = async function handler(req, res) {
     return send(res, 401, { ok: false, error: "Invalid Telegram authorization" });
   }
 
+  if (body.action === "pairs") {
+    try { const r = await require("../../lib/pairs").handleApp(user, body); return send(res, r.status, r.body); }
+    catch (error) { console.error("Pairs failed", error.message); return send(res, 500, { ok: false, error: "Не получилось. Попробуйте ещё раз." }); }
+  }
   if (body.action === "save_profile") {
     try { return send(res, 200, { ok: true, profile: await profile.saveProfile(user.id, body.profile || {}) }); }
     catch { return send(res, 500, { ok: false, error: "Не получилось сохранить. Попробуйте ещё раз." }); }

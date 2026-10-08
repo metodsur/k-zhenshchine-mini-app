@@ -6,6 +6,7 @@ const jobs = {
   // Evening job (18:00 Moscow): club renewal reminders and, on Fridays, the weekly tasks summary.
   "club-reminders": async () => {
     const result = await require("../../lib/handlers/club-reminders").runReminders();
+    try { result.pairs = await require("../../lib/pairs").runScheduled(); } catch (error) { console.error("Pairs failed", error.message); }
     try { result.tasks_summary = await require("../../lib/tasks").runWeeklySummary(); } catch (error) { console.error("Tasks summary failed", error.message); }
     return result;
   },

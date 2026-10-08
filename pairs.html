@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ритуал в паре — к Женщине</title>
+<style>
+:root{--gold:#b77a2b;--gold-deep:#8f5818;--ink:#303438;--muted:#737b80;--line:rgba(183,122,43,.18);--radius:28px}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:"Helvetica Neue",Arial,sans-serif;font-weight:300;background:radial-gradient(circle at 88% 2%,rgba(226,194,137,.24),transparent 360px),radial-gradient(circle at 0% 40%,rgba(226,194,137,.1),transparent 300px),linear-gradient(180deg,#fbfdfe 0%,#f2f7f8 100%);min-height:100vh}
+button,input{font:inherit}a{color:inherit}
+.page{width:min(100%,680px);margin:auto;padding:18px 16px 140px}
+.back{display:inline-flex;align-items:center;gap:6px;color:#86551c;text-decoration:none;font-size:.88rem;padding:6px 0}
+.hero{position:relative;margin:10px 0 0;padding:30px 24px 26px;border-radius:var(--radius);overflow:hidden;color:#fff;background:linear-gradient(125deg,#7d4b14 0%,#a96c22 30%,#d7a654 58%,#a5661d 82%,#7f4c16 100%);box-shadow:0 18px 44px rgba(128,78,20,.25)}
+.hero:before{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(255,240,205,.45);box-shadow:0 0 0 26px rgba(255,240,205,.08),0 0 0 60px rgba(255,240,205,.05)}
+.hero .eyebrow{position:relative;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;opacity:.86}
+.hero h1{position:relative;margin:10px 0 10px;font-size:clamp(2.2rem,9vw,3.2rem);font-weight:200;line-height:1;letter-spacing:.01em}
+.hero p{position:relative;margin:0;max-width:30em;font-size:.95rem;line-height:1.5;opacity:.95}
+.orbs{position:absolute;right:22px;bottom:20px;display:flex}.orbs i{width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,244,214,.9);background:rgba(255,255,255,.14);margin-left:-10px;backdrop-filter:blur(4px)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 0}
+.stat{padding:16px 18px;border-radius:22px;background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(77,89,94,.07)}
+.stat b{display:block;font-size:1.9rem;font-weight:200;color:var(--gold-deep);line-height:1}.stat span{display:block;margin-top:6px;font-size:.74rem;color:var(--muted);line-height:1.35}
+.section-title{display:flex;align-items:center;gap:14px;margin:30px 4px 14px}.section-title h2{margin:0;font-size:1.3rem;font-weight:300;letter-spacing:.03em}.section-title:after{content:"";height:1px;flex:1;max-width:120px;background:linear-gradient(90deg,var(--gold),transparent)}
+.surface{border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.8);border-radius:var(--radius);box-shadow:0 12px 34px rgba(77,89,94,.08);backdrop-filter:blur(13px)}
+.card{padding:22px 20px}
+.card h3{margin:0 0 8px;font-size:1.35rem;font-weight:300;line-height:1.2}.card p{margin:0;color:#5b6367;font-size:.93rem;line-height:1.55}
+.note{margin-top:12px!important;font-size:.78rem!important;color:#8a9195!important}
+.cta{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:54px;margin-top:16px;padding:0 22px;border:1px solid rgba(255,232,176,.8);border-radius:999px;color:#fff;text-decoration:none;font-size:1rem;cursor:pointer;background:linear-gradient(125deg,#8f5818 0%,#c38831 22%,#e9c477 43%,#b87321 62%,#d5a14b 79%,#925818 100%);box-shadow:0 8px 22px rgba(128,78,20,.25),inset 0 1px 0 rgba(255,248,218,.8)}
+.cta small{font-size:.78rem;opacity:.9}.cta:disabled{opacity:.6}
+.ghost{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;margin-top:10px;padding:0 22px;border:1px solid rgba(183,122,43,.5);border-radius:999px;background:rgba(255,255,255,.75);color:#86551c;font-size:1rem;cursor:pointer;text-decoration:none}
+.link{border:0;background:none;color:#8a9195;font-size:.82rem;text-decoration:underline;cursor:pointer;padding:12px 0 0}
+.field{display:block;margin-top:16px}.field span{display:block;margin:0 0 6px 4px;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:#8a9195}
+.field input{width:100%;min-height:48px;padding:10px 16px;border:1px solid rgba(183,122,43,.3);border-radius:16px;background:#fff;color:var(--ink);font-size:1rem}.field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(183,122,43,.14)}
+.status{display:flex;gap:12px;align-items:flex-start;padding:16px 18px;border-radius:22px;background:linear-gradient(120deg,rgba(255,248,232,.95),rgba(255,255,255,.9));border:1px solid rgba(214,166,84,.35);color:#6d4a1d;font-size:.92rem;line-height:1.5}
+.status .dot{flex:none;width:10px;height:10px;margin-top:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 0 rgba(183,122,43,.5);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(183,122,43,0)}100%{box-shadow:0 0 0 0 rgba(183,122,43,0)}}
+.people{display:grid;gap:10px}
+.person{display:grid;grid-template-columns:56px 1fr auto;gap:14px;align-items:center;padding:14px 14px 14px 16px;border-radius:22px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.95);box-shadow:0 8px 22px rgba(77,89,94,.06)}
+.ava{width:56px;height:56px;border-radius:50%;object-fit:cover;display:grid;place-items:center;font-size:1.3rem;color:#fff;background:linear-gradient(135deg,#c79443,#8f5818);border:2px solid #fff;box-shadow:0 0 0 1px rgba(183,122,43,.35)}
+.person h4{margin:0;font-size:1.02rem;font-weight:400}.meta{margin-top:3px;font-size:.8rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.chip{padding:3px 9px;border-radius:999px;border:1px solid rgba(183,122,43,.25);font-size:.7rem;color:#7a5523;background:rgba(255,250,240,.8)}.chip.tag{background:#f4ead8;border-color:transparent}.chip.met{background:#eef1f2;color:#7d8589;border-color:transparent}
+.mini{border:1px solid rgba(183,122,43,.55);background:#fff;color:#86551c;border-radius:999px;padding:9px 14px;font-size:.84rem;cursor:pointer;white-space:nowrap}.mini.gold{border-color:transparent;color:#fff;background:linear-gradient(115deg,#8c5517,#b97a2c 45%,#d4a24f)}.mini:disabled{opacity:.55;cursor:default}
+.mini-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.invite{border-color:rgba(214,166,84,.55);background:linear-gradient(120deg,#fffaf0,#fff)}
+.partner{text-align:center;padding:28px 20px 22px}
+.partner .avas{display:flex;justify-content:center;margin-bottom:14px}.partner .avas .ava{width:86px;height:86px;font-size:2rem;margin:0 -8px;border-width:3px}
+.partner .eyebrow{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:#a0753a}
+.partner h3{margin:8px 0 4px;font-size:1.7rem;font-weight:200}
+.done{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;margin-top:12px;border-radius:999px;background:#f3ecdf;color:#86551c;font-size:.95rem}
+.steps{display:grid;gap:10px;margin:0;padding:0;list-style:none;counter-reset:s}
+.steps li{position:relative;padding:14px 16px 14px 56px;border-radius:20px;background:rgba(255,255,255,.7);font-size:.9rem;line-height:1.45;color:#4f575b;counter-increment:s}
+.steps li:before{content:counter(s);position:absolute;left:16px;top:13px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;color:#fff;background:linear-gradient(135deg,#c79443,#8f5818)}
+.history{display:flex;flex-wrap:wrap;gap:8px}.history .chip{font-size:.8rem;padding:6px 12px}
+.empty{color:#8a9195;font-size:.88rem}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);max-width:90vw;padding:12px 18px;border-radius:16px;background:rgba(48,52,56,.92);color:#fff;font-size:.88rem;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none}.toast.on{opacity:1}
+.skeleton{height:160px;border-radius:var(--radius);background:linear-gradient(90deg,rgba(255,255,255,.6),rgba(255,255,255,.95),rgba(255,255,255,.6));background-size:200% 100%;animation:sh 1.4s infinite}@keyframes sh{to{background-position:-200% 0}}
+@media(max-width:430px){.person{grid-template-columns:48px 1fr;}.person .ava{width:48px;height:48px}.person .mini-row{grid-column:1/-1;justify-content:stretch}.person .mini-row .mini{flex:1}}
+</style>
+<script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
+<script src="/access-guard.js"></script>
+<link rel="stylesheet" href="/nav.css">
+<link rel="stylesheet" href="/polish.css">
+</head>
+<body>
+<main class="page">
+  <a class="back" href="about.html">← Обо мне</a>
+  <section class="hero"><div class="eyebrow">Клуб «к Женщине»</div><h1>Ритуал<br>в паре</h1><p>После каждого созвона клуба — новая пара. Так за месяц вокруг вас становится всё больше близких женщин.</p><div class="orbs" aria-hidden="true"><i></i><i></i></div></section>
+  <div class="stats"><div class="stat"><b id="month-count">0</b><span id="month-label">женщин в этом месяце</span></div><div class="stat"><b id="total-count">0</b><span id="total-label">разных женщин за всё время</span></div></div>
+  <div class="section-title"><h2 id="main-title">МОЯ ПАРА</h2></div>
+  <div id="main"><div class="skeleton"></div></div>
+  <div id="extra"></div>
+  <div class="section-title"><h2>КАК ЭТО УСТРОЕНО</h2></div>
+  <ol class="steps"><li>Раз в две недели — онлайн-созвон клуба. Знакомимся, делимся, слышим друг друга.</li><li>Сразу после созвона бот пришлёт приглашение: выберите пару сама или доверьте подбор нам.</li><li>Мы подбираем так, чтобы каждый раз это была новая участница — с похожими задачами, ресурсами и в удобном часовом поясе.</li><li>Вы созваниваетесь вдвоём, проходите ритуал и отмечаете «Ритуал пройден».</li></ol>
+  <div id="history-block" hidden><div class="section-title"><h2>С КЕМ Я УЖЕ БЫЛА В ПАРЕ</h2></div><div class="history" id="history"></div></div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<nav class="app-nav" aria-label="Основная навигация"><a href="space.html"><span class="icon"><svg class="line-icon" viewBox="-4 -4 56 56" aria-hidden="true"><g transform="translate(24 24)"><path d="M0-27 1.5-8 0-4.8-1.5-8ZM0 27-1.5 8 0 4.8 1.5 8ZM-27 0-8-1.5-4.8 0-8 1.5ZM27 0 8 1.5 4.8 0 8-1.5ZM-19.1-19.1-5.8-7.8-4.1-4.1-7.8-5.8ZM19.1 19.1 5.8 7.8 4.1 4.1 7.8 5.8ZM19.1-19.1 7.8-5.8 4.1-4.1 5.8-7.8ZM-19.1 19.1-7.8 5.8-4.1 4.1-5.8 7.8Z" fill="currentColor" stroke="none"/><path d="M-10.3-24.8-3.1-9.1M10.3 24.8 3.1 9.1M10.3-24.8 3.1-9.1M-10.3 24.8-3.1 9.1M-24.8-10.3-9.1-3.1M24.8 10.3 9.1 3.1M24.8-10.3 9.1-3.1M-24.8 10.3-9.1 3.1" stroke-width="1.15"/><circle r="3.2" stroke-width="1.35"/><circle r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Пространство</span></a><a href="path.html"><span class="icon"><svg class="line-icon" viewBox="-2 -2 52 52" aria-hidden="true"><g transform="translate(24 24)"><ellipse rx="24" ry="10.4" transform="rotate(-13)" stroke-width="1.35"/><ellipse rx="21.5" ry="9" transform="rotate(48)" stroke-width="1.05"/><path d="M-18.5 12.5C-9.5 19.6 7.8 19 18.7 8.3" stroke-width="1.05"/><circle r="6.7" stroke-width="1.25"/><circle cx="21.5" cy="-5.5" r="1.55" fill="currentColor" stroke="none"/><circle cx="-15.8" cy="13.2" r="1.05" fill="currentColor" stroke="none"/></g></svg></span><span>Путь</span></a><a href="meetings.html"><span class="icon"><svg class="line-icon" viewBox="0 0 48 48" aria-hidden="true"><g transform="translate(24 24)"><path d="M-6 16C-10.3 11.6-20.5 4.4-20.5-4.6-20.5-13.3-10.5-17-5.2-9.7-.1-17 10-13.3 10-4.6 10 4.2.2 11.6-6 16Z" stroke-width="1.35"/><path d="M6 16C1.7 11.6-8.5 4.4-8.5-4.6-8.5-13.3 1.5-17 6.8-9.7 11.9-17 22-13.3 22-4.6 22 4.2 12.2 11.6 6 16Z" stroke-width="1.35"/><circle cx="-6" cy="16" r=".95" fill="currentColor" stroke="none"/><circle cx="6" cy="16" r=".95" fill="currentColor" stroke="none"/></g></svg></span><span>Встречи</span></a><a href="about.html" class="active" aria-current="page"><span class="icon"><svg class="fill-icon" viewBox="0 0 512 512" aria-hidden="true"><path d="M241.251 145.056c-39.203-17.423-91.472 17.423-104.54 60.982-13.068 43.558 8.712 117.608 65.337 143.742 56.626 26.135 108.896-8.712 87.117-39.202-74.049-8.712-121.963-87.117-100.184-126.319s91.472-21.78 52.27-39.203zM337.079 271.375c47.914-39.202 21.779-126.319-17.423-135.031-39.202-8.712-56.626 13.068-26.135 39.202 39.203 30.491-8.712 91.472-39.202 87.117 0 0 34.847 47.914 82.76 8.712zM254.318 119.788c43.558-17.423 74.049-9.579 100.184 16.556 13.068-39.202-30.491-104.54-108.896-113.252S93.153 118.921 127.999 171.191c8.712-17.424 60.982-64.47 126.319-51.403zM110.576 245.24C36.527 262.663 28.87 335.248 45.239 380.27c17.423 47.914 4.356 82.761 26.135 91.472 20.622 8.253 91.472 13.068 152.454 17.423 60.982 4.356 108.896-47.914 91.472-108.896-174.233 30.492-204.724-95.827-204.724-135.029zM93.883 235.796s2.178-28.313 10.89-43.558c-4.356-4.356-8.712-21.779-8.712-21.779s-4.356-19.601-4.356-34.846c-32.669-6.534-89.295 34.846-91.472 41.38-2.178 6.534 10.889 80.583 39.202 82.761 30.492-23.958 54.448-23.958 54.448-23.958zM489.533 175.546c-39.202-82.761-113.252-65.337-113.252-65.337s4.356 21.779-4.356 34.846c43.558 47.914 13.067 146.643-24.681 158.265 130.675 56.626 159.712-58.081 164.068-75.504 4.356-17.423-13.067-30.49-21.779-52.27zM454.108 332.076c-22.359 15.841-85.663 11.613-121.964-7.265 1.446 14.514-13.067 37.756-20.325 39.202 27.59 11.621 53.725 62.436 7.265 116.161 18.878 18.87 95.828 4.356 140.842-24.689 7.325-4.722 18.869-52.27 21.779-79.851 3.855-36.531 7.258-68.247-27.597-43.558zM257.227 213.294c-18.928 5.164-30.439-6.27-23.234-18.869 5.811-10.167 5.266-20.69-8.712-13.068-29.044 17.423-11.612 66.784 24.689 62.428 49.36-17.423 27.581-62.428 14.514-60.982-13.067 1.446 8.712 26.135-7.257 30.491z"/></svg></span><span>Обо мне</span></a></nav>
+<datalist id="cities"><option value="Москва"><option value="Санкт-Петербург"><option value="Казань"><option value="Краснодар"><option value="Сочи"><option value="Екатеринбург"><option value="Новосибирск"><option value="Самара"><option value="Нижний Новгород"><option value="Калининград"><option value="Минск"><option value="Алматы"><option value="Тбилиси"><option value="Дубай"><option value="Бали"></datalist>
+<script>
+(function pairsPage(){
+const webApp=window.Telegram&&window.Telegram.WebApp;
+const CLUB_PAYMENT_URL='https://t.me/tribute/app?startapp=s17IJ';
+const MONTHS=['январе','феврале','марте','апреле','мае','июне','июле','августе','сентябре','октябре','ноябре','декабре'];
+const $=id=>document.getElementById(id);
+const main=$('main'),extra=$('extra');
+let initData='',state=null,busy=false,poll=null;
+
+const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),3200)}
+function haptic(kind){try{webApp&&webApp.HapticFeedback&&webApp.HapticFeedback.notificationOccurred(kind)}catch(e){}}
+function openLink(url){
+  if(!url)return;
+  if(webApp&&webApp.initData){if(/^https:\/\/t\.me\//.test(url)&&webApp.openTelegramLink)webApp.openTelegramLink(url);else if(webApp.openLink&&/^https:/.test(url))webApp.openLink(url);else location.href=url}
+  else window.open(url,'_blank','noopener');
+}
+function women(n){const a=n%10,b=n%100;return a===1&&b!==11?'женщина':a>=2&&a<=4&&(b<12||b>14)?'женщины':'женщин'}
+function avatar(p){
+  if(p.photo_url){const img=el('img','ava');img.src=p.photo_url;img.alt='';img.onerror=()=>img.replaceWith(initial(p));return img}
+  return initial(p);
+}
+function initial(p){const d=el('div','ava',(p.name||'?').trim()[0]||'?');d.setAttribute('aria-hidden','true');return d}
+
+async function api(body){
+  const r=await fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData,action:'pairs',...body})});
+  let data=null;try{data=await r.json()}catch(e){}
+  if(!r.ok||!data||data.ok===false)throw new Error(data&&data.error||'Не получилось. Попробуйте ещё раз.');
+  return data;
+}
+async function act(body,okMsg){
+  if(busy)return;busy=true;
+  try{state=await api(body);render();if(okMsg){toast(okMsg);haptic('success')}}
+  catch(e){toast(e.message);haptic('error')}
+  finally{busy=false}
+}
+
+function renderStats(s){
+  $('month-count').textContent=s.month_count;
+  $('month-label').textContent=women(s.month_count)+' в паре в '+MONTHS[new Date().getMonth()];
+  $('total-count').textContent=s.total_count;$('total-label').textContent=(s.total_count%10===1&&s.total_count%100!==11?'женщина':'разных женщин')+' за всё время';
+  const h=$('history');h.replaceChildren(...(s.history||[]).map(p=>el('span','chip',p.city?p.name+' · '+p.city:p.name)));
+  $('history-block').hidden=!(s.history||[]).length;
+}
+
+function card(){const c=el('section','surface card');main.replaceChildren(c);extra.replaceChildren();return c}
+
+function renderNotMember(){
+  $('main-title').textContent='ДЛЯ УЧАСТНИЦ КЛУБА';
+  const c=card();c.append(el('h3',null,'Ритуалы в паре — внутри клуба'),el('p',null,'Раз в две недели мы встречаемся онлайн, а после созвона проходим ритуал вдвоём — каждый раз с новой участницей.'));
+  const b=el('button','cta');b.innerHTML='Вступить в клуб <span>→</span>';b.onclick=()=>openLink(CLUB_PAYMENT_URL);c.appendChild(b);
+}
+
+function renderWaiting(s){
+  $('main-title').textContent='СЛЕДУЮЩИЙ РИТУАЛ';
+  const c=card();
+  if(s.next_call){c.append(el('h3',null,'Созвон клуба — '+s.next_call.label),el('p',null,'Сразу после созвона здесь откроется подбор пары, а бот пришлёт вам приглашение.'))}
+  else c.append(el('h3',null,'Подбор откроется после созвона клуба'),el('p',null,'Дату ближайшего созвона объявим в клубе — и бот пришлёт приглашение.'));
+}
+
+function renderJoin(s){
+  const r=s.round;$('main-title').textContent='РИТУАЛ ПОСЛЕ СОЗВОНА';
+  const c=card();
+  c.append(el('h3',null,'С кем вы пройдёте ритуал сегодня?'),el('p',null,r.matched?'Основной подбор уже прошёл, но ещё не поздно: запишитесь, и мы найдём вам пару среди тех, кто тоже ждёт.':'Выберите пару сама или доверьте подбор нам — в '+r.match_label+' пришлём вашу пару.'));
+  const f=el('label','field');f.append(el('span',null,'Ваш город'));const city=el('input');city.setAttribute('list','cities');city.maxLength=60;city.placeholder='Например, Москва';city.value=s.city||'';f.appendChild(city);c.appendChild(f);
+  const auto=el('button','cta');auto.innerHTML='Подберите мне пару <small>'+(r.matched?'сразу, как найдётся':'в '+r.match_label)+'</small>';
+  auto.onclick=()=>act({op:'join',mode:'auto',city:city.value},'Вы в подборе 💛');
+  const self=el('button','ghost');self.innerHTML='Выберу сама <span>→</span>';self.onclick=()=>act({op:'join',mode:'self',city:city.value});
+  c.append(auto,self,el('p','note','Ваша пара увидит имя, фото, город и сможет написать вам в Telegram. Ваши задачи никто не видит — они помогают только подобрать пару.'));
+}
+
+function personRow(p,buttons){
+  const row=el('article','person');const info=el('div');info.appendChild(el('h4',null,p.name));
+  const meta=[p.city].filter(Boolean).join(' · ');if(meta)info.appendChild(el('div','meta',meta));
+  const chips=el('div','chips');if(p.tag)chips.appendChild(el('span','chip tag',p.tag));if(p.met_before)chips.appendChild(el('span','chip met','уже были в паре'));(p.resources||[]).forEach(x=>chips.appendChild(el('span','chip',x)));
+  if(chips.childNodes.length)info.appendChild(chips);
+  const btns=el('div','mini-row');buttons.forEach(b=>btns.appendChild(b));
+  row.append(avatar(p),info,btns);return row;
+}
+function mini(text,cls,fn,disabled){const b=el('button','mini'+(cls?' '+cls:''),text);b.type='button';if(disabled)b.disabled=true;else b.onclick=fn;return b}
+
+function renderSearching(s){
+  const r=s.round;$('main-title').textContent='МОЯ ПАРА';
+  const box=el('div');main.replaceChildren(box);extra.replaceChildren();
+  const st=el('div','status');st.append(el('span','dot'));
+  st.appendChild(el('div',null,r.mode==='auto'&&!r.matched?'Вы в подборе. В '+r.match_label+' пришлём вашу пару — а пока можно выбрать самой.':r.matched?'Ждём ещё участниц — пришлём пару, как только кто-то запишется. Или пригласите сама.':'Выберите, кого пригласить. Если не успеете — в '+r.match_label+' мы подберём пару сами.'));
+  box.appendChild(st);
+  if(r.incoming.length){
+    const t=el('div','section-title');t.appendChild(el('h2',null,'ВАС ПРИГЛАСИЛИ'));extra.appendChild(t);
+    const list=el('div','people');r.incoming.forEach(p=>{const row=personRow(p,[mini('Принять','gold',()=>act({op:'accept',from:p.id},'Вы в паре 💛')),mini('Не сейчас','',()=>act({op:'decline',from:p.id}))]);row.classList.add('invite');list.appendChild(row)});extra.appendChild(list);
+  }
+  const t=el('div','section-title');t.appendChild(el('h2',null,'ВЫБРАТЬ САМОЙ'));extra.appendChild(t);
+  const avail=r.available.filter(p=>!r.incoming.some(i=>i.id===p.id));
+  if(!avail.length)extra.appendChild(el('p','empty','Пока никто больше не записался. Список обновляется сам.'));
+  else{const list=el('div','people');avail.forEach(p=>{const sent=r.outgoing.includes(p.id);list.appendChild(personRow(p,[mini(sent?'Приглашение отправлено':'Пригласить',sent?'':'gold',()=>act({op:'invite',to:p.id},'Приглашение отправлено 💛'),sent)]))});extra.appendChild(list)}
+  const leave=el('button','link','Передумала — не участвую в этот раз');leave.onclick=()=>act({op:'leave'});extra.appendChild(leave);
+}
+
+function renderPair(s){
+  const r=s.round,ps=r.pair.partners;$('main-title').textContent=ps.length>1?'МОЯ ТРОЙКА':'МОЯ ПАРА';
+  const c=el('section','surface card partner');main.replaceChildren(c);extra.replaceChildren();
+  const avas=el('div','avas');ps.forEach(p=>avas.appendChild(avatar(p)));
+  c.append(avas,el('div','eyebrow','Ритуал '+r.label),el('h3',null,ps.map(p=>p.name).join(' и ')));
+  const cities=ps.map(p=>p.city).filter(Boolean);if(cities.length)c.appendChild(el('p',null,cities.join(' · ')));
+  c.appendChild(el('p','note','Напишите и договоритесь, когда удобно созвониться. Пройти ритуал вместе можно в течение недели.'));
+  ps.forEach(p=>{const b=el('button','cta');b.innerHTML='Написать: '+p.name.replace(/[<>&]/g,'')+' <span>→</span>';b.onclick=()=>openLink(p.contact_url);c.appendChild(b)});
+  if(r.ritual_url){const b=el('button','ghost');b.innerHTML=(r.ritual_title||'Открыть ритуал').replace(/[<>&]/g,'')+' <span>→</span>';b.onclick=()=>openLink(r.ritual_url);c.appendChild(b)}
+  if(r.done)c.appendChild(el('div','done','✓ Ритуал пройден'));
+  else{const b=el('button','ghost');b.innerHTML='Ритуал пройден <span>✓</span>';b.onclick=()=>act({op:'done'},'Спасибо! Отметили 💛');c.appendChild(b)}
+}
+
+function render(){
+  const s=state;if(!s)return;renderStats(s);
+  clearInterval(poll);poll=null;
+  if(!s.member)return renderNotMember();
+  if(!s.round)return renderWaiting(s);
+  if(!s.round.joined)return renderJoin(s);
+  if(!s.round.pair){poll=setInterval(()=>{if(!busy&&document.visibilityState==='visible')api({op:'state'}).then(d=>{state=d;render()}).catch(()=>{})},20000);return renderSearching(s)}
+  renderPair(s);
+}
+
+(async()=>{
+  for(let i=0;i<20&&!initData;i++){initData=webApp&&webApp.initData||'';if(!initData)await new Promise(r=>setTimeout(r,250))}
+  if(!initData){main.replaceChildren(el('p','empty','Откройте эту страницу в приложении «к Женщине» в Telegram.'));return}
+  try{state=await api({op:'state'});render()}catch(e){main.replaceChildren(el('p','empty',e.message))}
+})();
+})();
+</script>
+</body>
+</html>

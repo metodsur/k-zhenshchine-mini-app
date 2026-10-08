@@ -46,6 +46,11 @@ function createWorld() {
         return v;
       }
       case 'HSETNX': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; if (h[rest[0]]) return 0; h[rest[0]] = rest[1]; kv.set(key, JSON.stringify(h)); return 1; }
+      case 'HSET': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; let added = 0; for (let i = 0; i < rest.length; i += 2) { if (!(rest[i] in h)) added++; h[rest[i]] = rest[i + 1]; } kv.set(key, JSON.stringify(h)); return added; }
+      case 'HDEL': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; let n = 0; rest.forEach((f) => { if (f in h) { delete h[f]; n++; } }); kv.set(key, JSON.stringify(h)); return n; }
+      case 'HGETALL': { const h = kv.has(key) ? JSON.parse(kv.get(key)) : {}; return Object.entries(h).flat(); }
+      case 'SREM': { const s = sets.get(key) || new Set(); let n = 0; rest.forEach((v) => { if (s.delete(String(v))) n++; }); return n; }
+      case 'SISMEMBER': return (sets.get(key) || new Set()).has(String(rest[0])) ? 1 : 0;
       default: throw new Error(`Fake Redis: unsupported ${cmd}`);
     }
   };

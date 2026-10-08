@@ -60,6 +60,9 @@ module.exports = async function handler(req, res) {
   if (!safeEqualString(req.headers["x-reminder-secret"], process.env.TELEGRAM_REMINDER_SECRET)) return send(res, 403, { ok: false });
   let body;
   try { body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {}); } catch { return send(res, 400, { ok: false }); }
+  if (body.kind === "pairs") {
+    try { return send(res, 200, { ok: true, result: await require("../../lib/pairs").handleDelayed(body) }); } catch (error) { console.error("Pairs step failed", error.message); return send(res, 500, { ok: false }); }
+  }
   if (body.kind === "checkout") {
     try { return send(res, 200, { ok: true, ...(await checkoutReminder(body.orderId)) }); } catch { return send(res, 500, { ok: false }); }
   }

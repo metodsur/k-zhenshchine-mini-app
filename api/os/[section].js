@@ -245,6 +245,34 @@ const sections = {
     return result.status === 200 ? { status: 200, body: { ok: true } } : fail(result);
   },
 
+  // Club: pairs for the ritual after every online call.
+  async pairs(member, body) {
+    if (!team.can(member, "pairs.edit")) return deny("пары");
+    const pairs = require("../../lib/pairs");
+    const action = body.action || "list";
+    const round = String(body.round || "");
+    let r;
+    if (action === "list") {
+      const config = await pairs.loadConfig();
+      const rounds = [];
+      for (const meta of await pairs.listRounds()) rounds.push(await pairs.roundSummary(meta));
+      const today = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10);
+      return { status: 200, body: { ok: true, config, next: pairs.nextCall(config), upcoming: config.enabled ? pairs.callDates(config, today, 4) : [], rounds } };
+    }
+    if (action === "round") {
+      const details = await pairs.roundDetails(round);
+      return details ? { status: 200, body: { ok: true, ...details } } : { status: 404, body: { ok: false, errors: ["Раунд не найден"] } };
+    }
+    if (action === "save_config") r = await pairs.saveConfig(body.config || {});
+    else if (action === "open_now") r = await pairs.openRound(new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10), { manual: true, by: who(member) });
+    else if (action === "match_now") r = await pairs.match(round, { auto: true });
+    else if (action === "unpair") r = await pairs.unpair(round, String(body.pair || ""));
+    else if (action === "pair") r = await pairs.pairManually(round, String(body.a || ""), String(body.b || ""));
+    else r = { status: 400, errors: ["Неизвестное действие"] };
+    if (r.status !== 200) return fail(r.error ? { status: r.status, errors: [r.error] } : r);
+    return { status: 200, body: { ok: true, ...r, status: undefined } };
+  },
+
   async collection(member, body) {
     const name = String(body.name || "");
     if (!collections.SCHEMAS[name]) return { status: 404, body: { ok: false, errors: ["Раздел не найден"] } };
