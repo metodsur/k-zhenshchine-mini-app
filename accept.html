@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#faf9f6">
+<title>Ритуал «Я принимаю» — к Женщине</title>
+<link rel="stylesheet" href="/masters.css">
+<script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
+<script src="/access-guard.js"></script>
+<style>
+.ab-hero h1{font-size:clamp(1.7rem,7vw,2.3rem);line-height:1.1}
+.audio-title{margin:6px 4px 14px;font-weight:300;font-size:1.25rem}
+.track{display:flex;gap:14px;align-items:center;padding:14px 12px;border-radius:18px;background:rgba(255,250,240,.9);border:1px solid rgba(214,166,84,.3);margin-top:10px}
+.play{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,232,176,.8);cursor:pointer;background:linear-gradient(125deg,#8f5818 0%,#c38831 25%,#e9c477 48%,#b87321 72%,#925818 100%);box-shadow:0 6px 16px rgba(128,78,20,.25);position:relative}
+.play:before{content:"";position:absolute;left:20px;top:16px;border-left:15px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent}
+.track.on .play:before{left:17px;top:17px;width:5px;height:18px;border:0;background:#fff;box-shadow:10px 0 0 #fff}
+.t-main{flex:1;min-width:0}.t-main b{font-weight:400;font-size:1rem}
+.bar{position:relative;height:6px;margin:9px 0 6px;border-radius:9px;background:rgba(183,122,43,.18);cursor:pointer;touch-action:none}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:9px;background:linear-gradient(90deg,#a96c22,#d7a654)}
+.t-main small{color:#8a7a62;font-size:.78rem}
+.audio-hint{margin:12px 4px 0;color:#8a9195;font-size:.78rem}
+.lesson{margin-top:18px;padding:18px 16px 16px}
+.lesson-head{display:flex;gap:14px;align-items:baseline;margin:0 4px 12px}
+.lesson-head b{flex:none;font-weight:300;font-size:1.5rem;color:#a96c22;line-height:1}
+.lesson-head h2{margin:0;font-weight:400;font-size:1.08rem;line-height:1.35}
+.video-frame{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#1d1a17;border:1px solid rgba(214,166,84,.35);box-shadow:0 12px 30px rgba(77,60,40,.16)}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video-soon{display:grid;place-items:center;aspect-ratio:16/9;border-radius:18px;background:linear-gradient(135deg,#f6ead6,#ecd9b8);color:#8a6a3c;font-size:.92rem;text-align:center;padding:16px}
+.video-soon span{display:block;font-size:1.6rem;margin-bottom:6px}
+.contents{list-style:none;margin:16px 0 0;padding:0}
+.contents li a{display:flex;gap:12px;padding:11px 4px;border-top:1px solid rgba(183,122,43,.16);text-decoration:none;color:inherit;font-size:.95rem}
+.contents li:first-child a{border-top:0}
+.contents li a b{font-weight:300;color:#a96c22;min-width:22px}
+</style>
+</head>
+<body>
+<main class="app">
+  <a class="back" href="/path.html">← На Путь</a>
+  <section class="m-hero ab-hero" style="background-image:linear-gradient(180deg,rgba(251,250,247,.9) 0%,rgba(251,250,247,.82) 55%,rgba(251,250,247,.95) 100%),url('/img/ka_asset_14-32f8c0c082.webp')"><div>
+    <div class="eyebrow">● Важный ритуал</div>
+    <h1>Я принимаю</h1>
+    <p>Практики на принятие себя, своей многогранности и всего своего объёма. Сначала посмотрите видео, затем пройдите аудиопрактики в спокойном месте.</p>
+  </div></section>
+  <div id="lessons"></div>
+  <section class="surface lesson audio-list">
+    <div class="eyebrow" style="margin:0 4px">Аудиопрактики</div>
+    <h2 class="audio-title">Послушайте и пройдите практики</h2>
+    <div class="track" data-src="/audio/accept-practice-1.m4a"><button class="play" type="button" aria-label="Слушать"></button><div class="t-main"><b>Аудиопрактика 1</b><div class="bar"><i></i></div><small><span class="cur">0:00</span> · <span class="dur">20 мин</span></small></div></div>
+    <div class="track" data-src="/audio/accept-practice-2.m4a"><button class="play" type="button" aria-label="Слушать"></button><div class="t-main"><b>Аудиопрактика 2</b><div class="bar"><i></i></div><small><span class="cur">0:00</span> · <span class="dur">5 мин</span></small></div></div>
+    <p class="audio-hint">Лучше в наушниках и в спокойном месте, где вас никто не отвлечёт.</p>
+  </section>
+</main>
+<script>
+(function () {
+  "use strict";
+  var LESSONS = [["accept_video_url", "Ритуал «Я принимаю»"]];
+  // VK Video link → embeddable player (same rules as on the server).
+  function vkEmbed(url) {
+    var u = String(url || "").trim();
+    if (!u) return null;
+    if (/^https:\/\/(vk\.com|vkvideo\.ru)\/video_ext\.php\?/.test(u)) return u;
+    var m = /(?:video|clip)(-?\d+)_(\d+)/.exec(u);
+    return m ? "https://vkvideo.ru/video_ext.php?oid=" + m[1] + "&id=" + m[2] + "&hd=2" : null;
+  }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function draw(links) {
+    var box = document.getElementById("lessons");
+    box.innerHTML = "";
+    LESSONS.forEach(function (item) {
+      var title = item[1];
+      var sec = el("section", "surface lesson");
+      var src = vkEmbed(links[item[0]]);
+      if (src) {
+        var frame = el("div", "video-frame"), f = document.createElement("iframe");
+        f.src = src; f.title = title; f.loading = "lazy"; f.setAttribute("frameborder", "0"); f.setAttribute("allowfullscreen", "");
+        f.setAttribute("allow", "autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock");
+        frame.appendChild(f); sec.appendChild(frame);
+      } else {
+        var soon = el("div", "video-soon"); soon.innerHTML = "<div><span>🎬</span>Видео скоро появится</div>"; sec.appendChild(soon);
+      }
+      box.appendChild(sec);
+    });
+  }
+
+  // Audio practices: one plays at a time; tap the bar to jump.
+  var audio = new Audio(); audio.preload = "none"; var current = null;
+  function fmt(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + ("0" + (t % 60)).slice(-2); }
+  document.querySelectorAll(".track").forEach(function (tr) {
+    var src = tr.getAttribute("data-src");
+    tr.querySelector(".play").addEventListener("click", function () {
+      if (current === tr && !audio.paused) { audio.pause(); return; }
+      if (current !== tr) { if (current) current.classList.remove("on"); current = tr; audio.src = src; }
+      audio.play().catch(function () {});
+    });
+    tr.querySelector(".bar").addEventListener("click", function (e) {
+      var r = this.getBoundingClientRect(), k = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+      if (current !== tr) { if (current) current.classList.remove("on"); current = tr; audio.src = src; audio.addEventListener("loadedmetadata", function once() { audio.removeEventListener("loadedmetadata", once); audio.currentTime = k * audio.duration; audio.play().catch(function () {}); }); audio.load(); return; }
+      if (audio.duration) audio.currentTime = k * audio.duration;
+    });
+  });
+  audio.addEventListener("play", function () { if (current) current.classList.add("on"); });
+  audio.addEventListener("pause", function () { if (current) current.classList.remove("on"); });
+  audio.addEventListener("timeupdate", function () {
+    if (!current) return;
+    current.querySelector(".cur").textContent = fmt(audio.currentTime);
+    if (audio.duration) { current.querySelector(".dur").textContent = fmt(audio.duration); current.querySelector(".bar i").style.width = (100 * audio.currentTime / audio.duration) + "%"; }
+  });
+  audio.addEventListener("ended", function () { if (current) { current.classList.remove("on"); current.querySelector(".bar i").style.width = "0"; current.querySelector(".cur").textContent = "0:00"; } });
+  draw({});
+  fetch("/api/schedule", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) { draw((d && d.links) || {}); }).catch(function () {});
+})();
+</script>
+</body>
+</html>
