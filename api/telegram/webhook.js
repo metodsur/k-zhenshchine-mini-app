@@ -46,12 +46,13 @@ const JOIN_REMINDERS = [{ stage: "10m", delay: "10m" }, { stage: "24h", delay: "
 async function scheduleReminder(chatId, userId) {
   const token = process.env.QSTASH_TOKEN;
   const secret = process.env.TELEGRAM_REMINDER_SECRET;
-  const baseUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
+  let baseUrl = (process.env.APP_BASE_URL || "").trim().replace(/\/$/, "");
+  if (baseUrl && !/^https?:\/\//i.test(baseUrl)) baseUrl = `https://${baseUrl}`;
   if (!token || !secret || !baseUrl) throw new Error("Reminder service is not configured");
   if (!(await store.claimOnce(`join-reminders:${userId}`, 2 * 24 * 60 * 60))) return;
   const destination = `${baseUrl}/api/telegram/reminder`;
   for (const { stage, delay } of JOIN_REMINDERS) {
-    const response = await fetch(`https://qstash.upstash.io/v2/publish/${encodeURIComponent(destination)}`, {
+    const response = await fetch(`https://qstash.upstash.io/v2/publish/${destination}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", "Upstash-Delay": delay, "Upstash-Forward-X-Reminder-Secret": secret },
       body: JSON.stringify({ chatId, userId, stage })

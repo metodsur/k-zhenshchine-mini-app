@@ -41,7 +41,7 @@ test('/start for a new visitor: start flow and two reminders (10 min, 24 h), sch
   assert.match(world.sent('sendMessage').at(-1).text, /Добро пожаловать/);
   assert.equal(lastButton(world).web_app.url, 'https://app.example.test');
   assert.deepEqual(world.qstash.map((q) => [q.headers['Upstash-Delay'], q.body.stage]), [['10m', '10m'], ['24h', '24h']]);
-  assert.match(world.qstash[0].url, /api%2Ftelegram%2Freminder/);
+  assert.ok(world.qstash[0].url.endsWith('/v2/publish/https://app.example.test/api/telegram/reminder'), world.qstash[0].url);
   await deliver({ from: MARIA, text: '/start' });
   assert.equal(world.qstash.length, 2, 'pressing /start again does not add more reminders');
 });
