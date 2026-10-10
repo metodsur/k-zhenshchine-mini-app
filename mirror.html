@@ -8,6 +8,12 @@
 <link rel="stylesheet" href="/masters.css">
 <script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 <script src="/access-guard.js"></script>
+<style>
+.video-block{margin:18px 0 6px}.video-block[hidden]{display:none}
+.video-block .eyebrow{margin:0 4px}.video-block h2{margin:6px 4px 12px;font-weight:300;font-size:1.35rem;letter-spacing:.02em}
+.video-frame{position:relative;aspect-ratio:16/9;border-radius:24px;overflow:hidden;background:#1d1a17;box-shadow:0 16px 38px rgba(77,60,40,.18);border:1px solid rgba(214,166,84,.35)}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+</style>
 </head>
 <body>
 <main class="app">
@@ -17,6 +23,7 @@
     <h1>Практика «Зеркало»</h1>
     <p>Авторская практика Варвары. Другая женщина не определяет меня — через встречу с ней я могу увидеть больше собственного объёма. Выбери Мастера многомерности, с которой хочешь пройти практику.</p>
   </div></section>
+  <section class="video-block" id="video" hidden><div class="eyebrow">Видео</div><h2>О практике «Зеркало»</h2><div class="video-frame"></div></section>
   <div id="root"><div class="loading">Загружаем Мастеров…</div></div>
 </main>
 <script>
@@ -42,7 +49,15 @@
   if (!initData) { render(h("div", { class: "surface section", text: "Откройте страницу из Telegram." })); return; }
   api().then(draw).catch(function () { render(h("div", { class: "surface section", text: "Не получилось загрузить. Попробуйте ещё раз." })); });
 
+  function showVideo(url) {
+    var box = document.getElementById("video");
+    if (!url || !box.hidden) return;
+    var frame = h("iframe", { src: url, title: "Видео о практике «Зеркало»", allow: "autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock", allowfullscreen: true, frameborder: "0", loading: "lazy" });
+    box.querySelector(".video-frame").appendChild(frame);
+    box.hidden = false;
+  }
   function draw(d) {
+    if (d && d.video) showVideo(d.video);
     if (!d || !d.ok) return render(h("div", { class: "surface section", text: (d && d.error) || "Не получилось загрузить." }));
     var nodes = [];
     if (d.bookings.length) nodes.push(h("section", { class: "surface section" }, h("h2", { text: "Мои записи" }), d.bookings.map(function (b) {
