@@ -151,3 +151,18 @@ test('pairs: test round invites only the team, matches in 10 minutes and can be 
   assert.equal((await pairs.listRounds()).length, 0);
   assert.equal((await pairs.deleteTestRound('2026-01-01')).status, 400, 'real rounds cannot be deleted');
 });
+
+test('pairs: if the delayed call never comes, opening the page after the matching time matches once', async () => {
+  const world = createWorld();
+  club(world, [ANNA, BELLA]);
+  await pairs.saveConfig({ enabled: false, match_after_min: 0 });
+  const past = Date.now() - 3 * 60e3;
+  await pairs.openRound('2026-02-02', { manual: true, now: past });
+  await pairs.join('2026-02-02', ANNA, { mode: 'auto' });
+  await pairs.join('2026-02-02', BELLA, { mode: 'auto' });
+  const st = (await app(ANNA, { op: 'state' })).body;
+  assert.equal(st.round.pair.partners[0].name, 'Белла');
+  assert.equal((await pairs.roundDetails('2026-02-02')).pairs.length, 1);
+  await app(BELLA, { op: 'state' });
+  assert.equal((await pairs.roundDetails('2026-02-02')).pairs.length, 1, 'only once');
+});

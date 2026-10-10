@@ -267,6 +267,7 @@ const sections = {
     const round = String(body.round || "");
     let r;
     if (action === "list") {
+      try { await pairs.matchDue(); } catch (e) { console.error("Pairs due matching failed", e.message); }
       const config = await pairs.loadConfig();
       const rounds = [];
       for (const meta of await pairs.listRounds()) rounds.push(await pairs.roundSummary(meta));
