@@ -35,12 +35,12 @@ test('club group messages feed the weekly summary; #коллаборация cou
 test('new admin links reach the public schedule', async () => {
   createWorld();
   const saved = await admin('settings', { action: 'save', settings: {
-    friendship_url: 'https://t.me/+friends', abundance_url: 'https://t.me/k/abundance', accept_url: 'https://t.me/k/accept' } });
+    friendship_url: 'https://t.me/+friends', abundance_video_1: 'https://vkvideo.ru/video-1_2', accept_url: 'https://t.me/k/accept' } });
   assert.equal(saved.status, 200);
   assert.ok(saved.body.fields.friendship_url);
   const pub = await call(scheduleApi, { method: 'GET' });
   assert.equal(pub.body.links.friendship_url, 'https://t.me/+friends');
-  assert.equal(pub.body.links.abundance_url, 'https://t.me/k/abundance');
+  assert.equal(pub.body.links.abundance_video_1, 'https://vkvideo.ru/video-1_2');
   assert.equal(pub.body.links.accept_url, 'https://t.me/k/accept');
   assert.equal(pub.body.links.materials_url, '');
 });

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#faf9f6">
+<title>Как создавать изобильную реальность — к Женщине</title>
+<link rel="stylesheet" href="/masters.css">
+<script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
+<script src="/access-guard.js"></script>
+<style>
+.ab-hero h1{font-size:clamp(1.7rem,7vw,2.3rem);line-height:1.1}
+.lesson{margin-top:18px;padding:18px 16px 16px}
+.lesson-head{display:flex;gap:14px;align-items:baseline;margin:0 4px 12px}
+.lesson-head b{flex:none;font-weight:300;font-size:1.5rem;color:#a96c22;line-height:1}
+.lesson-head h2{margin:0;font-weight:400;font-size:1.08rem;line-height:1.35}
+.video-frame{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:#1d1a17;border:1px solid rgba(214,166,84,.35);box-shadow:0 12px 30px rgba(77,60,40,.16)}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.video-soon{display:grid;place-items:center;aspect-ratio:16/9;border-radius:18px;background:linear-gradient(135deg,#f6ead6,#ecd9b8);color:#8a6a3c;font-size:.92rem;text-align:center;padding:16px}
+.video-soon span{display:block;font-size:1.6rem;margin-bottom:6px}
+.contents{list-style:none;margin:16px 0 0;padding:0}
+.contents li a{display:flex;gap:12px;padding:11px 4px;border-top:1px solid rgba(183,122,43,.16);text-decoration:none;color:inherit;font-size:.95rem}
+.contents li:first-child a{border-top:0}
+.contents li a b{font-weight:300;color:#a96c22;min-width:22px}
+</style>
+</head>
+<body>
+<main class="app">
+  <a class="back" href="/space.html">← В пространство</a>
+  <section class="m-hero ab-hero" style="background-image:linear-gradient(180deg,rgba(251,250,247,.9) 0%,rgba(251,250,247,.82) 55%,rgba(251,250,247,.95) 100%),url('/img/ka_asset_14-32f8c0c082.webp')"><div>
+    <div class="eyebrow">Авторская серия Варвары</div>
+    <h1>Как создавать изобильную реальность вокруг себя</h1>
+    <p>Четыре видео о том, как открываться дарам пространства, мужчин и мира — и создавать желаемую реальность.</p>
+    <ul class="contents" id="contents"></ul>
+  </div></section>
+  <div id="lessons"></div>
+</main>
+<script>
+(function () {
+  "use strict";
+  var LESSONS = [
+    "Как получать подарки от пространства",
+    "Как получать подарки от мужчин",
+    "Как притягивать нужные ресурсы в любом объёме",
+    "Нюансы создания желаемой реальности"
+  ];
+  // VK Video link → embeddable player (same rules as on the server).
+  function vkEmbed(url) {
+    var u = String(url || "").trim();
+    if (!u) return null;
+    if (/^https:\/\/(vk\.com|vkvideo\.ru)\/video_ext\.php\?/.test(u)) return u;
+    var m = /(?:video|clip)(-?\d+)_(\d+)/.exec(u);
+    return m ? "https://vkvideo.ru/video_ext.php?oid=" + m[1] + "&id=" + m[2] + "&hd=2" : null;
+  }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  function draw(links) {
+    var box = document.getElementById("lessons"), contents = document.getElementById("contents");
+    box.innerHTML = ""; contents.innerHTML = "";
+    LESSONS.forEach(function (title, i) {
+      var num = "0" + (i + 1), id = "video-" + (i + 1);
+      var li = el("li"), a = el("a"); a.href = "#" + id; a.appendChild(el("b", null, num)); a.appendChild(el("span", null, title)); li.appendChild(a); contents.appendChild(li);
+      var sec = el("section", "surface lesson"); sec.id = id;
+      var head = el("div", "lesson-head"); head.appendChild(el("b", null, num)); head.appendChild(el("h2", null, title)); sec.appendChild(head);
+      var src = vkEmbed(links["abundance_video_" + (i + 1)]);
+      if (src) {
+        var frame = el("div", "video-frame"), f = document.createElement("iframe");
+        f.src = src; f.title = title; f.loading = "lazy"; f.setAttribute("frameborder", "0"); f.setAttribute("allowfullscreen", "");
+        f.setAttribute("allow", "autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock");
+        frame.appendChild(f); sec.appendChild(frame);
+      } else {
+        var soon = el("div", "video-soon"); soon.innerHTML = "<div><span>🎬</span>Видео скоро появится</div>"; sec.appendChild(soon);
+      }
+      box.appendChild(sec);
+    });
+  }
+  draw({});
+  fetch("/api/schedule", { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (d) { draw((d && d.links) || {}); }).catch(function () {});
+})();
+</script>
+</body>
+</html>
