@@ -59,7 +59,7 @@
   function vkEmbed(url) {
     var u = String(url || "").trim();
     if (!u) return null;
-    if (/^https:\/\/(vk\.com|vkvideo\.ru)\/video_ext\.php\?/.test(u)) return u;
+    if (/^https:\/\/(vk\.com|vkvideo\.ru)\/video_ext\.php\?/.test(u) || /^https:\/\/kinescope\.io\/embed\//.test(u)) return u;
     var m = /(?:video|clip)(-?\d+)_(\d+)/.exec(u);
     return m ? "https://vkvideo.ru/video_ext.php?oid=" + m[1] + "&id=" + m[2] + "&hd=2" : null;
   }

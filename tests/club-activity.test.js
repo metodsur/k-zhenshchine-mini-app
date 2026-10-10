@@ -40,8 +40,8 @@ test('new admin links reach the public schedule', async () => {
   assert.ok(saved.body.fields.friendship_url);
   const pub = await call(scheduleApi, { method: 'GET' });
   assert.equal(pub.body.links.friendship_url, 'https://t.me/+friends');
-  assert.equal(pub.body.links.abundance_video_1, 'https://vkvideo.ru/video-1_2');
-  assert.equal(pub.body.links.accept_video_url, 'https://vkvideo.ru/video-3_4');
+  assert.equal(pub.body.links.abundance_video_1, 'https://vkvideo.ru/video_ext.php?oid=-1&id=2&hd=2');
+  assert.equal(pub.body.links.accept_video_url, 'https://vkvideo.ru/video_ext.php?oid=-3&id=4&hd=2');
   assert.equal(pub.body.links.materials_url, '');
 });
 
