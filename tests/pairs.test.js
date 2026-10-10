@@ -166,3 +166,14 @@ test('pairs: if the delayed call never comes, opening the page after the matchin
   await app(BELLA, { op: 'state' });
   assert.equal((await pairs.roundDetails('2026-02-02')).pairs.length, 1, 'only once');
 });
+
+test('owner /delaytest schedules a ping that reaches the bot', async () => {
+  const world = createWorld();
+  const say = (u, text) => deliver({ message: { chat: { id: u.id, type: 'private' }, from: u, text } });
+  await say(W(900, 'Варвара'), '/delaytest');
+  const q = world.qstash.find((x) => x.body.kind === 'ping');
+  assert.ok(q && q.headers['Upstash-Delay'] === '60s');
+  const res = { statusCode: 0, setHeader() {}, end() {} };
+  await reminder({ method: 'POST', headers: { 'x-reminder-secret': 'rs' }, body: q.body }, res);
+  assert.match(world.sent('sendMessage').pop().text, /Отложенные сообщения работают/);
+});
