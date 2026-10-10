@@ -1356,8 +1356,8 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       var open = new Date(r.closes_at).getTime() > Date.now();
       var status = r.matched_at ? (open ? "пары подобраны, запись открыта" : "завершён") : "автоподбор в " + pairsTime(r.match_at);
       return h("li", { class: "click", onclick: function () { openRound(r.id); } },
-        datePill(r.id),
-        h("div", { class: "main" }, h("b", { text: plural(r.entries, "участница", "участницы", "участниц") + " · " + plural(r.pairs, "пара", "пары", "пар") }), h("span", { class: "sub", text: status + (r.manual ? " · открыт вручную" : "") })),
+        datePill(r.date || r.id.slice(0, 10)),
+        h("div", { class: "main" }, h("b", { text: (r.test ? "🧪 Тест · " : "") + plural(r.entries, "участница", "участницы", "участниц") + " · " + plural(r.pairs, "пара", "пары", "пар") }), h("span", { class: "sub", text: status + (r.manual ? " · открыт вручную" : "") })),
         r.pairs ? h("span", { class: "tag paid", text: "ритуал: " + r.done_pairs + " из " + r.pairs }) : null,
         r.waiting ? h("span", { class: "tag over", text: "ждут: " + r.waiting }) : null);
     })) : h("div", { class: "empty", style: "padding:6px 18px 18px", text: "Пока не было ни одного раунда. Первый откроется сам после созвона по расписанию." }));
@@ -1365,10 +1365,15 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     setView([
       h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Клуб" }), h("h1", { text: "Пары на ритуал" }),
         h("p", { text: "После каждого онлайн-созвона клуба — новая пара для ритуала, чтобы за месяц было больше знакомств" })),
+        h("div", { style: "display:flex;gap:8px;flex-wrap:wrap" },
+        h("button", { class: "btn", type: "button", text: "🧪 Тестовый раунд (только команда)", onclick: function () {
+          if (!confirm("Открыть тестовый раунд? Приглашение придёт только команде, автоподбор — через 10 минут. Участницы клуба ничего не получат.")) return;
+          api("pairs", { action: "open_test" }).then(function (r) { if (r.ok) { toast(r.already ? "Тестовый раунд сегодня уже открыт" : "Тест открыт. Приглашений команде: " + (r.sent || 0)); viewPairs(); } else toast((r.errors || [])[0] || "Не получилось"); });
+        } }),
         h("button", { class: "btn gold", type: "button", text: "Открыть запись сейчас", onclick: function () {
           if (!confirm("Открыть подбор пар сейчас? Бот разошлёт приглашение всем участницам клуба.")) return;
           api("pairs", { action: "open_now" }).then(function (r) { if (r.ok) { toast(r.already ? "Сегодня запись уже открыта" : "Открыто. Приглашений отправлено: " + (r.sent || 0)); viewPairs(); } else toast((r.errors || [])[0] || "Не получилось"); });
-        } })),
+        } }))),
       h("div", { class: "grid2" }, h("div", null, rounds, h("div", { style: "height:16px" }), how), settings)
     ]);
   }
@@ -1385,7 +1390,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       var a = select(d.waiting.map(function (w) { return [w.id, w.name]; }), "", selStyle), b = select(d.waiting.map(function (w) { return [w.id, w.name]; }), d.waiting[1] ? d.waiting[1].id : "", { style: selStyle.style });
       dr.appendChild(h("div", { style: "padding:22px;overflow:auto;flex:1" },
         h("button", { class: "x", type: "button", text: "×", onclick: close }),
-        h("div", { class: "eyebrow", text: "Раунд" }), h("h2", { style: "font-weight:300;margin:6px 0 4px", text: dayLabel(d.meta.id) }),
+        h("div", { class: "eyebrow", text: "Раунд" }), h("h2", { style: "font-weight:300;margin:6px 0 4px", text: (d.meta.test ? "🧪 Тест · " : "") + dayLabel(d.meta.date || d.meta.id.slice(0, 10)) }),
         h("p", { style: "color:var(--muted);margin:0 0 16px", text: plural(d.entries, "участница", "участницы", "участниц") + " · " + plural(d.pairs.length, "пара", "пары", "пар") + " · " + (d.meta.matched_at ? "автоподбор прошёл" : "автоподбор в " + pairsTime(d.meta.match_at)) + " · ✓ — отметила «Ритуал пройден»" }),
         h("div", { class: "section-t", text: "Пары" }),
         d.pairs.length ? h("ul", { class: "rows", style: "padding:0" }, d.pairs.map(function (p) {
@@ -1398,7 +1403,11 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
         })) : h("div", { class: "empty", text: "Все в парах" }),
         d.waiting.length >= 2 ? h("div", { style: "display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px" }, a, "+", b,
           h("button", { class: "btn small gold", type: "button", text: "Соединить", onclick: function () { api("pairs", { action: "pair", round: id, a: a.value, b: b.value }).then(function (r) { after(r, "Пара собрана, обеим пришло сообщение"); }); } })) : null,
-        d.waiting.length ? h("button", { class: "btn", style: "margin-top:16px", type: "button", text: "Подобрать пары всем, кто ждёт", onclick: function () { api("pairs", { action: "match_now", round: id }).then(function (r) { after(r, "Подобрано пар: " + (r.formed || 0)); }); } }) : null));
+        d.waiting.length ? h("button", { class: "btn", style: "margin-top:16px", type: "button", text: "Подобрать пары всем, кто ждёт", onclick: function () { api("pairs", { action: "match_now", round: id }).then(function (r) { after(r, "Подобрано пар: " + (r.formed || 0)); }); } }) : null,
+        d.meta.test ? h("div", { style: "margin-top:22px" }, h("button", { class: "btn ghost", type: "button", text: "Удалить тестовый раунд", onclick: function () {
+          if (!confirm("Удалить тестовый раунд? Пары из него не попадут в историю и счётчики.")) return;
+          api("pairs", { action: "delete_test", round: id }).then(function (r) { if (r.ok) { toast("Тестовый раунд удалён"); close(); viewPairs(); } else toast((r.errors || [])[0] || "Не получилось"); });
+        } })) : null));
       document.body.append(bg, dr);
     });
   }

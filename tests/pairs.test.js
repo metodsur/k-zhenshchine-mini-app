@@ -121,3 +121,33 @@ test('pairs: next round avoids last partners; team can unpair and pair manually'
   assert.equal((await pairs.pairManually('2026-01-15', freed[0], freed[1])).status, 200);
   assert.equal((await pairs.pairManually('2026-01-15', freed[0], d.pairs[1].members[0].id)).status, 409);
 });
+
+test('pairs: test round invites only the team, matches in 10 minutes and can be deleted without a trace', async () => {
+  const world = createWorld();
+  club(world, [ANNA, BELLA]);
+  const adminRoute = require('../api/admin/[section]');
+  await call(adminRoute, { method: 'POST', query: { section: 'team' }, body: { initData: initData({ id: 900, first_name: 'Варвара' }), action: 'save', members: [{ id: '5101', name: 'Анастасия', role: 'director' }] } });
+  const id = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10) + 't';
+  const r = await pairs.openRound(id, { manual: true, test: true });
+  assert.equal(r.sent, 2, 'owner + director only');
+  const inv = world.sent('sendMessage').filter((m) => /Тестовый раунд/.test(m.text));
+  assert.deepEqual(inv.map((m) => String(m.chat_id)).sort(), ['5101', '900']);
+  assert.equal(inv[0].reply_markup.inline_keyboard[0][0].callback_data, `p:j:${id}`);
+  assert.ok(world.qstash.some((q) => q.body.round === id && q.headers['Upstash-Delay'] === '600s'));
+  const VARVARA = W(900, 'Варвара'), NASTYA = W(5101, 'Анастасия');
+  await press(VARVARA, `p:j:${id}`);
+  await press(NASTYA, `p:j:${id}`);
+  const res = { statusCode: 0, setHeader() {}, end() {} };
+  await reminder({ method: 'POST', headers: { 'x-reminder-secret': 'rs' }, body: { kind: 'pairs', step: 'match', round: id } }, res);
+  assert.equal((await pairs.roundDetails(id)).pairs.length, 1);
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '900').pop().text, /Ваша пара на ритуал — Анастасия/);
+  await press(VARVARA, `p:d:${id}`);
+  assert.equal((await app(VARVARA, { op: 'state' })).body.month_count, 1);
+  assert.equal((await pairs.deleteTestRound(id)).status, 200);
+  const after = (await app(VARVARA, { op: 'state' })).body;
+  assert.equal(after.month_count, 0);
+  assert.equal(after.total_count, 0);
+  assert.equal(after.round, null);
+  assert.equal((await pairs.listRounds()).length, 0);
+  assert.equal((await pairs.deleteTestRound('2026-01-01')).status, 400, 'real rounds cannot be deleted');
+});

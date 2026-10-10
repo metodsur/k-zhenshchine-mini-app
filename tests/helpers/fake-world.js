@@ -29,7 +29,7 @@ function createWorld() {
         if (rest.includes('NX') && kv.has(key)) return null;
         kv.set(key, rest[0]); return 'OK';
       }
-      case 'DEL': { const had = kv.delete(key) || sets.delete(key); return had ? 1 : 0; }
+      case 'DEL': { let n = 0; [key, ...rest].forEach((k) => { if (kv.delete(k) || sets.delete(k)) n++; }); return n; }
       case 'SADD': { const s = sets.get(key) || new Set(); const before = s.size; rest.forEach((v) => s.add(String(v))); sets.set(key, s); return s.size - before; }
       case 'SMEMBERS': return [...(sets.get(key) || [])];
       case 'INCR': { const v = (Number(kv.get(key)) || 0) + 1; kv.set(key, String(v)); return v; }
