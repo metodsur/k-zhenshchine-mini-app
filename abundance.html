@@ -38,11 +38,12 @@
 <script>
 (function () {
   "use strict";
+  // Display order; each video keeps its own admin field (abundance_video_N is tied to the topic).
   var LESSONS = [
-    "Как получать подарки от пространства",
-    "Как получать подарки от мужчин",
-    "Как притягивать нужные ресурсы в любом объёме",
-    "Нюансы создания желаемой реальности"
+    [3, "Как притягивать нужные ресурсы в любом объёме"],
+    [4, "Нюансы создания желаемой реальности"],
+    [1, "Как получать подарки от пространства"],
+    [2, "Как получать подарки от мужчин"]
   ];
   // VK Video link → embeddable player (same rules as on the server).
   function vkEmbed(url) {
@@ -56,12 +57,13 @@
   function draw(links) {
     var box = document.getElementById("lessons"), contents = document.getElementById("contents");
     box.innerHTML = ""; contents.innerHTML = "";
-    LESSONS.forEach(function (title, i) {
+    LESSONS.forEach(function (item, i) {
+      var title = item[1];
       var num = "0" + (i + 1), id = "video-" + (i + 1);
       var li = el("li"), a = el("a"); a.href = "#" + id; a.appendChild(el("b", null, num)); a.appendChild(el("span", null, title)); li.appendChild(a); contents.appendChild(li);
       var sec = el("section", "surface lesson"); sec.id = id;
       var head = el("div", "lesson-head"); head.appendChild(el("b", null, num)); head.appendChild(el("h2", null, title)); sec.appendChild(head);
-      var src = vkEmbed(links["abundance_video_" + (i + 1)]);
+      var src = vkEmbed(links["abundance_video_" + item[0]]);
       if (src) {
         var frame = el("div", "video-frame"), f = document.createElement("iframe");
         f.src = src; f.title = title; f.loading = "lazy"; f.setAttribute("frameborder", "0"); f.setAttribute("allowfullscreen", "");
