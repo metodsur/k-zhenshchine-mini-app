@@ -52,6 +52,26 @@ main{min-width:0;padding:30px 36px 60px}
 .tcomment{margin-top:10px;padding:10px 12px;border-radius:12px;background:#fbf1de;border-left:3px solid #b77a2b}
 .tcomment small{display:block;font-size:.74rem;color:#8a6a3c;margin-bottom:3px}
 .tcomment p{margin:0;font-size:1.02rem;font-weight:600;line-height:1.4;color:#2c2a26;white-space:pre-wrap;overflow-wrap:anywhere}
+.review-box{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+.review-box .note{margin:0;font-size:.9rem;white-space:pre-wrap;overflow-wrap:anywhere}
+.btn.ok{border-color:transparent;background:var(--ok);color:#fff}
+.btn.warn{border-color:var(--warn);color:var(--warn);background:var(--panel)}
+.btn.bad{border-color:var(--bad);color:var(--bad);background:var(--panel)}
+.tag.warn{background:var(--warn-bg);color:var(--warn)}
+.atts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+a.att{color:inherit;text-decoration:none}
+.att{position:relative;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;font-size:.84rem;min-width:0}
+.att.wide{grid-column:1/-1}
+.att img,.att video{display:block;width:100%;height:130px;object-fit:cover;background:#f1ece5}
+.att .cap{padding:7px 10px;overflow-wrap:anywhere}
+.att .cap small{display:block;color:var(--muted);font-size:.72rem}
+.att .txt{padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}
+.att a{color:var(--gold);overflow-wrap:anywhere}
+.att .del{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#8a8f92;font-size:1rem;cursor:pointer}
+.att-add{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.att-form{display:flex;flex-direction:column;gap:8px;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.att-form input,.att-form textarea{width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font:inherit}
+.att-form textarea{min-height:90px}
 .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-size:.88rem;white-space:nowrap}
 .btn:hover{border-color:#d7c6ad}
 .btn.gold{border-color:transparent;background:linear-gradient(115deg,#8c5517,#b0722a 55%,#c9944a);color:#fff;font-weight:400}
@@ -1542,6 +1562,35 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   }
 
   // ---------- Задачи команды ----------
+  var VERDICTS = { approved: "👍 Утверждено", revision: "✏️ Правки", defect: "⛔ Брак" };
+  function reviewTag(t) {
+    if (t.review && t.review.verdict === "approved") return h("span", { class: "tag paid", text: VERDICTS.approved });
+    if (t.status === "done") return h("span", { class: "tag followup", text: "🕐 Ждёт утверждения" });
+    if (t.review && t.status !== "done") return h("span", { class: "tag " + (t.review.verdict === "defect" ? "over" : "warn"), text: VERDICTS[t.review.verdict] });
+    return null;
+  }
+  function fileUrl(t, a) { return "/api/os/file?task=" + encodeURIComponent(t.id) + "&a=" + encodeURIComponent(a.id); }
+  function fileSize(n) { return n ? (n >= 1048576 ? (n / 1048576).toFixed(1).replace(".", ",") + " МБ" : Math.max(1, Math.round(n / 1024)) + " КБ") : ""; }
+  // Photos are shrunk in the browser (the request limit is 4.5 MB); videos and files go as they are.
+  function readForUpload(file) {
+    return new Promise(function (resolve) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size < 1.5 * 1048576) return resolve({ name: file.name, mime: file.type, data: reader.result, size: file.size });
+        var img = new Image();
+        img.onload = function () {
+          var k = Math.min(1, 2560 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+          c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+          c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+          var data = c.toDataURL("image/jpeg", 0.85);
+          resolve({ name: file.name.replace(/\.\w+$/, "") + ".jpg", mime: "image/jpeg", data: data, size: Math.round((data.length - 23) * 0.75) });
+        };
+        img.onerror = function () { resolve({ name: file.name, mime: file.type, data: reader.result, size: file.size }); };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
   function viewTasks() { api("tasks").then(function (d) { if (!d.ok) return setView(errorsBox(d)); state.tasksData = d; drawTasks(); }); }
   function drawTasks() {
     var d = state.tasksData, st = state.tf = state.tf || { q: "", area: "", mode: "board" }, today = iso(new Date());
@@ -1565,7 +1614,8 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       return h("div", { class: "kcard", onclick: function () { openTask(t); } }, h("b", { text: t.title }),
         h("span", { class: "sub", text: [t.area, t.owner].filter(Boolean).join(" · ") }),
         h("span", { class: "sub" }, t.due ? (late(t) ? h("span", { class: "tag over", text: "просрочено · " + dayLabel(t.due) }) : "Дедлайн: " + dayLabel(t.due)) : "без дедлайна",
-          cl.length ? " · ✓ " + cd + "/" + cl.length : ""),
+          cl.length ? " · ✓ " + cd + "/" + cl.length : "", (t.attachments || []).length ? " · 📎 " + t.attachments.length : ""),
+        reviewTag(t) ? h("span", { class: "sub" }, reviewTag(t)) : null,
         lastComment(t));
     }
     var search = h("input", { type: "search", placeholder: "Поиск по задачам", value: st.q, oninput: function () { st.q = search.value; var pos = search.selectionStart; drawTasks(); var again = document.querySelector("main input[type=search]"); if (again) { again.focus(); again.setSelectionRange(pos, pos); } } });
@@ -1585,7 +1635,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
         return h("tr", { onclick: function () { openTask(t); } }, h("td", null, h("b", { style: "font-weight:400", text: t.title }), lastComment(t)),
           h("td", { text: t.area || "—" }), h("td", { text: t.owner || "—" }),
           h("td", null, t.due ? h("span", { class: late(t) ? "tag over" : "", text: dayLabel(t.due) }) : "—"),
-          h("td", null, h("span", { class: "tag " + (t.status === "done" ? "paid" : t.status === "doing" ? "contact" : "new"), text: d.statuses[t.status] })),
+          h("td", null, h("span", { class: "tag " + (t.status === "done" ? "paid" : t.status === "doing" ? "contact" : "new"), text: d.statuses[t.status] }), reviewTag(t) ? [" ", reviewTag(t)] : null),
           h("td", { text: cl.length ? cl.filter(function (c) { return c.done; }).length + "/" + cl.length : "—" }));
       }))));
     setView([
@@ -1622,12 +1672,98 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     var dr = drawer(isNew ? "Новая задача" : t.title, isNew ? "Задачи" : (t.area || "Задачи") + " · " + d.statuses[t.status], body);
     function payload() { return { id: t.id || null, title: f.title.value, area: f.area.value, owner: f.owner.value, due: f.due.value, status: f.status.value, description: f.description.value, checklist: checklist }; }
     var comment = h("textarea", { placeholder: "Комментарий — придёт в бот ответственной и автору задачи", style: "width:100%;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:10px" });
+    function refresh(r, msg) { dr.close(); state.tasksData.tasks = r.tasks; openTask(r.task); if (msg) toast(msg); }
+    // Проверка: утвердить / на правки / брак.
+    var reviewBox = null;
+    if (!isNew && (can("tasks.review") || t.review || t.status === "done")) {
+      var rv = t.review;
+      reviewBox = h("div", { class: "review-box" },
+        h("div", null, reviewTag(t) || h("span", { class: "tag", text: "Ещё не на проверке" }),
+          rv ? h("small", { style: "color:var(--muted);margin-left:8px", text: rv.by + " · " + new Date(rv.at).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) }) : null),
+        rv && rv.note ? h("p", { class: "note", text: rv.note }) : null,
+        can("tasks.review") ? h("div", { class: "actions", style: "justify-content:flex-start;margin:0" },
+          rv && rv.verdict === "approved" ? null : h("button", { class: "btn small ok", type: "button", text: "👍 Утвердить", onclick: function () { review("approved"); } }),
+          h("button", { class: "btn small warn", type: "button", text: "✏️ На правки", onclick: function () { review("revision"); } }),
+          h("button", { class: "btn small bad", type: "button", text: "⛔ Брак", onclick: function () { review("defect"); } })) : null,
+        (t.reviews || []).length > 1 ? h("small", { style: "color:var(--muted)", text: "Правок: " + t.reviews.filter(function (x) { return x.verdict === "revision"; }).length + " · брак: " + t.reviews.filter(function (x) { return x.verdict === "defect"; }).length }) : null);
+    }
+    function review(verdict) {
+      var note = "";
+      if (verdict !== "approved") {
+        note = prompt(verdict === "defect" ? "В чём брак? Ответственная получит это сообщение, задача вернётся в работу." : "Что нужно поправить? Ответственная получит это сообщение, задача вернётся в работу.", "");
+        if (note === null) return;
+        if (!note.trim()) return toast(verdict === "defect" ? "Напишите, в чём брак" : "Напишите, что поправить");
+      }
+      api("tasks", { action: "review", id: t.id, verdict: verdict, note: note }).then(function (r) {
+        if (!r.ok) return toast((r.errors || [])[0] || "Не получилось");
+        refresh(r, verdict === "approved" ? "Утверждено 👍" : verdict === "defect" ? "Отмечено как брак — задача вернулась в работу" : "Отправлено на правки");
+      });
+    }
+    // Вложения: фото, видео, файлы, тексты, ссылки.
+    var attBox = h("div");
+    function drawAtts() {
+      attBox.innerHTML = "";
+      var list = t.attachments || [];
+      if (!list.length) attBox.appendChild(h("p", { class: "sub", style: "color:var(--muted);margin:0", text: "Вложений пока нет." }));
+      else attBox.appendChild(h("div", { class: "atts" }, list.map(function (a) {
+        var meta = h("small", { text: [a.by, new Date(a.at).toLocaleString("ru-RU", { day: "numeric", month: "short" }), fileSize(a.size)].filter(Boolean).join(" · ") });
+        var del = ro ? null : h("button", { class: "del", type: "button", title: "Удалить вложение", text: "×", onclick: function (e) {
+          e.stopPropagation(); e.preventDefault();
+          if (!confirm("Удалить вложение?")) return;
+          api("tasks", { action: "detach", id: t.id, attachment_id: a.id }).then(function (r) { if (r.ok) refresh(r, "Вложение удалено"); else toast((r.errors || [])[0]); });
+        } });
+        if (a.kind === "photo") return h("a", { class: "att", href: fileUrl(t, a), target: "_blank", rel: "noopener" }, h("img", { src: fileUrl(t, a), alt: a.title || a.name || "Фото", loading: "lazy" }), h("div", { class: "cap" }, a.title || a.name || "Фото", meta), del);
+        if (a.kind === "video") return h("div", { class: "att" }, h("video", { src: fileUrl(t, a), controls: true, preload: "metadata", playsinline: true }), h("div", { class: "cap" }, h("a", { href: fileUrl(t, a), target: "_blank", rel: "noopener", text: a.title || a.name || "Видео" }), meta), del);
+        if (a.kind === "file") return h("div", { class: "att" }, h("div", { class: "cap" }, "📄 ", h("a", { href: fileUrl(t, a), target: "_blank", rel: "noopener", text: a.title || a.name || "Файл" }), meta), del);
+        if (a.kind === "link") return h("div", { class: "att" }, h("div", { class: "cap" }, "🔗 ", h("a", { href: a.url, target: "_blank", rel: "noopener noreferrer", text: a.title || a.url }), a.title ? h("small", { text: a.url }) : null, meta), del);
+        return h("div", { class: "att wide" }, h("div", { class: "cap" }, h("b", { style: "font-weight:500", text: "📝 " + (a.title || "Текст") }), meta), h("div", { class: "txt", text: a.text }), del);
+      })));
+    }
+    drawAtts();
+    var attForm = h("div");
+    function attachRequest(payload, msg) {
+      return api("tasks", Object.assign({ id: t.id }, payload)).then(function (r) { if (!r.ok) { toast((r.errors || [])[0] || "Не получилось"); return false; } refresh(r, msg); return true; });
+    }
+    function showForm(kind) {
+      attForm.innerHTML = "";
+      var title = h("input", { placeholder: kind === "link" ? "Название (необязательно)" : "Заголовок (необязательно)" });
+      var main = kind === "link" ? h("input", { type: "url", placeholder: "https://…" }) : h("textarea", { placeholder: "Текст: сценарий, пост, ТЗ…" });
+      var btn = h("button", { class: "btn small gold", type: "button", text: "Добавить", onclick: function () {
+        var v = main.value.trim(); if (!v) return main.focus();
+        btn.disabled = true;
+        attachRequest({ action: "attach", attachment: kind === "link" ? { kind: "link", url: v, title: title.value } : { kind: "text", text: v, title: title.value } }, kind === "link" ? "Ссылка добавлена" : "Текст добавлен").then(function () { btn.disabled = false; });
+      } });
+      add(attForm, h("div", { class: "att-form" }, kind === "link" ? [main, title] : [title, main], h("div", { class: "actions", style: "margin:0" }, h("button", { class: "btn small ghost", type: "button", text: "Отмена", onclick: function () { attForm.innerHTML = ""; } }), btn)));
+      main.focus();
+    }
+    var fileInput = h("input", { type: "file", multiple: true, accept: "image/*,video/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip", style: "display:none", onchange: function () {
+      var files = [].slice.call(fileInput.files || []); fileInput.value = "";
+      if (!files.length) return;
+      toast("Загружаю…");
+      var chain = Promise.resolve(), last = null, okCount = 0;
+      files.forEach(function (file) {
+        chain = chain.then(function () { return readForUpload(file); }).then(function (f) {
+          if (f.size > 3 * 1048576) { toast("«" + file.name + "» больше 3 МБ — пришлите его в бот ответом на сообщение с задачей"); return; }
+          return api("tasks", { action: "upload", id: t.id, file: f }).then(function (r) { if (r.ok) { last = r; okCount++; } else toast((r.errors || [])[0] || "Не получилось загрузить"); });
+        });
+      });
+      chain.then(function () { if (last) refresh(last, okCount > 1 ? "Загружено файлов: " + okCount : "Загружено"); });
+    } });
+    var attSection = isNew ? h("p", { class: "sub", style: "color:var(--muted)", text: "Фото, видео, тексты и ссылки можно добавить после сохранения задачи." }) : [attBox,
+      ro ? null : h("div", { class: "att-add" },
+        h("button", { class: "btn small", type: "button", text: "📷 Фото / видео / файл", onclick: function () { fileInput.click(); } }),
+        h("button", { class: "btn small", type: "button", text: "📝 Текст", onclick: function () { showForm("text"); } }),
+        h("button", { class: "btn small", type: "button", text: "🔗 Ссылка", onclick: function () { showForm("link"); } }), fileInput),
+      ro ? null : attForm,
+      ro ? null : h("p", { class: "sub", style: "color:var(--muted);font-size:.78rem;margin:8px 0 0", text: "Большое видео (больше 3 МБ) пришлите в бот ответом на сообщение с этой задачей — оно появится здесь." })];
     add(body, [
       !isNew && !ro && t.status !== "done" ? h("div", { class: "actions", style: "justify-content:flex-start;margin:0 0 8px" },
         t.status === "todo" ? h("button", { class: "btn small", type: "button", text: "▶ В работу", onclick: function () { quick("doing"); } }) : null,
         h("button", { class: "btn small gold", type: "button", text: "✓ Выполнено", onclick: function () { quick("done"); } })) : null,
       h("datalist", { id: "task-areas" }, areas.map(function (a) { return h("option", { value: a }); })),
       h("div", { class: "form" }, field("Задача", f.title, "full"), field("Направление", f.area), field("Ответственный", f.owner), field("Дедлайн", f.due), field("Статус", f.status), field("Описание", f.description, "full")),
+      reviewBox ? [h("div", { class: "section-t", text: "Проверка" }), reviewBox] : null,
+      h("div", { class: "section-t", text: "Вложения" }), attSection,
       h("div", { class: "section-t", text: "Чек-лист" }), clBox, errBox,
       ro ? null : h("div", { class: "actions" },
         !isNew ? h("button", { class: "btn ghost", type: "button", text: "Удалить", onclick: function () { if (!confirm("Удалить задачу?")) return; api("tasks", { action: "remove", id: t.id }).then(function (r) { if (r.ok) { dr.close(); toast("Удалено"); viewTasks(); } }); } }) : null,

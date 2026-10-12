@@ -62,11 +62,25 @@ function createWorld() {
     if (href.startsWith('https://redis.example.test')) return ok({ result: redis(JSON.parse(options.body)) });
     if (href.startsWith('https://tribute.tg/') && world.tributeSubscribers) return ok(world.tributeSubscribers);
     if (href.startsWith('https://qstash.upstash.io/')) { world.qstash.push({ url: href, headers: options.headers, body: JSON.parse(options.body) }); return ok({ messageId: 'm' + world.qstash.length }); }
+    if (/api\.telegram\.org\/file\/bot[^/]+\//.test(href)) {
+      const bytes = Buffer.from(`file:${href.split('/').pop()}`);
+      return { ok: true, arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.length) };
+    }
     const tg = href.match(/api\.telegram\.org\/bot[^/]+\/(\w+)$/);
     if (tg) {
-      const payload = JSON.parse(options.body);
+      // Multipart uploads (FormData): text fields as the payload, the file as { name, type, size }.
+      let payload;
+      if (options.body instanceof FormData) {
+        payload = {};
+        for (const [k, v] of options.body.entries()) payload[k] = typeof v === 'string' ? v : { name: v.name, type: v.type, size: v.size };
+      } else payload = JSON.parse(options.body);
       telegramCalls.push({ method: tg[1], payload });
       if (tg[1] === 'sendMessage' && blockedChats.has(String(payload.chat_id))) return { ok: false, json: async () => ({ ok: false }) };
+      if (tg[1] === 'sendDocument' && payload.document && typeof payload.document === 'object') {
+        world.uploads = (world.uploads || 0) + 1;
+        return ok({ ok: true, result: { message_id: 7000 + world.uploads, document: { file_id: `doc-${world.uploads}`, file_name: payload.document.name, mime_type: payload.document.type, file_size: payload.document.size } } });
+      }
+      if (tg[1] === 'getFile') return world.bigFiles && world.bigFiles.has(payload.file_id) ? { ok: false, json: async () => ({ ok: false }) } : ok({ ok: true, result: { file_path: `documents/${payload.file_id}` } });
       if (tg[1] === 'createInvoiceLink') return ok({ ok: true, result: `https://t.me/$invoice-${payload.payload}` });
       if (tg[1] === 'getChatMemberCount') return ok({ ok: true, result: world.memberCounts[String(payload.chat_id)] ?? 0 });
       if (tg[1] === 'getChatMember') return ok({ ok: true, result: { status: (world.members.has(String(payload.user_id)) ? 'member' : 'left') } });

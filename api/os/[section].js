@@ -399,18 +399,68 @@ const sections = {
       if (team.can(member, "tasks.edit")) { try { await require("../../lib/seed-plan").importOnce(actor); } catch (e) { console.error("Plan import failed", e.message); } }
       return { status: 200, body: { ok: true, tasks: await tasks.load(), statuses: tasks.STATUSES } };
     }
-    if (!team.can(member, "tasks.edit")) return deny("задачи");
     let result;
+    if (action === "review") {
+      if (!team.can(member, "tasks.review")) return deny("утверждение задач");
+      result = await tasks.reviewTask(String(body.id || ""), String(body.verdict || ""), body.note, actor);
+      return result.status === 200 ? { status: 200, body: { ok: true, task: result.task, tasks: result.tasks, statuses: tasks.STATUSES } } : fail(result);
+    }
+    if (!team.can(member, "tasks.edit")) return deny("задачи");
     if (action === "save") result = await tasks.saveTask(body.task || {}, actor);
     else if (action === "status") result = await tasks.setStatus(String(body.id || ""), String(body.status || ""), actor, body.comment);
     else if (action === "comment") result = await tasks.addComment(String(body.id || ""), body.text, actor);
     else if (action === "remove") result = await tasks.removeTask(String(body.id || ""));
+    else if (action === "attach") result = await tasks.addAttachment(String(body.id || ""), body.attachment, actor);
+    else if (action === "upload") result = await tasks.uploadAttachment(String(body.id || ""), body.file, actor);
+    else if (action === "detach") result = await tasks.removeAttachment(String(body.id || ""), String(body.attachment_id || ""), actor);
     else result = { status: 400, errors: ["Неизвестное действие"] };
     return result.status === 200 ? { status: 200, body: { ok: true, task: result.task || null, tasks: result.tasks || await tasks.load(), statuses: tasks.STATUSES } } : fail(result);
   }
 };
 
+// GET /api/os/file?task=…&a=… — a task attachment kept in Telegram, proxied so the bot token
+// never reaches the browser. Only images and videos open inline; everything else downloads.
+async function attachmentFile(req, res) {
+  const notFound = () => { res.statusCode = 404; return res.end(); };
+  const member = await auth.memberFromRequest(req);
+  if (!member || !team.can(member, "os.workspace")) { res.statusCode = 401; return res.end(); }
+  const q = req.query || {};
+  const found = await require("../../lib/tasks").findAttachment(String(q.task || ""), String(q.a || ""));
+  if (!found) return notFound();
+  const { task, attachment: a } = found;
+  const { telegram } = require("../../lib/telegram");
+  let buffer = null;
+  try {
+    const file = await telegram("getFile", { file_id: a.file_id });
+    const response = await fetch(`https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`);
+    if (response.ok) buffer = Buffer.from(await response.arrayBuffer());
+  } catch { buffer = null; }
+  if (!buffer) {
+    // Telegram lets bots download only up to 20 MB: bigger files are sent to the viewer in the bot.
+    const method = { photo: "sendPhoto", video: "sendVideo", animation: "sendAnimation", video_note: "sendVideoNote" }[a.send] || "sendDocument";
+    const field = { sendPhoto: "photo", sendVideo: "video", sendAnimation: "animation", sendVideoNote: "video_note" }[method] || "document";
+    let ok = true;
+    try { await telegram(method, { chat_id: member.id, [field]: a.file_id, ...(method === "sendVideoNote" ? {} : { caption: `📎 Вложение к задаче «${task.title}»`.slice(0, 1000) }) }); } catch { ok = false; }
+    res.statusCode = ok ? 200 : 404;
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    return res.end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Вложение</title><body style="font:16px/1.5 system-ui,sans-serif;padding:32px;color:#2b3033;background:#fbf8f4">${ok ? "Файл большой, поэтому мы прислали его вам в Telegram-бот 🤍" : "Не получилось открыть файл."}</body>`);
+  }
+  const mime = String(a.mime || "");
+  const inline = /^(image\/(jpeg|png|gif|webp|heic|heif)|video\/(mp4|webm|quicktime))$/i.test(mime) || a.send === "photo";
+  const name = String(a.name || (a.kind === "photo" ? "photo.jpg" : a.kind === "video" ? "video.mp4" : "file")).replace(/["\\\r\n]/g, "");
+  res.statusCode = 200;
+  res.setHeader("Content-Type", inline ? (mime || "image/jpeg") : "application/octet-stream");
+  res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="file"; filename*=UTF-8''${encodeURIComponent(name)}`);
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "private, max-age=3600");
+  return res.end(buffer);
+}
+
 module.exports = async function handler(req, res) {
+  if (req.method === "GET" && String((req.query && req.query.section) || "") === "file") {
+    try { return await attachmentFile(req, res); } catch (error) { console.error("Attachment failed", error.message); res.statusCode = 500; return res.end(); }
+  }
   if (req.method !== "POST") return send(res, 405, { ok: false });
   // Only the dashboard page sends this header (blocks cross-site form posts).
   if (String((req.headers && req.headers["x-kz-os"]) || "") !== "1") return send(res, 403, { ok: false });

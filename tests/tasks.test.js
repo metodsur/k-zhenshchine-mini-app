@@ -179,3 +179,118 @@ test('vault: passwords encrypted at rest, revealed on request with a log, visibi
   r = await os('vault', { action: 'save', item: { title: 'CapCut', password: 'x' } }, lena);
   assert.deepEqual(r.body.items.find((x) => x.title === 'CapCut').access, ['Лена']);
 });
+
+test('tasks: review (approve, revisions, defect) from the dashboard and the bot', async () => {
+  const world = createWorld();
+  await call(adminRoute, { method: 'POST', query: { section: 'team' }, body: { initData: initData(OWNER), action: 'save', members: [{ id: '5101', name: 'Анастасия', role: 'director' }, { id: '5102', name: 'Лена', role: 'content' }] } });
+  const owner = await login(world, OWNER);
+  const lena = await login(world, { id: 5102, first_name: 'Лена' });
+  let r = await os('tasks', { action: 'save', task: { title: 'Смонтировать рилс', owner: 'Лена' } }, owner);
+  const id = r.body.task.id;
+  // Лена finishes → the owner gets the card with review buttons.
+  await os('tasks', { action: 'status', id, status: 'done' }, lena);
+  const card = world.sent('sendMessage').filter((m) => m.chat_id === '900').pop();
+  assert.match(card.text, /Ждёт утверждения/);
+  assert.deepEqual(card.reply_markup.inline_keyboard[0].map((b) => b.callback_data), [`t:y:${id}`, `t:r:${id}`, `t:x:${id}`]);
+  // Лена (content role) cannot review.
+  assert.equal((await os('tasks', { action: 'review', id, verdict: 'approved' }, lena)).status, 403);
+  // Revisions need a note; the task goes back to work and Лена gets the note.
+  assert.equal((await os('tasks', { action: 'review', id, verdict: 'revision', note: ' ' }, owner)).status, 400);
+  r = await os('tasks', { action: 'review', id, verdict: 'revision', note: 'Убрать музыку в начале' }, owner);
+  assert.equal(r.body.task.status, 'doing');
+  assert.equal(r.body.task.review.verdict, 'revision');
+  assert.match(r.body.task.comments.pop().text, /Нужны правки: Убрать музыку/);
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5102').pop().text, /Нужны правки по задаче «Смонтировать рилс»[\s\S]*Убрать музыку в начале/);
+  // Done again → waits for review; defect from the bot: button, then the reason as a message.
+  r = await os('tasks', { action: 'status', id, status: 'done' }, lena);
+  assert.equal(r.body.task.review, null);
+  await deliver({ callback_query: { id: 'r1', from: OWNER, data: `t:x:${id}`, message: { chat: { id: 900 }, message_id: 60 } } });
+  await say(OWNER, 'Звук рассинхронизирован');
+  let t = (await tasks.load()).find((x) => x.id === id);
+  assert.equal(t.status, 'doing');
+  assert.equal(t.review.verdict, 'defect');
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5102').pop().text, /Брак по задаче[\s\S]*Звук рассинхронизирован/);
+  // Approve from the bot.
+  await os('tasks', { action: 'status', id, status: 'done' }, lena);
+  await deliver({ callback_query: { id: 'r2', from: OWNER, data: `t:y:${id}`, message: { chat: { id: 900 }, message_id: 61 } } });
+  t = (await tasks.load()).find((x) => x.id === id);
+  assert.equal(t.status, 'done');
+  assert.equal(t.review.verdict, 'approved');
+  assert.deepEqual(t.reviews.map((x) => x.verdict), ['revision', 'defect', 'approved']);
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === '5102').pop().text, /Задача утверждена/);
+  assert.ok(!world.sent('editMessageText').pop().reply_markup.inline_keyboard.flat().some((b) => /^t:y:/.test(b.callback_data)), 'no review buttons once approved');
+  // Лена pressing a review button in the bot is refused.
+  await deliver({ callback_query: { id: 'r3', from: { id: 5102, first_name: 'Лена' }, data: `t:x:${id}`, message: { chat: { id: 5102 }, message_id: 62 } } });
+  assert.match(world.sent('answerCallbackQuery').pop().text, /владелица или директор/);
+});
+
+test('tasks: attachments — photos, videos, files, texts and links from the dashboard and the bot', async () => {
+  const world = createWorld();
+  await call(adminRoute, { method: 'POST', query: { section: 'team' }, body: { initData: initData(OWNER), action: 'save', members: [{ id: '5101', name: 'Анастасия', role: 'director' }] } });
+  const owner = await login(world, OWNER);
+  const nastya = await login(world, NASTYA);
+  let r = await os('tasks', { action: 'save', task: { title: 'Съёмка для клуба', owner: 'Анастасия' } }, owner);
+  const id = r.body.task.id;
+  // Link (https added) and text.
+  r = await os('tasks', { action: 'attach', id, attachment: { kind: 'link', url: 'disk.yandex.ru/d/abc', title: 'Исходники' } }, owner);
+  assert.equal(r.body.task.attachments[0].url, 'https://disk.yandex.ru/d/abc');
+  assert.equal((await os('tasks', { action: 'attach', id, attachment: { kind: 'link', url: 'javascript:alert(1)' } }, owner)).status, 400);
+  r = await os('tasks', { action: 'attach', id, attachment: { kind: 'text', title: 'Сценарий', text: 'Кадр 1: рассвет' } }, owner);
+  assert.equal(r.body.task.attachments[1].text, 'Кадр 1: рассвет');
+  // Photo upload: stored in Telegram through the uploader's chat; served back through the proxy.
+  r = await os('tasks', { action: 'upload', id, file: { name: 'кадр.jpg', mime: 'image/jpeg', data: 'data:image/jpeg;base64,' + Buffer.from('jpeg-bytes').toString('base64') } }, owner);
+  assert.equal(r.status, 200, JSON.stringify(r.body));
+  const photo = r.body.task.attachments[2];
+  assert.equal(photo.kind, 'photo');
+  assert.equal(photo.file_id, 'doc-1');
+  assert.equal(world.sent('sendDocument').pop().chat_id, '900');
+  assert.ok(!JSON.stringify(r.body).includes('test-only-credential'));
+  // Too big → a hint to send it to the bot.
+  const big = Buffer.alloc(3 * 1024 * 1024 + 10).toString('base64');
+  assert.match((await os('tasks', { action: 'upload', id, file: { name: 'v.mp4', mime: 'video/mp4', data: big } }, owner)).body.errors[0], /в бот/);
+  // The file proxy needs a session; inline for photos, download for other files.
+  const get = async (q, cookie) => {
+    const out = { headers: {} };
+    await osRoute({ method: 'GET', query: { section: 'file', ...q }, headers: { cookie } }, { statusCode: 0, setHeader(k, v) { out.headers[k.toLowerCase()] = v; }, end(v) { out.body = v; } });
+    return Object.assign(out, { status: out.status });
+  };
+  let f = await get({ task: id, a: photo.id }, '');
+  assert.equal(f.headers['content-type'], undefined);
+  f = await get({ task: id, a: photo.id }, nastya);
+  assert.equal(f.headers['content-type'], 'image/jpeg');
+  assert.match(f.headers['content-disposition'], /^inline/);
+  assert.equal(String(f.body), 'file:doc-1');
+  // Video and a document sent to the bot as replies to the task message.
+  const msg = world.sent('sendMessage').filter((m) => m.chat_id === '5101').pop();
+  assert.match(msg.text, /вложение/);
+  assert.equal(world.kv.get('tmsg:900:7001'), id, 'the uploaded file message is mapped to the task');
+  world.kv.set('tmsg:5101:555', id); // a task card Анастасия got in the bot
+  const replyTo = { message_id: 555 };
+  await deliver({ message: { chat: { id: 5101, type: 'private' }, from: NASTYA, caption: 'Дубль 2', video: { file_id: 'vid-1', file_size: 50e6, mime_type: 'video/mp4' }, reply_to_message: replyTo } });
+  await deliver({ message: { chat: { id: 5101, type: 'private' }, from: NASTYA, document: { file_id: 'doc-x', file_name: 'смета.html', mime_type: 'text/html' }, reply_to_message: replyTo } });
+  await deliver({ message: { chat: { id: 5101, type: 'private' }, from: NASTYA, text: 'https://t.me/c/1/2', reply_to_message: replyTo } });
+  let t = (await tasks.load()).find((x) => x.id === id);
+  const [video, doc, link] = t.attachments.slice(3);
+  assert.deepEqual([video.kind, video.title, video.send, video.by], ['video', 'Дубль 2', 'video', 'Анастасия']);
+  assert.equal(doc.kind, 'file');
+  assert.equal(link.url, 'https://t.me/c/1/2');
+  assert.equal(t.comments.length, 0, 'a bare link is an attachment, not a comment');
+  assert.match(world.sent('sendMessage').filter((m) => m.chat_id === 5101).pop().text, /Ссылка добавлена/);
+  // HTML never opens inline (no script from uploads on the dashboard origin).
+  f = await get({ task: id, a: doc.id }, owner);
+  assert.equal(f.headers['content-type'], 'application/octet-stream');
+  assert.match(f.headers['content-disposition'], /^attachment/);
+  assert.equal(f.headers['x-content-type-options'], 'nosniff');
+  // Over 20 MB Telegram won't hand it out → the bot sends it to the viewer instead.
+  world.bigFiles = new Set(['vid-1']);
+  f = await get({ task: id, a: video.id }, owner);
+  assert.match(String(f.body), /прислали его вам в Telegram/);
+  assert.equal(world.sent('sendVideo').pop().video, 'vid-1');
+  // Remove.
+  r = await os('tasks', { action: 'detach', id, attachment_id: link.id }, owner);
+  assert.equal(r.body.task.attachments.length, 5);
+  assert.match(r.body.task.history.pop().text, /Удалено вложение: Ссылка/);
+  // Bot card shows the count.
+  await deliver({ callback_query: { id: 'a1', from: OWNER, data: `t:o:${id}`, message: { chat: { id: 900 }, message_id: 80 } } });
+  assert.match(world.sent('sendMessage').filter((m) => String(m.chat_id) === '900').pop().text, /📎 Вложений: 5/);
+});
