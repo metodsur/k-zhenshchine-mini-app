@@ -19,7 +19,7 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 85 тестов, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 87 тестов, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в Vercel, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
@@ -44,6 +44,8 @@
 ### Задачи (`lib/tasks.js`, ключ `os:tasks`)
 - Статусы todo/doing/done, комментарии, чек-лист, история; уведомления в бот; дедлайны утром; сводка по пятницам вечером.
 - В боте: `/tasks` (владелица/директор — сводка по людям + все задачи кнопками), `/task Текст` или «➕ Новая задача» → выбор ответственного → срок. Комментарий = ответ (reply) на любое сообщение с задачей (карта `tmsg:<chat>:<msg>`). Последний комментарий выделен жирным и в боте, и в дашборде.
+- Проверка (право `tasks.review` — владелица и директор): «👍 Утвердить» / «✏️ На правки» / «⛔ Брак» в карточке задачи в дашборде и кнопками в боте под выполненной задачей. Правки и брак требуют текста, возвращают задачу в работу и приходят ответственной. Повторное «Выполнено» снова ставит «Ждёт утверждения». Поля `review`, `reviews`.
+- Вложения (`attachments`): фото, видео, файлы, тексты, ссылки. Файлы хранятся в Telegram (file_id): из дашборда до 3 МБ (бот отправляет файл загрузившему себе в чат), больше — ответом в боте на сообщение с задачей. Просмотр — `GET /api/os/file?task=…&a=…` (сессия дашборда; inline только фото/видео; больше 20 МБ бот присылает файл в Telegram). Голая ссылка ответом в боте = вложение-ссылка.
 - План от 07.10 (18 задач на Анастасию) импортируется один раз (`lib/seed-plan.js`).
 
 ### Доступы (`lib/vault.js`, ключ `os:vault`)
