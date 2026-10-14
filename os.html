@@ -39,6 +39,17 @@ main{min-width:0;padding:30px 36px 60px}
 .eyebrow{font-size:.7rem;letter-spacing:.17em;text-transform:uppercase;color:var(--muted)}
 .vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:14px}@media(max-width:700px){.vault-grid{grid-template-columns:1fr}}
 .vcard{padding:18px 20px 16px}
+.db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}@media(max-width:700px){.db-grid{grid-template-columns:1fr}}
+.dbcard{padding:0;overflow:hidden;display:flex;flex-direction:column}
+.dbcard .pv{display:flex;align-items:center;justify-content:center;height:150px;background:#f1ece5;font-size:2.4rem;color:#a08a6a;text-decoration:none}
+.dbcard .pv.icon{height:96px}
+.dbcard .pv img,.dbcard .pv video{width:100%;height:100%;object-fit:cover;display:block}
+.dbcard .in{padding:14px 16px 14px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.dbcard h3{margin:0;font-size:1.05rem;font-weight:400;overflow-wrap:anywhere}
+.dbcard .desc{margin:0;font-size:.9rem;white-space:pre-wrap;overflow-wrap:anywhere;color:#3a4043;max-height:9.5em;overflow:auto}
+.dbcard .tags{display:flex;gap:6px;flex-wrap:wrap}
+.dbcard .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;padding-top:6px;font-size:.84rem}
+.dbcard .links a{color:var(--gold);text-decoration:none}
 .vcard h3{margin:0;font-size:1.12rem;font-weight:400;display:flex;align-items:center;gap:8px;justify-content:space-between}
 .vcard .open{font-size:.82rem;color:var(--gold);text-decoration:none;word-break:break-all}
 .vrow{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:center;margin-top:10px;font-size:.9rem}
@@ -296,6 +307,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     cycles: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="3.5" r="1.4"/><circle cx="19.4" cy="16.3" r="1.4"/><circle cx="4.6" cy="16.3" r="1.4"/></svg>',
     calendar: '<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
     vault: '<svg viewBox="0 0 24 24"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.4"/></svg>',
+    database: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="7.5" ry="2.8"/><path d="M4.5 5.5v13c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8v-13"/><path d="M4.5 12c0 1.5 3.4 2.8 7.5 2.8s7.5-1.3 7.5-2.8"/></svg>',
     pairs: '<svg viewBox="0 0 24 24"><circle cx="8.5" cy="12" r="5.5"/><circle cx="15.5" cy="12" r="5.5"/></svg>',
     masters: '<svg viewBox="0 0 24 24"><path d="M12 3.2 14.2 8l5.2.6-3.9 3.5 1.1 5.1L12 14.6l-4.6 2.6 1.1-5.1-3.9-3.5L9.8 8Z"/><path d="M8 21h8"/></svg>',
     hr: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="3"/><circle cx="9" cy="11.5" r="2.4"/><path d="M5.6 17c.5-1.8 1.8-2.8 3.4-2.8s2.9 1 3.4 2.8M14.5 10h4M14.5 13.5h3"/></svg>',
@@ -316,6 +328,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     { id: "masters", label: "Мастера", perm: "os.workspace" },
     { id: "pairs", label: "Пары", perm: "pairs.edit" },
     { id: "vault", label: "Доступы", perm: "os.workspace" },
+    { id: "database", label: "База данных", perm: "os.workspace" },
     { id: "calendar", label: "Календарь", perm: "os.workspace" },
     { id: "content", label: "Контент", perm: "os.workspace" },
     { id: "media", label: "Медийность", perm: "os.workspace" },
@@ -408,7 +421,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     renderNav();
     var main = document.getElementById("view"); main.innerHTML = ""; main.appendChild(h("div", { class: "loading", text: "Загрузка…" }));
     if (["content", "media", "platforms", "library", "templates", "training", "instructions", "hr"].indexOf(view) !== -1) viewCollection(view);
-    else ({ tasks: viewTasks, masters: viewMasters, pairs: viewPairs, vault: viewVault, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
+    else ({ tasks: viewTasks, masters: viewMasters, pairs: viewPairs, vault: viewVault, database: viewDatabase, today: viewToday, rhythm: viewRhythm, crm: viewCrm, cycles: viewCycles, calendar: viewCalendar }[view] || viewToday)();
     window.scrollTo(0, 0);
   }
   function setView(nodes) { var main = document.getElementById("view"); main.innerHTML = ""; add(main, nodes); }
@@ -1328,6 +1341,121 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
             else { err.innerHTML = ""; err.appendChild(errorsBox(r)); }
           });
         } }))));
+  }
+
+  // ---------- База данных: файлы, ссылки и тексты с описанием ----------
+  var DB_ICONS = { photo: "🖼", video: "🎬", file: "📄", link: "🔗", text: "📝", note: "🗒" };
+  function dbFileUrl(e) { return "/api/os/file?db=" + encodeURIComponent(e.id); }
+  function viewDatabase() { api("database").then(drawDatabase); }
+  function drawDatabase(d) {
+    if (!d.items) return setView(errorsBox(d));
+    state.db = d;
+    var folders = []; d.items.forEach(function (e) { if (e.folder && folders.indexOf(e.folder) === -1) folders.push(e.folder); });
+    folders.sort(function (a, b) { return a.localeCompare(b, "ru"); });
+    var folder = folders.indexOf(state.dbFolder) === -1 ? "" : state.dbFolder, kind = state.dbKind || "";
+    var search = h("input", { type: "search", placeholder: "Поиск: название, описание, имя файла", value: state.dbQ || "", oninput: function (ev) { state.dbQ = ev.target.value; draw(); } });
+    var folderSeg = folders.length ? h("div", { class: "seg", style: "flex-wrap:wrap;border-radius:18px" }, [["", "Все папки"]].concat(folders.map(function (f) { return [f, f]; })).map(function (c) {
+      return h("button", { type: "button", class: folder === c[0] ? "on" : "", text: c[1], onclick: function () { state.dbFolder = c[0]; drawDatabase(d); } });
+    })) : null;
+    var kindSeg = h("div", { class: "seg", style: "flex-wrap:wrap;border-radius:18px" }, [["", "Все"], ["photo", "Фото"], ["video", "Видео"], ["file", "Документы"], ["link", "Ссылки"], ["text", "Тексты"]].map(function (c) {
+      return h("button", { type: "button", class: kind === c[0] ? "on" : "", text: c[1], onclick: function () { state.dbKind = c[0]; drawDatabase(d); } });
+    }));
+    var box = h("div", { class: "db-grid" });
+    function draw() {
+      var q = (state.dbQ || "").toLowerCase();
+      var items = d.items.filter(function (e) {
+        return (!folder || e.folder === folder) && (!kind || e.kind === kind) && (!q || [e.title, e.description, e.name, e.folder, e.url, e.text].join(" ").toLowerCase().indexOf(q) !== -1);
+      });
+      box.innerHTML = "";
+      if (!items.length) { box.appendChild(h("div", { class: "panel empty", text: d.items.length ? "Ничего не найдено" : "Пока пусто. Нажмите «+ Добавить» и загрузите первый файл: фото, видео, документ, ссылку или текст — с описанием." })); return; }
+      items.forEach(function (e) { box.appendChild(dbCard(e)); });
+    }
+    setView([
+      h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Команда" }), h("h1", { text: "База данных" }),
+        h("p", { text: "Файлы команды в одном месте: фото, видео, документы, ссылки и тексты — у каждого описание и папка." })),
+        h("button", { class: "btn gold", type: "button", text: "+ Добавить", onclick: function () { dbForm({}); } })),
+      h("div", { class: "toolbar" }, search, kindSeg), folderSeg ? h("div", { class: "toolbar" }, folderSeg) : null, box
+    ]);
+    draw();
+  }
+  function dbCard(e) {
+    var url = e.file_id ? dbFileUrl(e) : e.url || null;
+    var pv;
+    if (e.kind === "photo") pv = h("a", { class: "pv", href: url, target: "_blank", rel: "noopener" }, h("img", { src: url, alt: e.title, loading: "lazy" }));
+    else if (e.kind === "video") pv = h("div", { class: "pv" }, h("video", { src: url, controls: true, preload: "metadata", playsinline: true }));
+    else pv = h(url ? "a" : "div", { class: "pv icon", href: url, target: url ? "_blank" : null, rel: url ? "noopener noreferrer" : null, text: DB_ICONS[e.kind] || "🗒" });
+    return h("article", { class: "panel dbcard" }, pv,
+      h("div", { class: "in" },
+        h("h3", { text: e.title }),
+        h("div", { class: "tags" }, h("span", { class: "tag", text: state.db.kinds[e.kind] || "" }), e.folder ? h("span", { class: "tag", text: "📁 " + e.folder }) : null),
+        e.description ? h("p", { class: "desc", text: e.description }) : null,
+        e.text ? h("p", { class: "desc", style: "background:var(--soft);padding:8px 10px;border-radius:10px;font-size:.84rem", text: e.text }) : null,
+        h("div", { class: "vmeta", style: "margin-top:0" }, [e.name, fileSize(e.size), e.by, since(e.at)].filter(Boolean).join(" · ")),
+        h("div", { class: "links" },
+          e.file_id ? h("a", { href: url, target: "_blank", rel: "noopener", text: e.kind === "photo" || e.kind === "video" ? "Открыть ↗" : "Скачать ↓" }) : null,
+          e.url && e.file_id ? h("a", { href: e.url, target: "_blank", rel: "noopener noreferrer", text: "Ссылка ↗" }) : e.url ? h("a", { href: e.url, target: "_blank", rel: "noopener noreferrer", text: e.url.replace(/^https?:\/\//, "").slice(0, 40) + " ↗" }) : null,
+          h("a", { href: "#", text: "Изменить", onclick: function (ev) { ev.preventDefault(); dbForm(e); } }))));
+  }
+  function dbForm(e) {
+    var isNew = !e.id, picked = null;
+    var folders = []; state.db.items.forEach(function (x) { if (x.folder && folders.indexOf(x.folder) === -1) folders.push(x.folder); });
+    var f = {
+      title: h("input", { value: e.title || "", placeholder: "Например: Договор с площадкой, фото с ретрита" }),
+      folder: h("input", { value: e.folder || state.dbFolder || "", list: "db-folders", placeholder: "Например: Договоры, Фото, Видео" }),
+      description: h("textarea", { rows: 4, placeholder: "Что это за файл, для чего, где используется" }),
+      url: h("input", { type: "url", value: e.url || "", placeholder: "https://… (необязательно)" }),
+      text: h("textarea", { rows: 5, placeholder: "Текст: сценарий, пост, ТЗ… (необязательно)" })
+    };
+    f.description.value = e.description || ""; f.text.value = e.text || "";
+    var fileLabel = h("div", { style: "font-size:.86rem;color:var(--muted);text-transform:none;letter-spacing:0", text: e.file_id ? "Сейчас: " + (e.name || state.db.kinds[e.kind]) + (e.size ? " · " + fileSize(e.size) : "") : "Файл не выбран" });
+    var fileInput = h("input", { type: "file", style: "display:none", onchange: function () {
+      picked = (fileInput.files || [])[0] || null;
+      if (!picked) return;
+      fileLabel.textContent = picked.name + " · " + fileSize(picked.size) + (picked.size > 3 * 1048576 && !/^image\//.test(picked.type) ? " — больше 3 МБ, после сохранения бот попросит прислать его" : "");
+      if (!f.title.value.trim()) f.title.value = picked.name.replace(/\.\w+$/, "");
+    } });
+    var err = h("div");
+    var saveBtn;
+    function done(r, msg) { dr.close(); toast(msg); drawDatabase(r); }
+    function viaBot(id, msg) {
+      return api("database", { action: "via_bot", id: id }).then(function (r) {
+        if (r.ok) done(r, msg || "Бот написал вам в Telegram — пришлите файл ответом на его сообщение");
+        else { err.innerHTML = ""; err.appendChild(errorsBox(r)); saveBtn.disabled = false; }
+      });
+    }
+    function submit() {
+      var item = { id: e.id, title: f.title.value, folder: f.folder.value, description: f.description.value, url: f.url.value, text: f.text.value };
+      err.innerHTML = ""; saveBtn.disabled = true;
+      var fail = function (r) { err.appendChild(errorsBox(r)); saveBtn.disabled = false; if (r.item && !e.id) { e = r.item; isNew = false; } };
+      if (!picked) return api("database", { action: "save", item: item }).then(function (r) { if (r.ok) done(r, isNew ? "Добавлено" : "Сохранено"); else fail(r); });
+      toast("Загружаю…");
+      readForUpload(picked).then(function (file) {
+        if (file.size > 3 * 1048576) {
+          return api("database", { action: "save", item: item }).then(function (r) { if (!r.ok) return fail(r); e = r.item; isNew = false; return viaBot(r.item.id, "Запись сохранена. Файл большой — бот написал вам в Telegram, пришлите файл ответом на его сообщение"); });
+        }
+        return api("database", { action: "upload", item: item, file: file }).then(function (r) { if (r.ok) done(r, "Загружено"); else fail(r); });
+      });
+    }
+    saveBtn = h("button", { class: "btn gold", type: "button", text: isNew ? "Добавить" : "Сохранить", onclick: submit });
+    var dr = drawer(isNew ? "Новая запись" : e.title, "База данных", h("div", null,
+      h("datalist", { id: "db-folders" }, folders.map(function (x) { return h("option", { value: x }); })),
+      h("div", { class: "form" },
+        field("Название", f.title, "full"), field("Папка", f.folder, "full"),
+        field("Описание", f.description, "full"),
+        h("label", { class: "field full" }, h("span", { text: "Файл: фото, видео, документ" }),
+          h("div", { style: "display:flex;gap:10px;align-items:center;flex-wrap:wrap" },
+            h("button", { class: "btn small", type: "button", text: e.file_id ? "Заменить файл" : "Выбрать файл", onclick: function (ev) { ev.preventDefault(); fileInput.click(); } }),
+            !isNew ? h("button", { class: "btn small ghost", type: "button", text: "Прислать через бот", title: "Для файлов больше 3 МБ", onclick: function (ev) { ev.preventDefault(); saveBtn.disabled = true; viaBot(e.id); } }) : null,
+            fileLabel, fileInput)),
+        field("Ссылка", f.url, "full"), field("Текст", f.text, "full")),
+      h("p", { class: "sub", style: "color:var(--muted);font-size:.78rem;margin:8px 0 0", text: "Файлы до 3 МБ загружаются сразу. Большие (например, видео) — через бот: после сохранения он попросит прислать файл ответом на сообщение." }),
+      err,
+      h("div", { class: "actions", style: "margin-top:16px;display:flex;gap:8px;justify-content:space-between" },
+        !isNew && e.can_remove ? h("button", { class: "btn ghost", type: "button", text: "Удалить", onclick: function () {
+          if (!confirm("Удалить «" + e.title + "» из базы данных?")) return;
+          api("database", { action: "remove", id: e.id }).then(function (r) { if (r.ok) done(r, "Удалено"); else toast((r.errors || [])[0]); });
+        } }) : h("span"),
+        saveBtn)));
   }
 
   // ---------- Пары на ритуал ----------

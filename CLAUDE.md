@@ -19,7 +19,7 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 87 тестов, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 88 тестов, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в Vercel, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
@@ -38,7 +38,7 @@
 Команды в меню бота: `/space /master /tasks /task /start`. Меню обновляется каждое утро автоматически.
 
 ## Дашборд команды — `os.html` (вход: бот `/dashboard` → одноразовая ссылка → cookie)
-Разделы: Сегодня, Задачи, HR (только владелица, `hr.view`), Итоги, CRM, Циклы, Мастера, **Пары**, **Доступы**, Календарь, Контент, Медийность, Площадки, Библиотека (+ скрытые: шаблоны, материалы обучения, инструкции Мастеров).
+Разделы: Сегодня, Задачи, HR (только владелица, `hr.view`), Итоги, CRM, Циклы, Мастера, **Пары**, **Доступы**, **База данных**, Календарь, Контент, Медийность, Площадки, Библиотека (+ скрытые: шаблоны, материалы обучения, инструкции Мастеров).
 Роли/права — `lib/team.js` (owner, director = всё кроме team.manage и hr.view, analyst, manager, content, master).
 
 ### Задачи (`lib/tasks.js`, ключ `os:tasks`)
@@ -51,6 +51,10 @@
 ### Доступы (`lib/vault.js`, ключ `os:vault`)
 - Сервис, категория, ссылка на кабинет, логин, пароль (AES-256-GCM, в список не отдаётся; «Показать» на 30 с / «Копировать»; каждый просмотр логируется), «У кого есть доступ», заметки (выделены жирной плашкой).
 - Владелица и директор (`vault.all`) видят всё и удаляют; остальные — только записи, где указаны их имена.
+
+### База данных (`lib/database.js`, ключ `os:db`)
+- Записи: название, папка, описание + файл (фото/видео/документ), ссылка и/или текст. Видят и добавляют все с `os.workspace`; удаляет автор, владелица или директор (`tasks.review`).
+- Файлы — в Telegram, как вложения задач: из дашборда до 3 МБ (`upload`), больше — «Прислать через бот»: бот пишет сообщение, файл ответом на него (или следующим сообщением в течение часа, состояние `db_file`) попадает в запись (карта `dbmsg:<chat>:<msg>`). Просмотр — `GET /api/os/file?db=<id>`.
 
 ### Пары на ритуал (`lib/pairs.js`)
 - Раунд = созвон клуба (раз в 2 недели; расписание задаётся в дашборде «Пары»). После созвона бот зовёт подписчиц клуба: «Подберите мне пару» / «Выберу сама». Автоподбор через N минут (QStash) + страховка: подбор запускается при открытии страницы/дашборда после срока.
