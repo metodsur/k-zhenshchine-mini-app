@@ -259,6 +259,23 @@ const sections = {
     return { status: 200, body: { ok: true, entry: r.entry || null, password: r.password, items: action === "reveal" ? undefined : await vault.list(member) } };
   },
 
+  // «База данных»: files of any kind, links and texts with descriptions.
+  async database(member, body) {
+    const db = require("../../lib/database");
+    const action = body.action || "list";
+    const actor = { name: who(member), id: member.id };
+    const listing = async () => ({ ok: true, items: (await db.list()).map((it) => ({ ...it, can_remove: db.canRemove(member, it) })), kinds: db.KINDS });
+    if (action === "list") return { status: 200, body: await listing() };
+    let r;
+    if (action === "save") r = await db.saveItem(body.item || {}, actor);
+    else if (action === "upload") r = await db.upload(body.item || {}, body.file, actor);
+    else if (action === "via_bot") r = await db.requestViaBot(String(body.id || ""), actor);
+    else if (action === "remove") r = await db.removeItem(String(body.id || ""), member);
+    else r = { status: 400, errors: ["Неизвестное действие"] };
+    if (r.status !== 200) return { status: r.status, body: { ...(await listing()), ok: false, item: r.item || null, errors: r.errors } };
+    return { status: 200, body: { ...(await listing()), item: r.item || null } };
+  },
+
   // Club: pairs for the ritual after every online call.
   async pairs(member, body) {
     if (!team.can(member, "pairs.edit")) return deny("пары");
@@ -418,16 +435,24 @@ const sections = {
   }
 };
 
-// GET /api/os/file?task=…&a=… — a task attachment kept in Telegram, proxied so the bot token
-// never reaches the browser. Only images and videos open inline; everything else downloads.
+// GET /api/os/file?task=…&a=… (a task attachment) or ?db=… (a «База данных» file) — kept in Telegram,
+// proxied so the bot token never reaches the browser. Only images and videos open inline; everything else downloads.
 async function attachmentFile(req, res) {
   const notFound = () => { res.statusCode = 404; return res.end(); };
   const member = await auth.memberFromRequest(req);
   if (!member || !team.can(member, "os.workspace")) { res.statusCode = 401; return res.end(); }
   const q = req.query || {};
-  const found = await require("../../lib/tasks").findAttachment(String(q.task || ""), String(q.a || ""));
-  if (!found) return notFound();
-  const { task, attachment: a } = found;
+  let a, caption;
+  if (q.db) {
+    a = await require("../../lib/database").find(String(q.db));
+    if (!a) return notFound();
+    caption = `🗂 База данных: «${a.title}»`;
+  } else {
+    const found = await require("../../lib/tasks").findAttachment(String(q.task || ""), String(q.a || ""));
+    if (!found) return notFound();
+    a = found.attachment;
+    caption = `📎 Вложение к задаче «${found.task.title}»`;
+  }
   const { telegram } = require("../../lib/telegram");
   let buffer = null;
   try {
@@ -440,7 +465,7 @@ async function attachmentFile(req, res) {
     const method = { photo: "sendPhoto", video: "sendVideo", animation: "sendAnimation", video_note: "sendVideoNote" }[a.send] || "sendDocument";
     const field = { sendPhoto: "photo", sendVideo: "video", sendAnimation: "animation", sendVideoNote: "video_note" }[method] || "document";
     let ok = true;
-    try { await telegram(method, { chat_id: member.id, [field]: a.file_id, ...(method === "sendVideoNote" ? {} : { caption: `📎 Вложение к задаче «${task.title}»`.slice(0, 1000) }) }); } catch { ok = false; }
+    try { await telegram(method, { chat_id: member.id, [field]: a.file_id, ...(method === "sendVideoNote" ? {} : { caption: caption.slice(0, 1000) }) }); } catch { ok = false; }
     res.statusCode = ok ? 200 : 404;
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
