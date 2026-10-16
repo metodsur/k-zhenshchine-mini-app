@@ -462,8 +462,8 @@ async function attachmentFile(req, res) {
   } catch { buffer = null; }
   if (!buffer) {
     // Telegram lets bots download only up to 20 MB: bigger files are sent to the viewer in the bot.
-    const method = { photo: "sendPhoto", video: "sendVideo", animation: "sendAnimation", video_note: "sendVideoNote" }[a.send] || "sendDocument";
-    const field = { sendPhoto: "photo", sendVideo: "video", sendAnimation: "animation", sendVideoNote: "video_note" }[method] || "document";
+    const method = { photo: "sendPhoto", video: "sendVideo", animation: "sendAnimation", video_note: "sendVideoNote", audio: "sendAudio", voice: "sendVoice" }[a.send] || "sendDocument";
+    const field = { sendPhoto: "photo", sendVideo: "video", sendAnimation: "animation", sendVideoNote: "video_note", sendAudio: "audio", sendVoice: "voice" }[method] || "document";
     let ok = true;
     try { await telegram(method, { chat_id: member.id, [field]: a.file_id, ...(method === "sendVideoNote" ? {} : { caption: caption.slice(0, 1000) }) }); } catch { ok = false; }
     res.statusCode = ok ? 200 : 404;
@@ -472,8 +472,8 @@ async function attachmentFile(req, res) {
     return res.end(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Вложение</title><body style="font:16px/1.5 system-ui,sans-serif;padding:32px;color:#2b3033;background:#fbf8f4">${ok ? "Файл большой, поэтому мы прислали его вам в Telegram-бот 🤍" : "Не получилось открыть файл."}</body>`);
   }
   const mime = String(a.mime || "");
-  const inline = /^(image\/(jpeg|png|gif|webp|heic|heif)|video\/(mp4|webm|quicktime))$/i.test(mime) || a.send === "photo";
-  const name = String(a.name || (a.kind === "photo" ? "photo.jpg" : a.kind === "video" ? "video.mp4" : "file")).replace(/["\\\r\n]/g, "");
+  const inline = /^(image\/(jpeg|png|gif|webp|heic|heif)|video\/(mp4|webm|quicktime)|audio\/(mpeg|mp3|mp4|x-m4a|aac|ogg|wav|x-wav|webm))$/i.test(mime) || a.send === "photo";
+  const name = String(a.name || (a.kind === "photo" ? "photo.jpg" : a.kind === "video" ? "video.mp4" : a.kind === "audio" ? "audio.mp3" : "file")).replace(/["\\\r\n]/g, "");
   res.statusCode = 200;
   res.setHeader("Content-Type", inline ? (mime || "image/jpeg") : "application/octet-stream");
   res.setHeader("Content-Disposition", `${inline ? "inline" : "attachment"}; filename="file"; filename*=UTF-8''${encodeURIComponent(name)}`);
