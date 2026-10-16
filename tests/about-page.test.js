@@ -90,12 +90,12 @@ test('links: only the owner sets them; they reach the public schedule and the pr
   createWorld();
   await admin(OWNER, 'team', { action: 'save', members: [{ id: '5002', name: 'Ирина', role: 'manager' }] });
   assert.equal((await admin(MANAGER, 'settings')).status, 403);
-  const bad = await admin(OWNER, 'settings', { action: 'save', settings: { materials_url: 'not a link' } });
+  const bad = await admin(OWNER, 'settings', { action: 'save', settings: { friendship_url: 'not a link' } });
   assert.equal(bad.status, 400);
-  const ok = await admin(OWNER, 'settings', { action: 'save', settings: { materials_url: 'https://t.me/k_zhenshcine/10', ritual_url: 'https://t.me/+ritual' } });
+  const ok = await admin(OWNER, 'settings', { action: 'save', settings: { friendship_url: 'https://t.me/k_zhenshcine/10', ritual_url: 'https://t.me/+ritual' } });
   assert.equal(ok.status, 200);
   const pub = await call(scheduleApi, { method: 'GET' });
-  assert.equal(pub.body.links.materials_url, 'https://t.me/k_zhenshcine/10');
+  assert.equal(pub.body.links.friendship_url, 'https://t.me/k_zhenshcine/10');
   assert.equal(pub.body.links.ritual_url, 'https://t.me/+ritual');
-  assert.equal((await profileOf(ANNA)).body.links.materials_url, 'https://t.me/k_zhenshcine/10');
+  assert.equal((await profileOf(ANNA)).body.links.friendship_url, 'https://t.me/k_zhenshcine/10');
 });

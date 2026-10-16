@@ -45,7 +45,7 @@ test('new admin links reach the public schedule', async () => {
   assert.equal(pub.body.links.accept_video_url, 'https://vkvideo.ru/video_ext.php?oid=-3&id=4&hd=2');
   assert.equal(pub.body.links.integrity_video_2, 'https://vkvideo.ru/video_ext.php?oid=-5&id=6&hash=abc123');
   assert.equal(pub.body.links.integrity_video_1, '');
-  assert.equal(pub.body.links.materials_url, '');
+  assert.equal(pub.body.links.materials_url, undefined, 'free materials link was removed');
 });
 
 test('access check tells club buttons whether she is already in the club', async () => {
