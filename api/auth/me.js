@@ -113,7 +113,7 @@ module.exports = async function handler(req, res) {
     club,
     tickets: tickets || { items: [], passed: 0 },
     profile: saved || null,
-    links: links || { materials_url: "", ritual_url: "" },
+    links: links || { ritual_url: "" },
     start_flow: progress || null
   });
 };

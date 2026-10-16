@@ -8,7 +8,6 @@
 <link rel="stylesheet" href="/masters.css">
 <script src="/telegram-web-app.js"></script><script src="/app-shell.js"></script>
 <script src="/access-guard.js"></script>
-<script src="/app-links.js"></script>
 <style>
 .ab-hero h1{font-size:clamp(1.7rem,7vw,2.3rem);line-height:1.1}
 .audio-title{margin:6px 4px 14px;font-weight:300;font-size:1.25rem}
@@ -33,8 +32,6 @@
 .contents li a{display:flex;gap:12px;padding:11px 4px;border-top:1px solid rgba(183,122,43,.16);text-decoration:none;color:inherit;font-size:.95rem}
 .contents li:first-child a{border-top:0}
 .contents li a b{font-weight:300;color:#a96c22;min-width:22px}
-.materials[hidden]{display:none}
-.materials{display:flex;justify-content:center;margin:22px 0 8px}
 </style>
 </head>
 <body>
@@ -63,7 +60,6 @@
     <div class="track" data-src="/audio/integrity-11.m4a"><button class="play" type="button" aria-label="Слушать"></button><div class="t-main"><b>Практика «Я и Мир»</b><div class="bar"><i></i></div><small><span class="cur">0:00</span> · <span class="dur">12 мин</span></small></div></div>
     <p class="audio-hint">Лучше в наушниках и в спокойном месте, где вас никто не отвлечёт.</p>
   </section>
-  <div class="materials" id="materials" hidden><a class="cta outline" href="#" data-link="materials_url">Бесплатные материалы <span>→</span></a></div>
 </main>
 <script>
 (function () {
@@ -84,8 +80,6 @@
   function draw(links) {
     var box = document.getElementById("lessons"), contents = document.getElementById("contents");
     box.innerHTML = ""; contents.innerHTML = "";
-    // Free materials button shows only once its link is set in the admin.
-    document.getElementById("materials").hidden = !links.materials_url;
     LESSONS.forEach(function (item, i) {
       var title = item[1];
       var num = "0" + (i + 1), id = "video-" + (i + 1);
