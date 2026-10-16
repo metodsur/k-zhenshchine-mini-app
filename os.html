@@ -1344,7 +1344,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
   }
 
   // ---------- База данных: файлы, ссылки и тексты с описанием ----------
-  var DB_ICONS = { photo: "🖼", video: "🎬", file: "📄", link: "🔗", text: "📝", note: "🗒" };
+  var DB_ICONS = { photo: "🖼", video: "🎬", audio: "🎧", file: "📄", link: "🔗", text: "📝", note: "🗒" };
   function dbFileUrl(e) { return "/api/os/file?db=" + encodeURIComponent(e.id); }
   function viewDatabase() { api("database").then(drawDatabase); }
   function drawDatabase(d) {
@@ -1357,7 +1357,7 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
     var folderSeg = folders.length ? h("div", { class: "seg", style: "flex-wrap:wrap;border-radius:18px" }, [["", "Все папки"]].concat(folders.map(function (f) { return [f, f]; })).map(function (c) {
       return h("button", { type: "button", class: folder === c[0] ? "on" : "", text: c[1], onclick: function () { state.dbFolder = c[0]; drawDatabase(d); } });
     })) : null;
-    var kindSeg = h("div", { class: "seg", style: "flex-wrap:wrap;border-radius:18px" }, [["", "Все"], ["photo", "Фото"], ["video", "Видео"], ["file", "Документы"], ["link", "Ссылки"], ["text", "Тексты"]].map(function (c) {
+    var kindSeg = h("div", { class: "seg", style: "flex-wrap:wrap;border-radius:18px" }, [["", "Все"], ["photo", "Фото"], ["video", "Видео"], ["audio", "Аудио"], ["file", "Документы"], ["link", "Ссылки"], ["text", "Тексты"]].map(function (c) {
       return h("button", { type: "button", class: kind === c[0] ? "on" : "", text: c[1], onclick: function () { state.dbKind = c[0]; drawDatabase(d); } });
     }));
     var box = h("div", { class: "db-grid" });
@@ -1367,12 +1367,12 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
         return (!folder || e.folder === folder) && (!kind || e.kind === kind) && (!q || [e.title, e.description, e.name, e.folder, e.url, e.text].join(" ").toLowerCase().indexOf(q) !== -1);
       });
       box.innerHTML = "";
-      if (!items.length) { box.appendChild(h("div", { class: "panel empty", text: d.items.length ? "Ничего не найдено" : "Пока пусто. Нажмите «+ Добавить» и загрузите первый файл: фото, видео, документ, ссылку или текст — с описанием." })); return; }
+      if (!items.length) { box.appendChild(h("div", { class: "panel empty", text: d.items.length ? "Ничего не найдено" : "Пока пусто. Нажмите «+ Добавить» и загрузите первый файл: фото, видео, аудио, документ, ссылку или текст — с описанием." })); return; }
       items.forEach(function (e) { box.appendChild(dbCard(e)); });
     }
     setView([
       h("div", { class: "head" }, h("div", null, h("div", { class: "eyebrow", text: "Команда" }), h("h1", { text: "База данных" }),
-        h("p", { text: "Файлы команды в одном месте: фото, видео, документы, ссылки и тексты — у каждого описание и папка." })),
+        h("p", { text: "Файлы команды в одном месте: фото, видео, аудио, документы, ссылки и тексты — у каждого описание и папка." })),
         h("button", { class: "btn gold", type: "button", text: "+ Добавить", onclick: function () { dbForm({}); } })),
       h("div", { class: "toolbar" }, search, kindSeg), folderSeg ? h("div", { class: "toolbar" }, folderSeg) : null, box
     ]);
@@ -1388,11 +1388,12 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       h("div", { class: "in" },
         h("h3", { text: e.title }),
         h("div", { class: "tags" }, h("span", { class: "tag", text: state.db.kinds[e.kind] || "" }), e.folder ? h("span", { class: "tag", text: "📁 " + e.folder }) : null),
+        e.kind === "audio" ? h("audio", { src: url, controls: true, preload: "none", style: "width:100%" }) : null,
         e.description ? h("p", { class: "desc", text: e.description }) : null,
         e.text ? h("p", { class: "desc", style: "background:var(--soft);padding:8px 10px;border-radius:10px;font-size:.84rem", text: e.text }) : null,
         h("div", { class: "vmeta", style: "margin-top:0" }, [e.name, fileSize(e.size), e.by, since(e.at)].filter(Boolean).join(" · ")),
         h("div", { class: "links" },
-          e.file_id ? h("a", { href: url, target: "_blank", rel: "noopener", text: e.kind === "photo" || e.kind === "video" ? "Открыть ↗" : "Скачать ↓" }) : null,
+          e.file_id ? h("a", { href: url, target: "_blank", rel: "noopener", text: ["photo", "video", "audio"].indexOf(e.kind) !== -1 ? "Открыть ↗" : "Скачать ↓" }) : null,
           e.url && e.file_id ? h("a", { href: e.url, target: "_blank", rel: "noopener noreferrer", text: "Ссылка ↗" }) : e.url ? h("a", { href: e.url, target: "_blank", rel: "noopener noreferrer", text: e.url.replace(/^https?:\/\//, "").slice(0, 40) + " ↗" }) : null,
           h("a", { href: "#", text: "Изменить", onclick: function (ev) { ev.preventDefault(); dbForm(e); } }))));
   }
@@ -1442,13 +1443,13 @@ table.att input{width:17px;height:17px;accent-color:var(--gold)}
       h("div", { class: "form" },
         field("Название", f.title, "full"), field("Папка", f.folder, "full"),
         field("Описание", f.description, "full"),
-        h("label", { class: "field full" }, h("span", { text: "Файл: фото, видео, документ" }),
+        h("label", { class: "field full" }, h("span", { text: "Файл: фото, видео, аудио, документ" }),
           h("div", { style: "display:flex;gap:10px;align-items:center;flex-wrap:wrap" },
             h("button", { class: "btn small", type: "button", text: e.file_id ? "Заменить файл" : "Выбрать файл", onclick: function (ev) { ev.preventDefault(); fileInput.click(); } }),
             !isNew ? h("button", { class: "btn small ghost", type: "button", text: "Прислать через бот", title: "Для файлов больше 3 МБ", onclick: function (ev) { ev.preventDefault(); saveBtn.disabled = true; viaBot(e.id); } }) : null,
             fileLabel, fileInput)),
         field("Ссылка", f.url, "full"), field("Текст", f.text, "full")),
-      h("p", { class: "sub", style: "color:var(--muted);font-size:.78rem;margin:8px 0 0", text: "Файлы до 3 МБ загружаются сразу. Большие (например, видео) — через бот: после сохранения он попросит прислать файл ответом на сообщение." }),
+      h("p", { class: "sub", style: "color:var(--muted);font-size:.78rem;margin:8px 0 0", text: "Файлы до 3 МБ загружаются сразу. Большие (например, видео или аудиопрактики) — через бот: после сохранения он попросит прислать файл ответом на сообщение." }),
       err,
       h("div", { class: "actions", style: "margin-top:16px;display:flex;gap:8px;justify-content:space-between" },
         !isNew && e.can_remove ? h("button", { class: "btn ghost", type: "button", text: "Удалить", onclick: function () {

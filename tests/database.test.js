@@ -86,6 +86,24 @@ test('database: files, links and texts with descriptions; big files through the 
   assert.match(String(f.body), /прислали его вам в Telegram/);
   assert.match(world.sent('sendVideo').pop().caption, /База данных/);
 
+  // Audio: an mp3 from the dashboard plays inline; an audio track sent to the bot lands too.
+  r = await os('database', { action: 'upload', item: { title: 'Аудиопрактика 1', folder: 'Аудиопрактики' }, file: { name: 'practice-1.mp3', mime: 'audio/mpeg', data: Buffer.from('mp3').toString('base64') } }, owner);
+  assert.equal(r.body.item.kind, 'audio');
+  f = await getFile({ db: r.body.item.id }, owner);
+  assert.equal(f.headers['content-type'], 'audio/mpeg');
+  assert.match(f.headers['content-disposition'], /^inline/);
+  r = await os('database', { action: 'save', item: { title: 'Аудиопрактика 2' } }, owner);
+  const a2 = r.body.item;
+  await os('database', { action: 'via_bot', id: a2.id }, owner);
+  await deliver({ message: { chat: { id: 900, type: 'private' }, from: OWNER, audio: { file_id: 'aud-2', file_size: 30e6, mime_type: 'audio/mpeg', file_name: 'Практика 2.mp3' } } });
+  r = await os('database', {}, owner);
+  const got = r.body.items.find((x) => x.id === a2.id);
+  assert.deepEqual([got.kind, got.file_id, got.send, got.name], ['audio', 'aud-2', 'audio', 'Практика 2.mp3']);
+  world.bigFiles.add('aud-2');
+  f = await getFile({ db: a2.id }, owner);
+  assert.equal(world.sent('sendAudio').pop().audio, 'aud-2', 'over 20 MB the bot sends the audio');
+  for (const x of r.body.items.filter((x) => x.kind === 'audio')) await os('database', { action: 'remove', id: x.id }, owner);
+
   // Removing: the author or the owner, not others.
   const linkId = r.body.items.find((x) => x.kind === 'link').id;
   assert.equal((await os('database', { action: 'remove', id: linkId }, olga)).status, 403);
