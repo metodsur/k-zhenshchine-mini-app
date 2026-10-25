@@ -96,6 +96,10 @@ module.exports = async function handler(req, res) {
     try { const r = await require("../../lib/pairs").handleApp(user, body); return send(res, r.status, r.body); }
     catch (error) { console.error("Pairs failed", error.message); return send(res, 500, { ok: false, error: "Не получилось. Попробуйте ещё раз." }); }
   }
+  if (body.action === "referral") {
+    try { return send(res, 200, { ok: true, referral: await require("../../lib/referrals").status(user.id) }); }
+    catch (error) { console.error("Referral link failed", error.message); return send(res, 500, { ok: false, error: "Не получилось создать ссылку. Попробуйте позже." }); }
+  }
   if (body.action === "save_profile") {
     try { return send(res, 200, { ok: true, profile: await profile.saveProfile(user.id, body.profile || {}) }); }
     catch { return send(res, 500, { ok: false, error: "Не получилось сохранить. Попробуйте ещё раз." }); }

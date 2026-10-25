@@ -82,6 +82,7 @@
 .ticket.is-past{opacity:.6}
 .ticket-tag{display:inline-block;margin-top:5px;padding:2px 9px;border-radius:999px;background:#f3efe6;color:#6f777b;font-size:.68rem}
 .tickets .cta{margin-top:14px}
+.invite{padding:23px 25px}.invite-intro{margin:0 0 18px;color:#6f777b;font-size:.86rem;line-height:1.5}.invite-count{display:flex;align-items:baseline;gap:10px}.invite-count b{font-weight:200;font-size:2.6rem;line-height:1;color:var(--gold)}.invite-count span{color:#6f777b;font-size:.86rem}.invite-bar{height:6px;margin:14px 0 10px;border-radius:999px;background:rgba(183,122,43,.14);overflow:hidden}.invite-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d);transition:width .4s ease}.invite-next{margin:0 0 18px;color:#555d61;font-size:.88rem;line-height:1.45}.invite .cta{width:min(100%,430px);cursor:pointer}.invite .cta[disabled]{opacity:.55;cursor:default}.invite-copy{display:block;margin:12px 4px 0;border:0;background:none;color:#9a611c;font:inherit;font-size:.84rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0}.invite-copy[disabled]{opacity:.5;cursor:default}.invite-status{min-height:1.2em;margin:10px 4px 0;color:#777f84;font-size:.76rem}
 #vision-text.is-empty{color:#9aa1a5;font-style:italic}
 .facet-add-form{grid-column:1/-1;display:flex;gap:8px;margin-bottom:6px}.facet-add-form[hidden]{display:none}
 .facet-add-form input{flex:1;min-height:44px;padding:10px 14px;border:1px solid rgba(183,122,43,.28);border-radius:14px;font:300 .95rem "Helvetica Neue",Arial,sans-serif}
@@ -109,6 +110,8 @@
   <section class="resources surface" aria-label="Выбор нужных ресурсов"><p class="resource-intro">Выберите один или несколько ресурсов — клуб поможет найти женщин, опыт и возможности для следующего шага.</p><div class="resource-options" id="resource-options">
     <button class="resource-chip" type="button">Поддержка</button><button class="resource-chip" type="button">Окружение</button><button class="resource-chip" type="button">Подруги</button><button class="resource-chip" type="button">Наставничество</button><button class="resource-chip" type="button">Партнёрство</button><button class="resource-chip" type="button">Команда</button><button class="resource-chip" type="button">Инвестиции</button><button class="resource-chip" type="button">Клиенты</button><button class="resource-chip" type="button">Экспертиза</button><button class="resource-chip" type="button">Продвижение</button><button class="resource-chip" type="button">Продажи</button><button class="resource-chip" type="button">Дизайн</button><button class="resource-chip" type="button">Маркетинг</button><button class="resource-chip" type="button">Финансы</button><button class="resource-chip" type="button">Юридическая помощь</button><button class="resource-chip" type="button">Пространство</button><button class="resource-chip" type="button">Нетворкинг</button><button class="resource-chip" type="button">Идеи</button><button class="resource-chip" type="button">Время</button><button class="resource-chip" type="button">Энергия</button><button class="resource-chip" type="button">Вдохновение</button><button class="resource-chip resource-add" id="add-resource" type="button" aria-expanded="false">+ Добавить ресурс</button>
   </div><form class="resource-add-form" id="resource-form" hidden><input id="resource-input" maxlength="40" placeholder="Например: няня, бухгалтер, площадка" aria-label="Новый ресурс" enterkeyhint="done"><button type="submit">Добавить</button></form><button class="cta resource-action" id="find-resources" type="button">Найти ресурсы в клубе <span>→</span></button><p class="resource-status" id="resource-status" aria-live="polite"></p></section>
+    <div class="section-title"><h2>ПРИГЛАСИ ПОДРУГ</h2><small>Женщина женщине — дом</small></div>
+  <section class="invite surface" id="invite" aria-label="Пригласи подруг"><p class="invite-intro">Поделись своей личной ссылкой на канал «к&nbsp;Женщине». 10 подруг — две недели клуба в подарок. 20 — ты можешь стать экспертом в День эфиров.</p><div class="invite-count"><b id="invite-count">0</b><span id="invite-label">женщин пришли по твоей ссылке</span></div><div class="invite-bar" aria-hidden="true"><i id="invite-bar"></i></div><p class="invite-next" id="invite-next">Ещё 10 — и две недели клуба твои.</p><button class="cta" id="invite-share" type="button" disabled>Поделиться ссылкой <span>→</span></button><button class="invite-copy" id="invite-copy" type="button" disabled>Скопировать ссылку</button><p class="invite-status" id="invite-status"></p></section>
     <div class="section-title"><h2>РИТУАЛ В ПАРЕ</h2><small>Каждый созвон клуба — новая пара</small></div>
   <a class="pair-entry" href="pairs.html"><span class="pair-orbs" aria-hidden="true"><i></i><i></i></span><span class="pair-copy"><b>Моя пара на ритуал</b><small>После созвона клуба — новая участница. Выберите сама или доверьте подбор нам.</small></span><span class="pair-arrow">→</span></a>
     <div class="section-title"><h2>МОИ ЗАДАЧИ</h2><small>Что важно сделать сейчас</small></div>
@@ -285,6 +288,23 @@ const profileData=(async()=>{try{
   return await api({});
 }catch(e){return null}})();
 profileData.then(renderProfile);
+
+// "Пригласи подруг": her personal channel link and how many women came through it.
+const DATE_LONG=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'});
+function womenCame(n){const a=n%10,b=n%100;return a===1&&b!==11?'женщина пришла':a>=2&&a<=4&&(b<12||b>14)?'женщины пришли':'женщин пришли'}
+let inviteLink='';
+function renderInvite(r){
+  const n=r.count;$('invite-count').textContent=n;$('invite-label').textContent=womenCame(n)+' по твоей ссылке';
+  const goal=n<r.club_goal?r.club_goal:r.expert_goal;$('invite-bar').style.width=Math.min(100,n/goal*100)+'%';
+  const gift=r.trial&&!r.trial.ended?'Подарок получен: клуб открыт до '+DATE_LONG.format(new Date(r.trial.until))+'. ':'';
+  $('invite-next').textContent=n<r.club_goal?'Ещё '+(r.club_goal-n)+' — и две недели клуба твои.'
+    :n<r.expert_goal?gift+'Ещё '+(r.expert_goal-n)+' — и ты можешь стать экспертом в День эфиров.'
+    :gift+'Ты можешь стать экспертом в День эфиров — мы напишем тебе, чтобы выбрать слот.';
+  inviteLink=r.link;$('invite-share').disabled=false;$('invite-copy').disabled=false;
+}
+profileData.then(p=>p&&api({action:'referral'})).then(d=>{if(d&&d.referral)renderInvite(d.referral);else if(initData)throw new Error('referral')}).catch(()=>{$('invite-status').textContent='Ссылка пока не загрузилась. Загляните чуть позже.'});
+$('invite-share').addEventListener('click',()=>{if(!inviteLink)return;openLink('https://t.me/share/url?url='+encodeURIComponent(inviteLink)+'&text='+encodeURIComponent('Приглашаю тебя в пространство «к Женщине» — здесь женщине не нужно уменьшаться, чтобы быть 🤍'))});
+$('invite-copy').addEventListener('click',async()=>{if(!inviteLink)return;try{await navigator.clipboard.writeText(inviteLink);$('invite-status').textContent='Ссылка скопирована'}catch(e){$('invite-status').textContent=inviteLink}});
 
 // "Найти ресурсы в клубе": club members go to the club group, others to the club payment.
 const clubStatus=profileData.then(p=>({club_member:Boolean(p&&p.club&&p.club.member===true),club_url:p&&p.club?p.club.url:null}));

@@ -181,9 +181,15 @@ module.exports = async function handler(req, res) {
       if (!isMemberStatus(oldStatus) && isMemberStatus(newStatus)) {
         const joinedUserId = change.new_chat_member.user.id;
         const joinedAt = new Date((change.date || Math.floor(Date.now() / 1000)) * 1000).toISOString();
+        let firstJoin = false;
         try {
-          if (Number(await store.rememberChannelJoin(joinedUserId, joinedAt)) === 1) await stats.trackChannelJoin(new Date(joinedAt));
+          firstJoin = Number(await store.rememberChannelJoin(joinedUserId, joinedAt)) === 1;
+          if (firstJoin) await stats.trackChannelJoin(new Date(joinedAt));
         } catch (error) { console.error("Join date storage failed"); }
+        // Only women new to the space count for the one who invited them.
+        if (firstJoin) {
+          try { await require("../../lib/referrals").onChannelJoin(change); } catch (error) { console.error("Referral count failed", error.message); }
+        }
         await crm.safeTouch(change.new_chat_member.user, { type: "channel", text: "Вступила в бесплатный канал «к Женщине»" });
         await sendJoined(joinedUserId);
       }
