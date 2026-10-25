@@ -110,6 +110,7 @@ module.exports = async function handler(req, res) {
     safely(() => ticketsInfo(user.id)), safely(() => profile.loadProfile(user.id)),
     safely(() => settings.loadSettings()), safely(() => store.onboardingState(user.id))
   ]);
+  const journey = await safely(() => require("../../lib/journey").build(user.id, { space, club, tickets, profile: saved, start: progress }));
   return send(res, 200, {
     ok: true,
     user: { first_name: user.first_name || null, last_name: user.last_name || null, photo_url: user.photo_url || null },
@@ -118,6 +119,7 @@ module.exports = async function handler(req, res) {
     tickets: tickets || { items: [], passed: 0 },
     profile: saved || null,
     links: links || { ritual_url: "" },
-    start_flow: progress || null
+    start_flow: progress || null,
+    journey: journey || null
   });
 };

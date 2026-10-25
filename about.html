@@ -82,6 +82,7 @@
 .ticket.is-past{opacity:.6}
 .ticket-tag{display:inline-block;margin-top:5px;padding:2px 9px;border-radius:999px;background:#f3efe6;color:#6f777b;font-size:.68rem}
 .tickets .cta{margin-top:14px}
+.mypath{padding:23px 22px}.mypath-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;position:relative}.mypath-steps:before{content:"";position:absolute;top:13px;left:10%;right:10%;height:1px;background:rgba(183,122,43,.25)}.mypath-steps li{position:relative;text-align:center;color:#9aa1a4;font-size:.68rem;line-height:1.25}.mypath-steps i{display:flex;align-items:center;justify-content:center;width:26px;height:26px;margin:0 auto 7px;border-radius:50%;border:1px solid rgba(183,122,43,.4);background:#fff;font-style:normal;font-size:.72rem;color:#b77a2b}.mypath-steps li.is-reached{color:#555d61}.mypath-steps li.is-reached i{color:#fff;border-color:#a86c21;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d)}.mypath-steps li.is-current{color:var(--ink);font-weight:400}.mypath-steps li.is-current i{box-shadow:0 0 0 5px rgba(212,157,61,.18)}.mypath-now{margin:20px 0 16px;color:#555d61;font-size:.9rem;line-height:1.5}.mypath-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.mypath-stat{padding:13px 8px;border-radius:18px;background:rgba(183,122,43,.06);text-align:center}.mypath-stat b{display:block;font-weight:200;font-size:1.7rem;line-height:1.1;color:var(--gold)}.mypath-stat span{display:block;margin-top:4px;color:#6f777b;font-size:.7rem;line-height:1.3}.mypath .cta{margin-top:18px;width:min(100%,430px)}
 .invite{padding:23px 25px}.invite-intro{margin:0 0 18px;color:#6f777b;font-size:.86rem;line-height:1.5}.invite-count{display:flex;align-items:baseline;gap:10px}.invite-count b{font-weight:200;font-size:2.6rem;line-height:1;color:var(--gold)}.invite-count span{color:#6f777b;font-size:.86rem}.invite-bar{height:6px;margin:14px 0 10px;border-radius:999px;background:rgba(183,122,43,.14);overflow:hidden}.invite-bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(112deg,#9a611c,#d49d3d 48%,#a8671d);transition:width .4s ease}.invite-next{margin:0 0 18px;color:#555d61;font-size:.88rem;line-height:1.45}.invite .cta{width:min(100%,430px);cursor:pointer}.invite .cta[disabled]{opacity:.55;cursor:default}.invite-copy{display:block;margin:12px 4px 0;border:0;background:none;color:#9a611c;font:inherit;font-size:.84rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0}.invite-copy[disabled]{opacity:.5;cursor:default}.invite-status{min-height:1.2em;margin:10px 4px 0;color:#777f84;font-size:.76rem}
 #vision-text.is-empty{color:#9aa1a5;font-style:italic}
 .facet-add-form{grid-column:1/-1;display:flex;gap:8px;margin-bottom:6px}.facet-add-form[hidden]{display:none}
@@ -99,6 +100,8 @@
 <body>
 <main class="page">
   <section class="hero" aria-labelledby="about-title"><img class="hero-art" src="/img/about-03-0979d275e9.webp" alt="Женщина в белом платье среди золотых световых сфер и снежных гор"><div class="profile"><div class="portrait-wrap"><img class="portrait" id="profile-avatar" src="/img/about-04-4a85d5dfb3.webp" alt="Моё фото"><label class="avatar-upload" title="Загрузить своё фото" aria-label="Загрузить своё фото">↥<input id="avatar-input" type="file" accept="image/*"></label></div><div class="identity-copy"><h1 id="about-title">Моя страница</h1><p class="membership-badge"><span id="space-since">В пространстве с сентября 2026</span></p><p class="club-membership" id="club-membership" hidden></p><p class="hero-lead">Я раскрываюсь. Я меняюсь. Я остаюсь собой.</p><p class="hero-lead hero-unique">Ты особенная. Твой путь уникален.</p></div></div></section>
+    <div class="section-title"><h2>МОЙ ПУТЬ</h2><small>Каждый день — маленький шаг к большому объёму</small></div>
+    <section class="mypath surface" id="mypath" aria-label="Мой путь"><ol class="mypath-steps" id="mypath-steps"></ol><p class="mypath-now" id="mypath-now">Здесь ты видишь свой путь в пространстве и всё, что уже прожила.</p><div class="mypath-stats" id="mypath-stats"></div><a class="cta" href="path.html">Весь путь <span>→</span></a></section>
     <div class="section-title"><h2>МОИ ВСТРЕЧИ</h2><small>Мои билеты и пройденные встречи</small></div>
     <section class="tickets surface" id="my-tickets"><p class="tickets-empty">Здесь появятся встречи, на которые вы записались.</p><a class="cta" href="meetings.html">Выбрать встречу <span>→</span></a></section>
     <section class="vision surface" id="vision"><div class="vision-head"><h2>КАК Я ВИЖУ СЕБЯ СЕГОДНЯ</h2><span class="rule"></span><time id="vision-updated" hidden></time><button class="edit-button" id="edit-vision" aria-label="Редактировать описание">✎</button></div><p id="vision-text" class="is-empty">Напишите пару строк о себе: какая вы сегодня, что для вас важно, куда идёте.</p><textarea id="vision-editor" aria-label="Описание себя" placeholder="Какая я сегодня…"></textarea></section>
@@ -288,6 +291,32 @@ const profileData=(async()=>{try{
   return await api({});
 }catch(e){return null}})();
 profileData.then(renderProfile);
+
+// "Мой путь": the stages of the path and what she has already lived.
+const JOURNEY_STEPS=['Видимость','Целостность','Наполнение','Раскрытие объёма','Проявление'];
+function plural(n,one,few,many){const a=n%10,b=n%100;return a===1&&b!==11?one:a>=2&&a<=4&&(b<12||b>14)?few:many}
+function renderJourney(j){
+  const steps=$('mypath-steps');steps.replaceChildren(...j.stages.map((s,i)=>{const li=document.createElement('li');if(s.reached)li.classList.add('is-reached');if(i===j.current)li.classList.add('is-current');const dot=document.createElement('i');dot.textContent=s.reached?'✓':String(i);li.append(dot,s.title);return li}));
+  const now=[
+    'Начни с ритуала видимости: покажи себя пространству настолько, насколько тебе сейчас комфортно.',
+    'Ты на этапе целостности: собираешь себя воедино. Следующий шаг — клуб «Наполнение» с ежедневными ритуалами и новой парой каждые две недели.',
+    'Ты в клубе «Наполнение». Следующий шаг — живые встречи «Раскрытие многомерного объёма».',
+    'Ты раскрываешь свой объём: пройдено '+j.meetings+' из 6 встреч. Дальше — путь Мастера или Партнёра.',
+    'Ты на этапе проявления: твой объём уже идёт в мир.'
+  ][j.current];
+  $('mypath-now').textContent=now;
+  const stats=[
+    j.days!=null?[j.days,plural(j.days,'день','дня','дней')+' в пространстве']:null,
+    [j.meetings+' из 6','встреч пройдено'],
+    [j.women,plural(j.women,'женщина','женщины','женщин')+' в паре'],
+    [j.invited,plural(j.invited,'подруга пришла','подруги пришли','подруг пришли')],
+    [j.tasks_done,plural(j.tasks_done,'задача выполнена','задачи выполнены','задач выполнено')],
+    [j.facets,plural(j.facets,'грань','грани','граней')+' во мне']
+  ].filter(Boolean);
+  $('mypath-stats').replaceChildren(...stats.map(([v,l])=>{const d=document.createElement('div');d.className='mypath-stat';const b=document.createElement('b');b.textContent=v;const sp=document.createElement('span');sp.textContent=l;d.append(b,sp);return d}));
+}
+renderJourney({current:0,stages:JOURNEY_STEPS.map(t=>({title:t,reached:false})),days:null,meetings:0,women:0,invited:0,tasks_done:0,facets:7});
+profileData.then(p=>{if(p&&p.journey)renderJourney(p.journey)});
 
 // "Пригласи подруг": her personal channel link and how many women came through it.
 const DATE_LONG=new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'long'});
