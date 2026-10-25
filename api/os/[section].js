@@ -56,7 +56,7 @@ async function calendarItems(from, to, cycleView) {
   for (const e of await events.loadEvents()) {
     if (e.date >= from && e.date <= to) items.push({ kind: "club", id: `club:${e.date}:${e.title}`, date: e.date, time: "", title: e.title, place: "Клуб", meta: e.text || "" });
   }
-  for (const name of ["content", "media"]) {
+  for (const name of ["content", "media", "experts"]) {
     const cal = collections.SCHEMAS[name].calendar;
     for (const it of await collections.load(name)) {
       const date = it[cal.field];

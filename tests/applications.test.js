@@ -65,3 +65,22 @@ test('expert form: answers, slots and invited count reach the team; values must 
   assert.deepEqual(saved.expert.slots, ['16:30', '17:00']);
   assert.equal(saved.contact, '@anna');
 });
+
+test('expert form also reaches the director in the bot and lands on the board «Эксперты»', async () => {
+  const world = createWorld();
+  await require('../lib/team').saveTeam([{ id: '555', name: 'Анастасия', role: 'director' }, { id: '556', name: 'Ира', role: 'content' }]);
+  const r = await apply(ANNA, { kind: 'expert', about: 'Коуч', serve: 'Опора', topic: 'Женская опора', stage: 'Целостность', takeaway: 'Практика',
+    levels_url: 'https://yrovni.ru/anna', slots: ['18:00'], values_ok: true });
+  assert.equal(r.status, 200);
+  const toDirector = world.sent('sendMessage').find((m) => m.chat_id === '555');
+  assert.match(toDirector.text, /Эксперт Дня эфиров/);
+  assert.match(toDirector.text, /раздел «Эксперты»/);
+  assert.equal(world.sent('sendMessage').filter((m) => m.chat_id === '556').length, 0);
+  const [card] = await require('../lib/os-collections').load('experts');
+  assert.equal(card.title, 'Женская опора');
+  assert.equal(card.stage, 'new');
+  assert.equal(card.slots, '18:00');
+  assert.equal(card.path_stage, 'Целостность');
+  assert.equal(card.invited, 0);
+  assert.equal(card.tg_id, '7001');
+});
