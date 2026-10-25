@@ -44,3 +44,24 @@ test('master application includes how many meetings she has passed', async () =>
   assert.match(alert.text, /Город: Москва/);
   assert.match(alert.text, /Пройдено встреч: 1 из 6/);
 });
+
+test('expert form: answers, slots and invited count reach the team; values must be accepted', async () => {
+  const world = createWorld();
+  const form = { kind: 'expert', about: 'Нутрициолог, 8 лет практики', serve: 'Помогаю вернуть энергию', experience: '30 эфиров', cases: 'Клиентка вернула сон за месяц',
+    levels_url: 'https://yrovni.ru/anna', topic: 'Энергия женщины через питание', stage: 'Наполнение', takeaway: 'Утренний ритуал на 5 минут', product: '', slots: ['16:30', '17:00', '23:00'] };
+  let r = await apply(ANNA, { ...form, values_ok: false });
+  assert.equal(r.status, 400);
+  assert.match(r.body.error, /ценности/);
+  assert.equal((await apply(ANNA, { ...form, values_ok: true, levels_url: '' })).status, 400);
+  r = await apply(ANNA, { ...form, values_ok: true });
+  assert.equal(r.status, 200);
+  const alert = world.sent('sendMessage').find((m) => m.chat_id === '900');
+  assert.match(alert.text, /Эксперт Дня эфиров/);
+  assert.match(alert.text, /Анна \(@anna\)/);
+  assert.match(alert.text, /Пригласила: 0 из 20/);
+  assert.match(alert.text, /Слоты: 16:30, 17:00\n/);
+  assert.match(alert.text, /Чем может служить пространству: Помогаю вернуть энергию/);
+  const saved = JSON.parse(world.lists.applications[0]);
+  assert.deepEqual(saved.expert.slots, ['16:30', '17:00']);
+  assert.equal(saved.contact, '@anna');
+});
