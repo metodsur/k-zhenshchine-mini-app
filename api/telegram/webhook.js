@@ -131,7 +131,9 @@ module.exports = async function handler(req, res) {
     }
     if (message?.chat?.type === "private" && typeof message.text === "string" && message.text.startsWith("/start")) {
       await stats.trackStart(message.from.id);
-      const source = crm.startParam(message.text);
+      const param = crm.startParam(message.text);
+      // Buttons of channel posts (/start go_<page>) count as the channel, not as a separate source.
+      const source = param && param.startsWith("go_") ? "channel_post" : param;
       let ref = null;
       try { ref = await require("../../lib/master-finance").attach(message.from.id, source); } catch (error) { console.error("Referral attach failed"); }
       const label = ref ? `Мастер: ${ref.master.name}` : crm.sourceLabel(source);
@@ -144,6 +146,12 @@ module.exports = async function handler(req, res) {
       } else {
         await telegram("sendMessage", { chat_id: message.chat.id, text: "Пространство откроется после вступления в канал «к Женщине» 🤍", reply_markup: channelKeyboard() });
       }
+      return send(res, 200, { ok: true });
+    }
+    const goPage = message?.chat?.type === "private" && typeof message.text === "string" ? require("../../lib/channel-posts").PAGES[(crm.startParam(message.text) || "").replace(/^go_/, "") || "-"] : null;
+    if (goPage && /^\/start(@\w+)?\s+go_/.test(message.text) && await isMemberSafe(message.from.id)) {
+      const appUrl = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
+      await telegram("sendMessage", { chat_id: message.chat.id, text: "Открывай 🤍✨", reply_markup: { inline_keyboard: [[{ text: "Открыть ✨", web_app: { url: `${appUrl}/${goPage}` } }]] } });
       return send(res, 200, { ok: true });
     }
     if (message?.chat && typeof message.text === "string" && message.text.startsWith("/start") && await isMemberSafe(message.from.id)) {

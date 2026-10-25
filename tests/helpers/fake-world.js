@@ -80,6 +80,7 @@ function createWorld() {
         world.uploads = (world.uploads || 0) + 1;
         return ok({ ok: true, result: { message_id: 7000 + world.uploads, document: { file_id: `doc-${world.uploads}`, file_name: payload.document.name, mime_type: payload.document.type, file_size: payload.document.size } } });
       }
+      if (tg[1] === 'sendMessage') return ok({ ok: true, result: { message_id: 100 + telegramCalls.length } });
       if (tg[1] === 'getFile') return world.bigFiles && world.bigFiles.has(payload.file_id) ? { ok: false, json: async () => ({ ok: false }) } : ok({ ok: true, result: { file_path: `documents/${payload.file_id}` } });
       if (tg[1] === 'createChatInviteLink') return ok({ ok: true, result: { invite_link: `https://t.me/+${payload.name}-${telegramCalls.length}`, name: payload.name } });
       if (tg[1] === 'createInvoiceLink') return ok({ ok: true, result: `https://t.me/$invoice-${payload.payload}` });
