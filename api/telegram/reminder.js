@@ -70,6 +70,9 @@ module.exports = async function handler(req, res) {
   if (body.kind === "nudges") {
     try { return send(res, 200, { ok: true, result: await require("../../lib/nudges").runDaily() }); } catch (error) { console.error("Nudges failed", error.message); return send(res, 500, { ok: false }); }
   }
+  if (body.kind === "channel_post") {
+    try { return send(res, 200, { ok: true, result: await require("../../lib/channel-posts").publish(String(body.date || ""), String(body.slot || "")) }); } catch (error) { console.error("Channel post failed", error.message); return send(res, 500, { ok: false }); }
+  }
   if (body.kind === "checkout") {
     try { return send(res, 200, { ok: true, ...(await checkoutReminder(body.orderId)) }); } catch { return send(res, 500, { ok: false }); }
   }
