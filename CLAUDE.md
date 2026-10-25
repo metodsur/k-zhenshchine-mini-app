@@ -19,7 +19,7 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 94 теста, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 97 тестов, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в Vercel, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
@@ -31,7 +31,7 @@
 - Экраны с видео VK (ссылки из админки → «Ссылки»): `abundance.html` (4 видео «Изобильная реальность», порядок: ресурсы → нюансы → подарки от пространства → подарки от мужчин; поля `abundance_video_3,4,1,2`), `practice.html` («Практика многомерности», `practice_video_url`), `integrity.html` («Твоя целостность» с «Пути», 2 видео `integrity_video_1,2` + 11 аудиопрактик `audio/integrity-01…11.m4a` (AAC моно 48k)), `accept.html` («Я принимаю», `accept_video_url` + 2 аудио в `audio/`), `mirror.html` («Зеркало», `mirror_video_url` + карточки Мастеров).
 - Поля видео принимают ссылку VK, **целый код «Экспортировать»** (нужен для видео «по ссылке» — в нём hash) или ссылку Kinescope; сохраняется адрес плеера (`lib/settings.js → videoEmbed`).
 - `pairs.html` — «Ритуал в паре» (вход с «Обо мне»). `master.html` — путь Мастера (Встречи → «Стать Мастером»). `master-cabinet.html` — кабинет Мастера (бот `/master`, только оплатившим): обучение, «Зеркало», финансы + реф-ссылка + договор, инструкции.
-- «Обо мне»: грани, свои ресурсы («+ Добавить ресурс»), «Мои задачи» (личные, хранятся в `profile:<id>`), вход в «Ритуал в паре».
+- «Обо мне»: «Мой путь» (этапы пути, счётчики и «Мои победы»: автоматические + свои в `profile.wins` — `lib/journey.js`, поле `journey` в `/api/auth/me`), грани, свои ресурсы («+ Добавить ресурс»), «Мои задачи» (личные, хранятся в `profile:<id>`), вход в «Ритуал в паре».
 
 ## Бот (api/telegram/webhook.js)
 Порядок: оплаты → callback-кнопки (`p:` пары → `lib/pairs.js`, `t:` задачи → `lib/tasks.js`) → `/setup`, `/delaytest` (владелица, `lib/bot-setup.js`) → задачи (`/tasks`, `/task`, ответы на сообщения задач) → согласие → `/master` → ответы на рассылки.
