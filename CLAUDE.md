@@ -19,7 +19,7 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 100 тестов, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 102 теста, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в Vercel, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
@@ -67,7 +67,8 @@
 - 10 приглашённых → две недели клуба в подарок: одноразовая ссылка в группу клуба, сообщение ей и команде. Вечерний cron за 2 дня напоминает, а по окончании без подписки Tribute удаляет из группы (ban + unban). Нужны права бота в группе клуба: приглашать и удалять участников.
 - 20 приглашённых → может стать экспертом в День эфиров: сообщение ей и команде (один раз).
 
-### Сообщения дня от бота (`lib/nudges.js`, шаг `nudges` утреннего cron 9:00 МСК)
+### Сообщения дня от бота (`lib/nudges.js`) — в 11:00 МСК
+- Утренний cron 9:00 ставит запуск через QStash на 11:00 (`/api/telegram/reminder`, `kind: "nudges"`); если вызов не пришёл, вечерний cron 18:00 отправляет их сам («Доброе утро» → «Добрый вечер»). Раньше 11:00 не уходят.
 - Не больше одного сообщения в день каждой, у кого есть карточка CRM и нет /stop.
 - Если со вчера перешла на новый этап пути — поздравление с этапом вместо ритуала дня (первый запуск только запоминает этапы в `nudge:stage`).
 - Иначе ритуал дня по сетке недели бесплатного канала: Пн путь/видимость, Вт День эфиров, Ср ресурсы, Чт целостность, Пт День дружбы/«Я принимаю», Сб многомерность, Вс «запиши победу недели» + пригласи подругу.

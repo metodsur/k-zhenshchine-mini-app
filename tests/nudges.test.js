@@ -2,16 +2,16 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { setupEnv, createWorld } = require('./helpers/fake-world');
 
-setupEnv({ TRIBUTE_API_KEY: 'test-tribute' });
+setupEnv({ TRIBUTE_API_KEY: 'test-tribute', QSTASH_TOKEN: 'q', TELEGRAM_REMINDER_SECRET: 'rs' });
 const nudges = require('../lib/nudges');
 const crm = require('../lib/crm');
 const store = require('../lib/store');
 const tribute = require('../lib/tribute');
 
-// 9:00 Moscow = 06:00 UTC.
-const MONDAY = Date.parse('2026-10-26T06:00:00Z');
-const TUESDAY = Date.parse('2026-10-27T06:00:00Z');
-const SUNDAY = Date.parse('2026-11-01T06:00:00Z');
+// 11:00 Moscow = 08:00 UTC.
+const MONDAY = Date.parse('2026-10-26T08:00:00Z');
+const TUESDAY = Date.parse('2026-10-27T08:00:00Z');
+const SUNDAY = Date.parse('2026-11-01T08:00:00Z');
 
 async function women() {
   await crm.touch({ id: 701, first_name: 'Анна' }, { force: true });
@@ -74,4 +74,22 @@ test('moving to a new stage replaces the ritual of the day with congratulations'
   assert.match(to(world, 701)[1].text, /этап «Целостность»/);
   assert.match(to(world, 702)[1].text, /Добро пожаловать в «Наполнение», Мария/);
   assert.equal(to(world, 702).length, 2);
+});
+
+test('the 9:00 morning run schedules the messages for 11:00; nothing goes out earlier', async () => {
+  const world = createWorld();
+  await women();
+  const nine = Date.parse('2026-10-26T06:00:00Z');
+  assert.deepEqual(await nudges.schedule(nine), { scheduled_in_s: 7200 });
+  assert.deepEqual(world.qstash.map((q) => q.body), [{ kind: 'nudges' }]);
+  assert.deepEqual(await nudges.runDaily(nine), { early: true });
+  assert.equal(world.sent('sendMessage').length, 0);
+});
+
+test('if the 11:00 call never came, the evening run sends them with an evening greeting', async () => {
+  const world = createWorld();
+  await women();
+  await nudges.runDaily(Date.parse('2026-10-26T15:00:00Z'));
+  assert.match(to(world, 701)[0].text, /^Добрый вечер, Анна/);
+  assert.deepEqual(await nudges.runDaily(Date.parse('2026-10-26T15:05:00Z')), { skipped: true });
 });
