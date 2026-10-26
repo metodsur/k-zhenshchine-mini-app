@@ -91,3 +91,53 @@ test('a post button opens the right page of the app through the bot', async () =
   const reply = world.sent('sendMessage').find((m) => m.chat_id === 7001);
   assert.equal(reply.reply_markup.inline_keyboard[0][0].web_app.url, 'https://app.example.test/abundance.html');
 });
+
+test('VK: each post is repeated on the community wall with links instead of buttons; off without the key', async () => {
+  const world = createWorld();
+  assert.deepEqual(await posts.publish('2026-10-27', '10:00', msk('2026-10-27', '10:00')), { sent: 'ritual' });
+  assert.equal(world.vk.length, 0);
+
+  process.env.VK_GROUP_ID = 'club12345';
+  process.env.VK_GROUP_TOKEN = 'vk-token';
+  try {
+    assert.deepEqual(await posts.publish('2026-10-27', '13:00', msk('2026-10-27', '13:00')), { sent: 'rubrics', vk: 'sent' });
+    assert.deepEqual(await posts.publish('2026-10-27', '13:00', msk('2026-10-27', '13:05')), { skipped: 'already_sent', vk: 'already_sent' });
+    // The morning post went out before VK was on: the evening run adds it to VK only.
+    const late = await posts.catchUp(msk('2026-10-27', '18:00'));
+    assert.deepEqual(late['10:00'], { skipped: 'already_sent', vk: 'sent' });
+    assert.deepEqual(late['17:00'], { sent: 'explore', vk: 'sent' });
+    assert.equal(toChannel(world).length, 3);
+    assert.equal(world.vk.length, 3);
+    const ritual = world.vk[1].params;
+    assert.equal(world.vk[1].method, 'wall.post');
+    assert.equal(ritual.owner_id, '-12345');
+    assert.equal(ritual.from_group, '1');
+    assert.equal(ritual.access_token, 'vk-token');
+    assert.match(ritual.message, /^📌 Начни отсюда/);
+    assert.match(ritual.message, /Ты уже достаточна, чтобы быть здесь\.\n\nПройти ритуал видимости ✨\nhttps:\/\/t\.me\/K_zhenshcine_bot\?start=vk_ritual$/);
+
+    // A VK error never stops Telegram; the team hears once a day, the evening run tries again.
+    world.vkError = 'Access denied';
+    assert.deepEqual(await posts.publish('2026-10-28', '10:00', msk('2026-10-28', '10:00')), { sent: 'resources', vk: 'error' });
+    assert.deepEqual((await posts.catchUp(msk('2026-10-28', '18:00')))['10:00'], { skipped: 'already_sent', vk: 'error' });
+    const alerts = world.sent('sendMessage').filter((m) => /не вышел во ВКонтакте/.test(m.text));
+    assert.ok(alerts.length >= 1);
+    assert.equal(new Set(alerts.map((m) => m.chat_id)).size, alerts.length);
+    world.vkError = null;
+    assert.deepEqual((await posts.catchUp(msk('2026-10-28', '18:30')))['10:00'], { skipped: 'already_sent', vk: 'sent' });
+  } finally {
+    delete process.env.VK_GROUP_ID;
+    delete process.env.VK_GROUP_TOKEN;
+  }
+});
+
+test('a link under a VK post opens the page and counts the woman as coming from VK', async () => {
+  const world = createWorld();
+  world.members.add('7002');
+  const res = await call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
+    body: { message: { chat: { id: 7002, type: 'private' }, from: { id: 7002, first_name: 'Вера' }, text: '/start vk_accept' } } });
+  assert.equal(res.status, 200);
+  const reply = world.sent('sendMessage').find((m) => m.chat_id === 7002);
+  assert.equal(reply.reply_markup.inline_keyboard[0][0].web_app.url, 'https://app.example.test/accept.html');
+  assert.equal((await require('../lib/crm').getCard('tg7002')).source, 'ВКонтакте');
+});

@@ -19,11 +19,11 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 109 тестов, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 111 тестов, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в Vercel, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
-Необязательные: `QSTASH_URL` (регион QStash), `VAULT_KEY` (ключ шифрования «Доступов»; без него ключ выводится из `TELEGRAM_WEBHOOK_SECRET` — **не менять этот секрет**, иначе сохранённые пароли не расшифруются), `OWNER_NAME`.
+Необязательные: `QSTASH_URL` (регион QStash), `VK_GROUP_ID` + `VK_GROUP_TOKEN` (сообщество ВК и его ключ доступа с правом «Стена»: посты канала повторяются на стене ВК, `lib/vk.js`; без них ВК выключен), `VAULT_KEY` (ключ шифрования «Доступов»; без него ключ выводится из `TELEGRAM_WEBHOOK_SECRET` — **не менять этот секрет**, иначе сохранённые пароли не расшифруются), `OWNER_NAME`.
 
 ## Приложение (Mini App) — страницы
 - Старт: `index.html` → `welcome-*.html` → `rituals.html`; доступ и согласие на ПДн — `access-guard.js` (оверлей «Согласна»), `privacy.html`.
@@ -70,6 +70,9 @@
 ### Анкета эксперта (`expert.html`, `kind: "expert"` в `lib/handlers/application.js`)
 - День эфиров: вторник 16:00–18:30 МСК, 5 эфиров по 30 минут подряд (слоты 16:00…18:00).
 - Вступление о пространстве → 10 вопросов (кто ты, чем служить пространству, опыт выступлений, кейсы, ссылка на «Уровни», тема, этап пути, польза, продукт, слоты) → 5 ценностей, все обязательны. Ответы + число приглашённых приходят команде в бот и в список `applications`, заметка в CRM. Сообщение получают все с правом `alerts` (владелица и директор Анастасия, если она добавлена в команду с её Telegram ID). Карточка сама появляется в дашборде «Эксперты» (коллекция `experts` в `lib/os-collections.js`, видят владелица и директор, `tasks.review`): Новая анкета → Созвон → Слот назначен (дата + время, попадает в Календарь) → Эфир проведён / Не сейчас. Вход: «Обо мне» → «Пригласи подруг» и кнопка в сообщении на 20 приглашённых.
+
+### Посты канала (`lib/channel-posts.js`) и ВКонтакте (`lib/vk.js`)
+- Утверждённая сетка выходит в Telegram-канал сама (утро ставит через QStash, вечер догоняет). Если заданы `VK_GROUP_ID`/`VK_GROUP_TOKEN`, тот же пост уходит на стену сообщества ВК (`wall.post`), кнопки становятся ссылками `/start vk_<страница>` — источник «ВКонтакте» в CRM. Ошибка ВК не мешает Telegram: команде одно сообщение в день, вечером повтор. Postmypost публикует другой контент — дублей нет.
 
 ### Сообщение о старте (`lib/launch-message.js`)
 - Разовое: 27.10.2026 в 10:05 МСК (через 5 минут после поста с ритуалом в канале) всем с карточкой в CRM без /stop, кнопки «Перейти в канал» и «Пройти ритуал видимости». Утро ставит через QStash (`kind: "launch_dm"`), вечер догоняет; каждой один раз (`launch_dm:sent`).
