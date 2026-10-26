@@ -55,7 +55,7 @@ function createWorld() {
     }
   };
   const blockedChats = new Set();
-  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {} };
+  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {}, vk: [], vkError: null };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });
@@ -87,6 +87,11 @@ function createWorld() {
       if (tg[1] === 'getChatMemberCount') return ok({ ok: true, result: world.memberCounts[String(payload.chat_id)] ?? 0 });
       if (tg[1] === 'getChatMember') return ok({ ok: true, result: { status: (world.members.has(String(payload.user_id)) ? 'member' : 'left') } });
       return ok({ ok: true, result: true });
+    }
+    const vk = href.match(/^https:\/\/api\.vk\.com\/method\/([\w.]+)$/);
+    if (vk) {
+      world.vk.push({ method: vk[1], params: Object.fromEntries(new URLSearchParams(options.body)) });
+      return ok(world.vkError ? { error: { error_code: 15, error_msg: world.vkError } } : { response: { post_id: world.vk.length } });
     }
     throw new Error(`Unexpected request ${href}`);
   };
