@@ -73,6 +73,9 @@ module.exports = async function handler(req, res) {
   if (body.kind === "channel_post") {
     try { return send(res, 200, { ok: true, result: await require("../../lib/channel-posts").publish(String(body.date || ""), String(body.slot || "")) }); } catch (error) { console.error("Channel post failed", error.message); return send(res, 500, { ok: false }); }
   }
+  if (body.kind === "launch_dm") {
+    try { return send(res, 200, { ok: true, result: await require("../../lib/launch-message").run() }); } catch (error) { console.error("Launch message failed", error.message); return send(res, 500, { ok: false }); }
+  }
   if (body.kind === "checkout") {
     try { return send(res, 200, { ok: true, ...(await checkoutReminder(body.orderId)) }); } catch { return send(res, 500, { ok: false }); }
   }
