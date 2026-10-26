@@ -19,6 +19,7 @@ test('bot: consent before anything, then the original /start continues', async (
   assert.equal(msgs.length, 1);
   assert.match(msgs[0].text, /согласие на обработку персональных данных/);
   assert.match(msgs[0].text, /href="https:\/\/app\.example\.test\/privacy\.html"/);
+  assert.match(msgs[0].text, /href="https:\/\/app\.example\.test\/consent\.html"/, 'consent is a separate document');
   assert.equal(msgs[0].reply_markup.keyboard[0][0].text, 'Согласна ✅');
   assert.equal(await crm.getCard('tg7101'), null, 'nothing stored before consent');
   assert.equal(world.qstash.length, 0);
@@ -62,6 +63,7 @@ test('app: overlay until she agrees; purchases are recorded regardless', async (
   const r1 = await call(access, { method: 'POST', body: { initData: initData(ANNA) } });
   assert.equal(r1.body.consent, false);
   assert.match(r1.body.policy_url, /privacy\.html$/);
+  assert.match(r1.body.consent_url, /consent\.html$/);
   assert.equal(r1.body.subscribed, undefined, 'nothing checked or stored before consent');
   const r2 = await call(access, { method: 'POST', body: { initData: initData(ANNA), consent: true } });
   assert.equal(r2.body.consent, true);

@@ -28,7 +28,7 @@ module.exports = async function handler(req, res) {
     else if (!(await consent.has(user.id))) {
       let settings = {};
       try { settings = await require("../../lib/settings").loadSettings(); } catch { settings = {}; }
-      return send(res, 200, { ok: true, consent: false, policy_url: consent.policyUrl(settings) });
+      return send(res, 200, { ok: true, consent: false, policy_url: consent.policyUrl(settings), consent_url: consent.consentUrl() });
     }
   } catch { /* storage trouble must not lock her out */ }
 
