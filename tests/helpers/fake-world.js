@@ -55,7 +55,7 @@ function createWorld() {
     }
   };
   const blockedChats = new Set();
-  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {}, vk: [], vkError: null };
+  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {}, vk: [], vkError: null, levels: [], levelsDown: false };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });
@@ -89,6 +89,10 @@ function createWorld() {
       if (tg[1] === 'getChatMemberCount') return ok({ ok: true, result: world.memberCounts[String(payload.chat_id)] ?? 0 });
       if (tg[1] === 'getChatMember') return ok({ ok: true, result: { status: (world.members.has(String(payload.user_id)) ? 'member' : 'left') } });
       return ok({ ok: true, result: true });
+    }
+    if (href.startsWith('https://levels.example.test/')) {
+      world.levels.push({ url: href, auth: options.headers.Authorization, body: JSON.parse(options.body) });
+      return world.levelsDown ? { ok: false, status: 503, json: async () => ({}) } : ok({ ok: true });
     }
     const vk = href.match(/^https:\/\/api\.vk\.com\/method\/([\w.]+)$/);
     if (vk) {

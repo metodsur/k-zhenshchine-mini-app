@@ -13,11 +13,14 @@ const CLUB = { id: -1004375885816, type: 'supergroup' };
 const deliver = (message) => call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' }, body: { message } });
 const admin = (section, extra = {}) => call(adminRoute, { method: 'POST', query: { section }, body: { initData: initData(OWNER), ...extra } });
 
-test('club group messages feed the weekly summary; #коллаборация counts collaborations', async () => {
+test('club group messages feed the weekly summary; confirmed #коллаборация counts collaborations', async () => {
   createWorld();
+  const tap = (from, msg) => call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' }, body: { callback_query: { id: 'q' + msg, from, data: `c:y:${msg}`, message: { chat: CLUB } } } });
   await deliver({ chat: CLUB, from: { id: 1 }, text: 'Всем привет!' });
-  await deliver({ chat: CLUB, from: { id: 2 }, text: 'Договорились с Анной о съёмке #коллаборация' });
-  await deliver({ chat: CLUB, from: { id: 2 }, caption: 'Наш проект #Коллаб', photo: [{}] });
+  await deliver({ chat: CLUB, message_id: 11, from: { id: 2 }, text: 'Договорились с @anna_k о съёмке #коллаборация', entities: [{ type: 'mention', offset: 15, length: 7 }] });
+  await deliver({ chat: CLUB, message_id: 12, from: { id: 2 }, caption: 'Наш проект с @anna_k #Коллаб', caption_entities: [{ type: 'mention', offset: 13, length: 7 }], photo: [{}] });
+  await tap({ id: 1, username: 'Anna_K' }, 11);
+  await tap({ id: 1, username: 'anna_k' }, 12);
   await deliver({ chat: CLUB, from: { id: 3, is_bot: true }, text: '#коллаборация от бота не считается' });
   await deliver({ chat: { id: -100999, type: 'supergroup' }, from: { id: 4 }, text: '#коллаборация в другой группе' });
   await deliver({ chat: { id: 5, type: 'private' }, from: { id: 5 }, text: '#коллаборация в личке' });
