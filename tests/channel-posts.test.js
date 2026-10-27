@@ -164,3 +164,16 @@ test('the ritual button opens the ritual itself, even for those who passed it; w
   assert.deepEqual(await posts.refreshPinned(), { ok: false, reason: 'not_ritual_post' });
   posts.resetDirect();
 });
+
+test('/fixbutton: the owner points the button of a channel post to any link', async () => {
+  const world = createWorld();
+  const send = (id, text) => call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
+    body: { message: { chat: { id, type: 'private' }, from: { id, first_name: 'В' }, text } } });
+  await send(900, '/fixbutton https://t.me/k_zhenshcine/7 https://t.me/k_zhenshcine/9');
+  const edit = world.sent('editMessageReplyMarkup')[0];
+  assert.equal(edit.message_id, 7);
+  assert.deepEqual(edit.reply_markup.inline_keyboard, [[{ text: 'Пройти ритуал видимости ✨', url: 'https://t.me/k_zhenshcine/9' }]]);
+  assert.match(world.sent('sendMessage').at(-1).text, /Готово/);
+  await send(7002, '/fixbutton https://t.me/k_zhenshcine/7 https://evil.example');
+  assert.equal(world.sent('editMessageReplyMarkup').length, 1);
+});
