@@ -26,7 +26,7 @@ test('launch day: one message at 10:05 to every woman in the bot, never twice, n
   assert.equal(String(msg.chat_id), '701');
   assert.match(msg.text, /^Мы начинаем историю «к Женщине» 🎉🤍\n\nАнна, мы так рады/);
   assert.equal(msg.reply_markup.inline_keyboard[0][0].url, 'https://t.me/test_channel');
-  assert.ok(msg.reply_markup.inline_keyboard[1][0].web_app.url.endsWith('/rituals.html'));
+  assert.ok(msg.reply_markup.inline_keyboard[1][0].web_app.url.endsWith('/rituals.html?open=1'));
 
   assert.equal((await launch.run(msk('2026-10-27', '18:00'))).sent, 0);
   assert.equal(world.sent('sendMessage').length, 1);

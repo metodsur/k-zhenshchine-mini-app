@@ -83,6 +83,11 @@
       return;
     }
     if (access.full_access !== true || kind === "app") return;
+    // Opened by a channel post button (t.me/<bot>?startapp=<page>): straight to that page.
+    var startPages = { ritual: "/rituals.html?open=1", app: "/space.html", abundance: "/abundance.html", integrity: "/integrity.html", accept: "/accept.html", practice: "/practice.html", about: "/about.html", expert: "/expert.html", path: "/path.html" };
+    var wa = window.Telegram && window.Telegram.WebApp;
+    var startParam = (wa && wa.initDataUnsafe && wa.initDataUnsafe.start_param) || "";
+    if (kind === "entry" && startPages[startParam]) return window.location.replace(startPages[startParam]);
     // Opened on purpose from the app (e.g. "Открыть ритуал" on "Пространство"): no redirect.
     if (kind === "ritual" && /[?&]open=1(&|$)/.test(window.location.search)) return;
     // Ritual button pressed: every entry opens "Пространство".
