@@ -181,6 +181,9 @@ module.exports = async function handler(req, res) {
       }
     }
     const change = update.chat_member;
+    if (change && clubActivity.isClubGroup(change.chat) && !isMemberStatus(change.old_chat_member?.status) && isMemberStatus(change.new_chat_member?.status)) {
+      try { await require("../../lib/club-posts").onJoin(change.new_chat_member.user); } catch (error) { console.error("Club welcome failed", error.message); }
+    }
     const configuredChannel = String(process.env.TELEGRAM_CHANNEL_ID || "").toLowerCase();
     const updateUsername = change?.chat?.username ? `@${change.chat.username}`.toLowerCase() : "";
     const isConfiguredChannel = change && (String(change.chat.id) === configuredChannel || updateUsername === configuredChannel);
