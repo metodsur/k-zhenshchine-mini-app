@@ -19,7 +19,7 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 122 теста, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 123 теста, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в Vercel, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
@@ -73,7 +73,7 @@
 
 ### Коллаборации клуба (`lib/collabs.js`)
 - В группе клуба пост с #коллаборация (#коллаб) и @партнёршей → бот отвечает кнопкой «Подтверждаю 🤝» (`c:y:<msg>`). Засчитывается только когда подтвердила отмеченная партнёрша: +1 обеим (`collabs:user:<id>`, «Мой путь» в «Обо мне» + победа), первое подтверждение поста +1 к счёту клуба в «Пространстве». Без отметок бот просит отметить партнёршу ответом автора на свой пост.
-- Каждая подтверждённая пара уходит на «Уровни» (репозиторий metodsur/energy-platform, `POST /api/club-collabs`, ключ `LEVELS_SYNC_SECRET`), там идёт в кольцо «Сделки»; участницу находят по нику Telegram в профиле. Сбой — повтор вечерним cron (`collab:sync:pending`).
+- Каждая подтверждённая пара уходит на «Уровни» (репозиторий metodsur/energy-platform, `POST /api/club-collabs`, ключ `LEVELS_SYNC_SECRET`), там идёт в кольцо «Сделки»; участницу находят по нику Telegram в профиле. Сбой или ещё нет ключа — пара ждёт и уходит вечерним cron (`collab:sync:pending`).
 
 ### Посты клуба «Наполнение» (`lib/club-posts.js`) — в группе клуба, с 02.11.2026
 - Утверждено 27.10: Пн «Я говорю ДА», Вт принятие, Ср День коллабораций, Чт «Я проявляю грань», Пт «Я вижу и признаю твой объём» + «Зеркало», Сб День наполнения себя, Вс «Я воплощаю и признаю созданное» — в 10:00; каждый вечер 20:00 «Волшебство дня» (ответы на него и #волшебстводня считаются для воскресенья). У каждого ритуала 4 текста — по неделям по кругу.
