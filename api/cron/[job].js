@@ -20,7 +20,20 @@ const jobs = {
   "meeting-reminders": () => require("../../lib/morning").runMorning()
 };
 
-module.exports = async function handler(req, res) {
+// One-time move to Timeweb (lib/migrate.js); works only while MIGRATE_SECRET is set.
+async function migrate(req, res) {
+  const secret = process.env.MIGRATE_SECRET;
+  if (!secret || !safeEqualString(req.headers.authorization, `Bearer ${secret}`)) return send(res, 403, { ok: false });
+  try {
+    return send(res, 200, { ok: true, ...(await require("../../lib/migrate").run(String(req.query.action || ""), req.query)) });
+  } catch (error) {
+    console.error("Migrate failed", error.message);
+    return send(res, 500, { ok: false, error: error.message });
+  }
+}
+
+async function handler(req, res) {
+  if (String((req.query && req.query.job) || "") === "migrate") return migrate(req, res);
   const job = jobs[String((req.query && req.query.job) || "")];
   if (!job) return send(res, 404, { ok: false });
   const secret = process.env.CRON_SECRET;
@@ -33,4 +46,7 @@ module.exports = async function handler(req, res) {
     console.error(`Cron ${req.query.job} failed`, error.message);
     return send(res, 500, { ok: false });
   }
-};
+}
+
+module.exports = handler;
+module.exports.jobs = jobs;
