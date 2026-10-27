@@ -92,6 +92,7 @@ module.exports = async function handler(req, res) {
   const required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "TELEGRAM_CHANNEL_ID", "TELEGRAM_CHANNEL_URL", "APP_BASE_URL"];
   if (required.some((name) => !process.env[name])) return send(res, 500, { ok: false, error: "Server configuration error" });
   if (!safeEqualString(req.headers["x-telegram-bot-api-secret-token"], process.env.TELEGRAM_WEBHOOK_SECRET)) return send(res, 403, { ok: false });
+  if (await require("../../lib/migrate").onHold()) return send(res, 503, { ok: false }); // Telegram retries later
   const update = req.body || {};
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });

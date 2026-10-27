@@ -10,25 +10,29 @@
 - Мастера получают только за офлайн-встречи: 3 500 ₽ за участницу по реф-ссылке Мастера, 2 500 ₽ — если пришла «от нас». С клуба доли нет. Выплаты — только самозанятым/ИП.
 
 ## Стек и деплой
-- Vercel (Hobby): статические `*.html` + serverless в `api/`. **Лимит 12 функций** (сейчас 11) и **2 ежедневных cron**:
-  - `/api/cron/meeting-reminders` 06:00 UTC → `lib/morning.js` (напоминания о встречах, автоfollow-up, отзывы, обучение, «Итоги», недельный отчёт, дедлайны задач, пары, обновление настроек бота, дайджест 9:00);
-  - `/api/cron/club-reminders` 15:00 UTC (18:00 МСК) → продление клуба, пары, пятничная сводка задач.
-- Хранилище: Upstash Redis REST (`lib/store.js`, `store.command(...)`).
+- **Timeweb Cloud Apps** (с 28.10.2026, раньше Vercel): `Dockerfile` → `node server.js`, порт 3000, автодеплой из `main`. `server.js` отдаёт статические `*.html` (чистые адреса как на Vercel: `/space`, `.html` → 308) и запускает функции из `api/` (`api/os/[section].js` → `req.query.section`). Файлы `lib/`, `api/`, `tests/`, `server.js`, `package.json`, `*.md` наружу не отдаются.
+- Ежедневные задачи (были cron Vercel) запускает `lib/scheduler.js` внутри сервера, раз в день (метка `cron:run:<job>:<дата>`), с догоном 3 часа после перезапуска:
+  - `meeting-reminders` 06:00 UTC → `lib/morning.js` (напоминания о встречах, автоfollow-up, отзывы, обучение, «Итоги», недельный отчёт, дедлайны задач, пары, обновление настроек бота, дайджест 9:00);
+  - `club-reminders` 15:00 UTC (18:00 МСК) → продление клуба, пары, пятничная сводка задач.
+  Вручную: `POST /api/cron/<job>` с `Authorization: Bearer $CRON_SECRET`.
+- Хранилище: Valkey на Timeweb (`VALKEY_URL=redis://default:<пароль>@77.95.203.76:6379`, клиент ioredis в `lib/store.js`, `store.command(...)`); без `VALKEY_URL` — запасной Upstash REST (`KV_REST_API_*`, так работают тесты).
+- Медиа (аудиопрактики, видео основательницы) — в S3 Timeweb, публичный бакет `k-zhenshchine-media`: `https://s3.twcstorage.ru/k-zhenshchine-media/audio/…`, `/video/…`. Новые тяжёлые файлы класть туда, не в репозиторий.
+- `lib/migrate.js` + `POST /api/cron/migrate?action=…` (ключ `MIGRATE_SECRET`) — разовый перенос с Vercel/Upstash; после переезда не нужен.
 - Отложенные вызовы: QStash (`lib/qstash.js` → `POST /api/telegram/reminder`, заголовок `X-Reminder-Secret`). Адрес назначения передаётся **без** URL-кодирования (иначе QStash 400). Проверка владелицей: команда бота `/delaytest`.
 - Tribute API — подписчики клуба (`lib/tribute.js`). ЮKassa — оплаты встреч/обучения через Telegram invoice.
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
-- Деплой: коммит в `main` → Vercel собирает сам. Проверка: `gh api repos/metodsur/k-zhenshchine-mini-app/commits/$(git rev-parse HEAD)/status --jq .state` → `success`.
+- Деплой: коммит в `main` → Timeweb собирает сам (API `https://api.timeweb.cloud/api/v1/apps/<id>/deploys`, логи в панели → Apps).
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 122 теста, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 125 тестов, все зелёные — держать так.
 
-## Переменные окружения (значения — только в Vercel, никогда в чат/код)
-`TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, KV_REST_API_URL, KV_REST_API_TOKEN`.
+## Переменные окружения (значения — только в панели Timeweb → Apps → приложение → Переменные, никогда в чат/код)
+`TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, VALKEY_URL`.
 Необязательные: `QSTASH_URL` (регион QStash), `VK_GROUP_ID` + `VK_GROUP_TOKEN` (сообщество ВК и его ключ доступа с правом «Стена»: посты канала повторяются на стене ВК, `lib/vk.js`; без них ВК выключен), `LEVELS_SYNC_SECRET` (+ необязательный `LEVELS_URL`, по умолчанию https://yrovni.ru) — ключ передачи коллабораций на «Уровни», тот же, что `CLUB_SYNC_SECRET` на «Уровнях»; без него передача выключена, `VAULT_KEY` (ключ шифрования «Доступов»; без него ключ выводится из `TELEGRAM_WEBHOOK_SECRET` — **не менять этот секрет**, иначе сохранённые пароли не расшифруются), `OWNER_NAME`.
 
 ## Приложение (Mini App) — страницы
 - Старт: `index.html` → `welcome-*.html` → `rituals.html`; доступ и согласие на ПДн — `access-guard.js` (оверлей «Согласна»), `privacy.html`.
 - Нижнее меню: `space.html` (Пространство), `path.html` (Путь), `meetings.html` (Встречи), `about.html` (Обо мне).
-- Экраны с видео VK (ссылки из админки → «Ссылки»): `abundance.html` (4 видео «Изобильная реальность», порядок: ресурсы → нюансы → подарки от пространства → подарки от мужчин; поля `abundance_video_3,4,1,2`), `practice.html` («Практика многомерности», `practice_video_url`), `integrity.html` («Твоя целостность» с «Пути», 2 видео `integrity_video_1,2` + 11 аудиопрактик `audio/integrity-01…11.m4a` (AAC моно 48k)), `accept.html` («Я принимаю», `accept_video_url` + 2 аудио в `audio/`), `mirror.html` («Зеркало», `mirror_video_url` + карточки Мастеров).
+- Экраны с видео VK (ссылки из админки → «Ссылки»): `abundance.html` (4 видео «Изобильная реальность», порядок: ресурсы → нюансы → подарки от пространства → подарки от мужчин; поля `abundance_video_3,4,1,2`), `practice.html` («Практика многомерности», `practice_video_url`), `integrity.html` («Твоя целостность» с «Пути», 2 видео `integrity_video_1,2` + 11 аудиопрактик в S3: `…/k-zhenshchine-media/audio/integrity-01…11.m4a` (AAC моно 48k)), `accept.html` («Я принимаю», `accept_video_url` + 2 аудио в S3 (`audio/accept-practice-1,2.m4a`)), `mirror.html` («Зеркало», `mirror_video_url` + карточки Мастеров).
 - Поля видео принимают ссылку VK, **целый код «Экспортировать»** (нужен для видео «по ссылке» — в нём hash) или ссылку Kinescope; сохраняется адрес плеера (`lib/settings.js → videoEmbed`).
 - `pairs.html` — «Ритуал в паре» (вход с «Обо мне»). `master.html` — путь Мастера (Встречи → «Стать Мастером»). `master-cabinet.html` — кабинет Мастера (бот `/master`, только оплатившим): обучение, «Зеркало», финансы + реф-ссылка + договор, инструкции.
 - «Обо мне»: «Мой путь» (этапы пути, счётчики и «Мои победы»: автоматические + свои в `profile.wins` — `lib/journey.js`, поле `journey` в `/api/auth/me`), грани, свои ресурсы («+ Добавить ресурс»), «Мои задачи» (личные, хранятся в `profile:<id>`), вход в «Ритуал в паре».
