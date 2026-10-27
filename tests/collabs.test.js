@@ -68,3 +68,18 @@ test('«Уровни» down: the pair waits and goes with the evening retry', as
   assert.deepEqual(await collabs.retrySync(), { pending: 0, sent: 0 });
   assert.equal(world.levels.length, 2);
 });
+
+test('before the «Уровни» key is set, confirmed pairs wait and go once it is there', async () => {
+  const world = createWorld();
+  const key = process.env.LEVELS_SYNC_SECRET;
+  delete process.env.LEVELS_SYNC_SECRET;
+  try {
+    const text = '@anna_k #коллаборация';
+    await deliver({ message_id: 80, from: MARIA, text, entities: [mention(text, '@anna_k')] });
+    await tap(ANNA, 80);
+    assert.equal(world.levels.length, 0);
+    assert.deepEqual(await collabs.retrySync(), { pending: 1, sent: 0 });
+  } finally { process.env.LEVELS_SYNC_SECRET = key; }
+  assert.deepEqual(await collabs.retrySync(), { pending: 1, sent: 1 });
+  assert.equal(world.levels.length, 1);
+});
