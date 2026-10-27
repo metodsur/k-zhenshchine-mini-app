@@ -147,9 +147,30 @@ function notFound(res) {
   res.end("Not found");
 }
 
+function sendJson(res, status, body) {
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Cache-Control", "no-store");
+  res.end(JSON.stringify(body));
+}
+
+// Can the server reach what it depends on? Only yes/no, nothing else is shown.
+async function checkDeps() {
+  const timed = (promise) => Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(false), 8000))]).catch(() => false);
+  const store = require("./lib/store");
+  const [storage, telegram, qstash, tribute] = await Promise.all([
+    timed(store.command("PING").then((r) => r === "PONG")),
+    timed(fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getMe`).then((r) => r.ok)),
+    timed(fetch(`${String(process.env.QSTASH_URL || "https://qstash.upstash.io").replace(/\/$/, "")}/v2/topics`, { headers: { Authorization: `Bearer ${process.env.QSTASH_TOKEN}` } }).then((r) => r.status < 500)),
+    timed(fetch("https://tribute.tg/api/v1/products", { headers: { "Api-Key": String(process.env.TRIBUTE_API_KEY || "") } }).then((r) => r.status < 500))
+  ]);
+  return { storage, telegram, qstash, tribute };
+}
+
 async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/healthz") { res.setHeader("Content-Type", "text/plain"); return res.end("ok"); }
+  if (url.pathname === "/healthz/deps") return sendJson(res, 200, await checkDeps());
   if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
     const match = matchRoute(url.pathname);
     if (!match) return notFound(res);
