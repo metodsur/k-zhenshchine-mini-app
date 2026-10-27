@@ -15,7 +15,7 @@
   - `meeting-reminders` 06:00 UTC → `lib/morning.js` (напоминания о встречах, автоfollow-up, отзывы, обучение, «Итоги», недельный отчёт, дедлайны задач, пары, обновление настроек бота, дайджест 9:00);
   - `club-reminders` 15:00 UTC (18:00 МСК) → продление клуба, пары, пятничная сводка задач.
   Вручную: `POST /api/cron/<job>` с `Authorization: Bearer $CRON_SECRET`.
-- Хранилище: Valkey на Timeweb (`VALKEY_URL=redis://default:<пароль>@77.95.203.76:6379`, клиент ioredis в `lib/store.js`, `store.command(...)`); без `VALKEY_URL` — запасной Upstash REST (`KV_REST_API_*`, так работают тесты).
+- Хранилище: Valkey на Timeweb (`VALKEY_HOST=77.95.203.76`, `VALKEY_PORT=6379`, `VALKEY_USER=default`, `VALKEY_PASSWORD`; или один `VALKEY_URL` — но панель Timeweb раскодирует `%..` в адресе, поэтому там отдельные переменные; клиент ioredis в `lib/store.js`, `store.command(...)`); без `VALKEY_URL` — запасной Upstash REST (`KV_REST_API_*`, так работают тесты).
 - Медиа (аудиопрактики, видео основательницы) — в S3 Timeweb, публичный бакет `k-zhenshchine-media`: `https://s3.twcstorage.ru/k-zhenshchine-media/audio/…`, `/video/…`. Новые тяжёлые файлы класть туда, не в репозиторий.
 - `lib/migrate.js` + `POST /api/cron/migrate?action=…` (ключ `MIGRATE_SECRET`) — разовый перенос с Vercel/Upstash; после переезда не нужен.
 - Отложенные вызовы: QStash (`lib/qstash.js` → `POST /api/telegram/reminder`, заголовок `X-Reminder-Secret`). Адрес назначения передаётся **без** URL-кодирования (иначе QStash 400). Проверка владелицей: команда бота `/delaytest`.
@@ -26,7 +26,7 @@
 - Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 125 тестов, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в панели Timeweb → Apps → приложение → Переменные, никогда в чат/код)
-`TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, VALKEY_URL`.
+`TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, VALKEY_HOST, VALKEY_PASSWORD`.
 Необязательные: `QSTASH_URL` (регион QStash), `VK_GROUP_ID` + `VK_GROUP_TOKEN` (сообщество ВК и его ключ доступа с правом «Стена»: посты канала повторяются на стене ВК, `lib/vk.js`; без них ВК выключен), `LEVELS_SYNC_SECRET` (+ необязательный `LEVELS_URL`, по умолчанию https://yrovni.ru) — ключ передачи коллабораций на «Уровни», тот же, что `CLUB_SYNC_SECRET` на «Уровнях»; без него передача выключена, `VAULT_KEY` (ключ шифрования «Доступов»; без него ключ выводится из `TELEGRAM_WEBHOOK_SECRET` — **не менять этот секрет**, иначе сохранённые пароли не расшифруются), `OWNER_NAME`.
 
 ## Приложение (Mini App) — страницы
