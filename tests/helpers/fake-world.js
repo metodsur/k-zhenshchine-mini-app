@@ -81,6 +81,8 @@ function createWorld() {
         return ok({ ok: true, result: { message_id: 7000 + world.uploads, document: { file_id: `doc-${world.uploads}`, file_name: payload.document.name, mime_type: payload.document.type, file_size: payload.document.size } } });
       }
       if (tg[1] === 'sendMessage') return ok({ ok: true, result: { message_id: 100 + telegramCalls.length } });
+      if (tg[1] === 'getMe') return ok({ ok: true, result: { id: 1, is_bot: true, username: 'K_zhenshcine_bot', has_main_web_app: Boolean(world.mainWebApp) } });
+      if (tg[1] === 'getChat' && world.pinned) return ok({ ok: true, result: { id: -100, pinned_message: world.pinned } });
       if (tg[1] === 'getFile') return world.bigFiles && world.bigFiles.has(payload.file_id) ? { ok: false, json: async () => ({ ok: false }) } : ok({ ok: true, result: { file_path: `documents/${payload.file_id}` } });
       if (tg[1] === 'createChatInviteLink') return ok({ ok: true, result: { invite_link: `https://t.me/+${payload.name}-${telegramCalls.length}`, name: payload.name } });
       if (tg[1] === 'createInvoiceLink') return ok({ ok: true, result: `https://t.me/$invoice-${payload.payload}` });

@@ -141,3 +141,26 @@ test('a link under a VK post opens the page and counts the woman as coming from 
   assert.equal(reply.reply_markup.inline_keyboard[0][0].web_app.url, 'https://app.example.test/accept.html');
   assert.equal((await require('../lib/crm').getCard('tg7002')).source, 'ВКонтакте');
 });
+
+test('the ritual button opens the ritual itself, even for those who passed it; with the main Mini App buttons open the app at once', async () => {
+  const world = createWorld();
+  world.members.add('7002');
+  await call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
+    body: { message: { chat: { id: 7002, type: 'private' }, from: { id: 7002, first_name: 'Оля' }, text: '/start go_ritual' } } });
+  assert.equal(world.sent('sendMessage').find((m) => m.chat_id === 7002).reply_markup.inline_keyboard[0][0].web_app.url, 'https://app.example.test/rituals.html?open=1');
+
+  world.mainWebApp = true;
+  posts.resetDirect();
+  const ritual = await posts.build('2026-10-27', '10:00');
+  assert.equal(ritual.reply_markup.inline_keyboard[0][0].url, 'https://t.me/K_zhenshcine_bot?startapp=ritual');
+  assert.match(posts.vkText(ritual), /\?start=vk_ritual/);
+
+  world.pinned = { message_id: 55, text: '📌 Начни отсюда 🤍 …' };
+  assert.deepEqual(await posts.refreshPinned(), { ok: true, direct: true });
+  const edit = world.sent('editMessageReplyMarkup')[0];
+  assert.equal(edit.message_id, 55);
+  assert.equal(edit.reply_markup.inline_keyboard[0][0].url, 'https://t.me/K_zhenshcine_bot?startapp=ritual');
+  world.pinned = { message_id: 56, text: 'Другой пост' };
+  assert.deepEqual(await posts.refreshPinned(), { ok: false, reason: 'not_ritual_post' });
+  posts.resetDirect();
+});
