@@ -6,6 +6,17 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = __dirname;
+
+// The last lines of the server output, for /healthz/logs (Timeweb's log API shows only the start).
+const recent = [];
+for (const level of ["log", "error", "warn"]) {
+  const original = console[level].bind(console);
+  console[level] = (...args) => {
+    recent.push(`${new Date().toISOString()} ${level === "log" ? "" : level + " "}${args.map((a) => (typeof a === "string" ? a : JSON.stringify(a))).join(" ")}`.slice(0, 1000));
+    if (recent.length > 300) recent.shift();
+    original(...args);
+  };
+}
 const PORT = Number(process.env.PORT || 3000);
 const MAX_BODY = 10 * 1024 * 1024;
 
@@ -171,6 +182,11 @@ async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/healthz") { res.setHeader("Content-Type", "text/plain"); return res.end("ok"); }
   if (url.pathname === "/healthz/deps") return sendJson(res, 200, await checkDeps());
+  if (url.pathname === "/healthz/logs") {
+    const { safeEqualString } = require("./lib/telegram");
+    if (!process.env.CRON_SECRET || !safeEqualString(req.headers.authorization, `Bearer ${process.env.CRON_SECRET}`)) return sendJson(res, 403, { ok: false });
+    return sendJson(res, 200, { lines: recent });
+  }
   if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
     const match = matchRoute(url.pathname);
     if (!match) return notFound(res);
