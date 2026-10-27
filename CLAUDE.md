@@ -17,6 +17,7 @@
   Вручную: `POST /api/cron/<job>` с `Authorization: Bearer $CRON_SECRET`.
 - Хранилище: Valkey на Timeweb (`VALKEY_HOST=77.95.203.76`, `VALKEY_PORT=6379`, `VALKEY_USER=default`, `VALKEY_PASSWORD`; или один `VALKEY_URL` — но панель Timeweb раскодирует `%..` в адресе, поэтому там отдельные переменные; клиент ioredis в `lib/store.js`, `store.command(...)`); без `VALKEY_URL` — запасной Upstash REST (`KV_REST_API_*`, так работают тесты).
 - Медиа (аудиопрактики, видео основательницы) — в S3 Timeweb, публичный бакет `k-zhenshchine-media`: `https://s3.twcstorage.ru/k-zhenshchine-media/audio/…`, `/video/…`. Новые тяжёлые файлы класть туда, не в репозиторий.
+- Логи: `GET /healthz/logs` с `Authorization: Bearer $CRON_SECRET` (последние 300 строк; API логов Timeweb показывает только начало). Доступность зависимостей: `/healthz/deps`.
 - `lib/migrate.js` + `POST /api/cron/migrate?action=…` (ключ `MIGRATE_SECRET`) — разовый перенос с Vercel/Upstash; после переезда не нужен.
 - Отложенные вызовы: QStash (`lib/qstash.js` → `POST /api/telegram/reminder`, заголовок `X-Reminder-Secret`). Адрес назначения передаётся **без** URL-кодирования (иначе QStash 400). Проверка владелицей: команда бота `/delaytest`.
 - Tribute API — подписчики клуба (`lib/tribute.js`). ЮKassa — оплаты встреч/обучения через Telegram invoice.
