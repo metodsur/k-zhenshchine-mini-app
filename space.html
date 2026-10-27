@@ -101,7 +101,7 @@ a.cta{text-decoration:none;box-sizing:border-box}
     var cs=data.club_stats;
     if(cs){
       document.getElementById('collabs-total').textContent=cs.collabs_total||0;
-      if(!cs.collabs_total)document.getElementById('collabs-note').textContent='Счёт только начался. Договорились о совместном проекте в клубе — отметьте пост хэштегом #коллаборация, и он появится здесь.';
+      if(!cs.collabs_total)document.getElementById('collabs-note').textContent='Счёт только начался. Договорились о совместном проекте в клубе — напишите пост с #коллаборация и отметьте @партнёршу. Когда она подтвердит, коллаборация появится здесь.';
       var w=cs.week||{};
       ['collabs','meetings','women','cities'].forEach(function(k){document.getElementById('week-'+k).textContent=w[k]||0});
     }

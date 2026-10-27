@@ -310,6 +310,7 @@ function renderJourney(j){
     [j.meetings+' из 6','встреч пройдено'],
     [j.women,plural(j.women,'женщина','женщины','женщин')+' в паре'],
     [j.invited,plural(j.invited,'подруга пришла','подруги пришли','подруг пришли')],
+    j.collabs?[j.collabs,plural(j.collabs,'коллаборация','коллаборации','коллабораций')+' · растят рейтинг на «Уровнях»']:null,
     [j.tasks_done,plural(j.tasks_done,'задача выполнена','задачи выполнены','задач выполнено')],
     [j.facets,plural(j.facets,'грань','грани','граней')+' во мне']
   ].filter(Boolean);

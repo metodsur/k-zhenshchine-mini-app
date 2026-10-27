@@ -97,7 +97,8 @@ module.exports = async function handler(req, res) {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     if (update.callback_query) {
       try {
-        if (!(await require("../../lib/pairs").handleCallback(update.callback_query))) await require("../../lib/tasks").handleCallback(update.callback_query);
+        if (!(await require("../../lib/collabs").handleCallback(update.callback_query))
+          && !(await require("../../lib/pairs").handleCallback(update.callback_query))) await require("../../lib/tasks").handleCallback(update.callback_query);
       } catch (error) { console.error("Callback failed", error.message); }
       return send(res, 200, { ok: true });
     }

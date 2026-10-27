@@ -11,6 +11,7 @@ const jobs = {
     try { result.nudges = await require("../../lib/nudges").runDaily(); } catch (error) { console.error("Nudges failed", error.message); }
     try { result.channel_posts = await require("../../lib/channel-posts").catchUp(); } catch (error) { console.error("Channel posts failed", error.message); }
     try { result.launch_dm = await require("../../lib/launch-message").run(); } catch (error) { console.error("Launch message failed", error.message); }
+    try { result.levels_sync = await require("../../lib/collabs").retrySync(); } catch (error) { console.error("Levels sync failed", error.message); }
     try { result.tasks_summary = await require("../../lib/tasks").runWeeklySummary(); } catch (error) { console.error("Tasks summary failed", error.message); }
     return result;
   },
