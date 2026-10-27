@@ -1,42 +1,6 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "crons": [
-    {
-      "path": "/api/cron/club-reminders",
-      "schedule": "0 15 * * *"
-    },
-    {
-      "path": "/api/cron/meeting-reminders",
-      "schedule": "0 6 * * *"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/img/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/audio/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=604800"
-        }
-      ]
-    }
-  ],
-  "functions": {
-    "api/cron/[job].js": {
-      "maxDuration": 60
-    },
-    "api/os/[section].js": {
-      "maxDuration": 60
-    }
-  }
+  "redirects": [
+    { "source": "/", "destination": "https://metodsur-k-zhenshchine-mini-app-bc88.twc1.net/", "permanent": false },
+    { "source": "/:path*", "destination": "https://metodsur-k-zhenshchine-mini-app-bc88.twc1.net/:path*", "permanent": false }
+  ]
 }
