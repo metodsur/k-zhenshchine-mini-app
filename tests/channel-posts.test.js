@@ -195,6 +195,8 @@ test('/fixpost: a post that went out with buttons gets the links in its text, so
   assert.match(edit.text, /^Среда — день ресурсов/);
   assert.match(edit.text, /startapp=abundance/);
   assert.match(world.sent('sendMessage').at(-1).text, /Готово/);
+  await send(900, '/fixpost');
+  assert.match(world.sent('sendMessage').at(-1).text, /Например: \/fixpost https/);
   await send(7002, '/fixpost https://t.me/k_zhenshcine/12 10:00');
   assert.equal(world.sent('editMessageText').length, 1);
   posts.resetDirect();
