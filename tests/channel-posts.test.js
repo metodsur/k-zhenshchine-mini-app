@@ -20,8 +20,10 @@ test('launch day: three posts at their time, the first one pinned, the counter f
   assert.deepEqual(await posts.publish('2026-10-27', '10:00', msk('2026-10-27', '10:01')), { skipped: 'already_sent' });
   const [ritual] = toChannel(world);
   assert.match(ritual.text, /^📌 Начни отсюда/);
-  assert.match(ritual.text, /Ты уже достаточна, чтобы быть здесь\.$/);
-  assert.equal(ritual.reply_markup.inline_keyboard[0][0].url, 'https://t.me/K_zhenshcine_bot?start=go_ritual');
+  // No inline buttons (they hide the comments): the button is a link at the end of the text.
+  assert.equal(ritual.reply_markup, undefined);
+  assert.equal(ritual.parse_mode, 'HTML');
+  assert.match(ritual.text, /Ты уже достаточна, чтобы быть здесь\.\n\n👉 <a href="https:\/\/t\.me\/K_zhenshcine_bot\?start=go_ritual">Пройти ритуал видимости ✨<\/a>$/);
   assert.equal(world.sent('pinChatMessage').length, 1);
   assert.equal(world.sent('pinChatMessage')[0].chat_id, '@test_channel');
   assert.equal(typeof world.sent('pinChatMessage')[0].message_id, 'number');
@@ -33,6 +35,7 @@ test('launch day: three posts at their time, the first one pinned, the counter f
   const rubrics = toChannel(world)[1];
   assert.match(rubrics.text, /сейчас нас 37 🤍/);
   assert.equal(rubrics.reply_markup, undefined);
+  assert.doesNotMatch(rubrics.text, /<a /);
   assert.equal(toChannel(world).length, 3);
 });
 
@@ -56,7 +59,7 @@ test('weekly grid: rotating video and feature, Saturday announcement, affirmatio
   const sunday = await posts.build('2026-11-01', '13:00');
   assert.match(sunday.text, /^Хочешь выйти в эфир/);
   assert.match(sunday.text, /Со следующей недели каждый вторник/);
-  assert.deepEqual(sunday.reply_markup.inline_keyboard.map((r) => r[0].url.split('go_')[1]), ['about', 'expert']);
+  assert.deepEqual([...sunday.html.matchAll(/go_(\w+)"/g)].map((m) => m[1]), ['about', 'expert']);
   assert.match((await posts.build('2026-11-08', '13:00')).text, /\n\nКаждый вторник — День эфиров/);
   for (const monday of ['2026-11-02', '2026-11-09', '2026-11-16']) {
     const lines = [];
@@ -152,7 +155,7 @@ test('the ritual button opens the ritual itself, even for those who passed it; w
   world.mainWebApp = true;
   posts.resetDirect();
   const ritual = await posts.build('2026-10-27', '10:00');
-  assert.equal(ritual.reply_markup.inline_keyboard[0][0].url, 'https://t.me/K_zhenshcine_bot?startapp=ritual');
+  assert.match(ritual.html, /href="https:\/\/t\.me\/K_zhenshcine_bot\?startapp=ritual"/);
   assert.match(posts.vkText(ritual), /\?start=vk_ritual/);
 
   world.pinned = { message_id: 55, text: '📌 Начни отсюда 🤍 …' };
@@ -176,4 +179,33 @@ test('/fixbutton: the owner points the button of a channel post to any link', as
   assert.match(world.sent('sendMessage').at(-1).text, /Готово/);
   await send(7002, '/fixbutton https://t.me/k_zhenshcine/7 https://evil.example');
   assert.equal(world.sent('editMessageReplyMarkup').length, 1);
+});
+
+test('/fixpost: a post that went out with buttons gets the links in its text, so the comments come back', async () => {
+  const world = createWorld();
+  world.mainWebApp = true;
+  posts.resetDirect();
+  const send = (id, text) => call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' },
+    body: { message: { chat: { id, type: 'private' }, from: { id, first_name: 'В' }, text } } });
+  await send(900, '/fixpost https://t.me/k_zhenshcine/12 10:00 2026-10-28');
+  const edit = world.sent('editMessageText')[0];
+  assert.equal(edit.message_id, 12);
+  assert.equal(edit.parse_mode, 'HTML');
+  assert.equal(edit.reply_markup, undefined);
+  assert.match(edit.text, /^Среда — день ресурсов/);
+  assert.match(edit.text, /startapp=abundance/);
+  assert.match(world.sent('sendMessage').at(-1).text, /Готово/);
+  await send(7002, '/fixpost https://t.me/k_zhenshcine/12 10:00');
+  assert.equal(world.sent('editMessageText').length, 1);
+  posts.resetDirect();
+});
+
+test('a failed check of the main Mini App is not remembered and keeps the links opening the app', async () => {
+  const world = createWorld();
+  posts.resetDirect();
+  world.failGetMe = true;
+  assert.equal(await posts.directOpen(), true);
+  world.failGetMe = false;
+  assert.equal(await posts.directOpen(), false);
+  posts.resetDirect();
 });

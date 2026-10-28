@@ -24,7 +24,7 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Timeweb собирает сам (API `https://api.timeweb.cloud/api/v1/apps/<id>/deploys`, логи в панели → Apps).
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 125 тестов, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 127 тестов, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в панели Timeweb → Apps → приложение → Переменные, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, VALKEY_HOST, VALKEY_PASSWORD`.
@@ -88,7 +88,7 @@
 
 ### Посты канала (`lib/channel-posts.js`) и ВКонтакте (`lib/vk.js`)
 - Утверждённая сетка выходит в Telegram-канал сама (утро ставит через QStash, вечер догоняет). Если заданы `VK_GROUP_ID`/`VK_GROUP_TOKEN`, тот же пост уходит на стену сообщества ВК (`wall.post`), кнопки становятся ссылками `/start vk_<страница>` — источник «ВКонтакте» в CRM. Ошибка ВК не мешает Telegram: команде одно сообщение в день, вечером повтор. Postmypost публикует другой контент — дублей нет.
-- Кнопки в Telegram: если у бота включено основное Mini App (BotFather → Bot Settings → Configure Mini App, `getMe.has_main_web_app`), ссылка `t.me/<бот>?startapp=<страница>` открывает приложение сразу (`access-guard.js` ведёт со входа на страницу); иначе `t.me/<бот>?start=go_<страница>`, и бот отвечает кнопкой на страницу (`PAGES`). Ритуал открывается с `?open=1`, иначе прошедших ритуал уводит в «Пространство». `/fixpinned` (владелица) обновляет кнопки закреплённого поста с ритуалом; `/fixbutton <ссылка на пост> <ссылка> [текст]` (владелица) ставит любому посту бота в канале одну кнопку-ссылку.
+- Кнопки в Telegram — **не inline-кнопки, а ссылки в конце текста** (`👉 <a>…</a>`, `parse_mode: HTML`): под постом с inline-кнопками Telegram прячет комментарии. `/fixpost <ссылка на пост> <ЧЧ:ММ> [ГГГГ-ММ-ДД]` (владелица) переписывает уже вышедший пост бота так же. Если у бота включено основное Mini App (BotFather → Bot Settings → Configure Mini App, `getMe.has_main_web_app`; включено с 27.10, если getMe не ответил — считаем включённым), ссылка `t.me/<бот>?startapp=<страница>` открывает приложение сразу (`access-guard.js` ведёт со входа на страницу); иначе `t.me/<бот>?start=go_<страница>`, и бот отвечает кнопкой на страницу (`PAGES`). Ритуал открывается с `?open=1`, иначе прошедших ритуал уводит в «Пространство». `/fixpinned` (владелица) обновляет кнопки закреплённого поста с ритуалом; `/fixbutton <ссылка на пост> <ссылка> [текст]` (владелица) ставит любому посту бота в канале одну кнопку-ссылку.
 
 ### Сообщение о старте (`lib/launch-message.js`)
 - Разовое: 27.10.2026 в 10:05 МСК (через 5 минут после поста с ритуалом в канале) всем с карточкой в CRM без /stop, кнопки «Перейти в канал» и «Пройти ритуал видимости». Утро ставит через QStash (`kind: "launch_dm"`), вечер догоняет; каждой один раз (`launch_dm:sent`).
