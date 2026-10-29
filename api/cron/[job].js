@@ -13,6 +13,7 @@ const jobs = {
     try { result.club_posts = await require("../../lib/club-posts").catchUp(); } catch (error) { console.error("Club posts failed", error.message); }
     try { result.launch_dm = await require("../../lib/launch-message").run(); } catch (error) { console.error("Launch message failed", error.message); }
     try { result.levels_sync = await require("../../lib/collabs").retrySync(); } catch (error) { console.error("Levels sync failed", error.message); }
+    try { result.levels_gifts = await require("../../lib/levels-gift").retrySync(); } catch (error) { console.error("Levels gift sync failed", error.message); }
     try { result.tasks_summary = await require("../../lib/tasks").runWeeklySummary(); } catch (error) { console.error("Tasks summary failed", error.message); }
     return result;
   },
