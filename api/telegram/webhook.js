@@ -114,6 +114,9 @@ module.exports = async function handler(req, res) {
     } catch (error) { console.error("Tasks command failed", error.message); }
     if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });
     try {
+      if (await require("../../lib/levels-gift").handleStart(update.message)) return send(res, 200, { ok: true });
+    } catch (error) { console.error("Levels gift failed", error.message); }
+    try {
       if (await require("../../lib/handlers/master").handleBot(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Master bot handling failed", error.message); }
     try {

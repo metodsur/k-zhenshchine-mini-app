@@ -24,11 +24,11 @@
 - `telegram-web-app.js` лежит в репозитории (telegram.org блокируется в РФ).
 - Деплой: коммит в `main` → Timeweb собирает сам (API `https://api.timeweb.cloud/api/v1/apps/<id>/deploys`, логи в панели → Apps).
 - Коммиты: `git -c user.name="Claude" -c user.email="noreply@anthropic.com" commit`, в конце сообщения строка `Co-Authored-By: Claude …`.
-- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 127 тестов, все зелёные — держать так.
+- Тесты: `node --test tests/*.test.js` (фейковые Redis/Telegram/QStash в `tests/helpers/fake-world.js`). Сейчас 132 теста, все зелёные — держать так.
 
 ## Переменные окружения (значения — только в панели Timeweb → Apps → приложение → Переменные, никогда в чат/код)
 `TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_SETUP_SECRET, TELEGRAM_CHANNEL_ID, TELEGRAM_CHANNEL_URL, TELEGRAM_CLUB_CHAT_ID, TELEGRAM_CLUB_URL, APP_BASE_URL, ADMIN_TELEGRAM_IDS, CRON_SECRET, QSTASH_TOKEN, TELEGRAM_REMINDER_SECRET, TRIBUTE_API_KEY, YOOKASSA_PROVIDER_TOKEN, VALKEY_HOST, VALKEY_PASSWORD`.
-Необязательные: `QSTASH_URL` (регион QStash), `VK_GROUP_ID` + `VK_GROUP_TOKEN` (сообщество ВК и его ключ доступа с правом «Стена»: посты канала повторяются на стене ВК, `lib/vk.js`; без них ВК выключен), `LEVELS_SYNC_SECRET` (+ необязательный `LEVELS_URL`, по умолчанию https://yrovni.ru) — ключ передачи коллабораций на «Уровни», тот же, что `CLUB_SYNC_SECRET` на «Уровнях»; без него передача выключена, `VAULT_KEY` (ключ шифрования «Доступов»; без него ключ выводится из `TELEGRAM_WEBHOOK_SECRET` — **не менять этот секрет**, иначе сохранённые пароли не расшифруются), `OWNER_NAME`.
+Необязательные: `QSTASH_URL` (регион QStash), `VK_GROUP_ID` + `VK_GROUP_TOKEN` (сообщество ВК и его ключ доступа с правом «Стена»: посты канала повторяются на стене ВК, `lib/vk.js`; без них ВК выключен), `LEVELS_SYNC_SECRET` (+ необязательный `LEVELS_URL`, по умолчанию https://yrovni.ru) — ключ передачи коллабораций на «Уровни», тот же, что `CLUB_SYNC_SECRET` на «Уровнях»; без него передача выключена; им же подписана кнопка «Неделя клуба в подарок» из кабинета «Уровней» (`/start yr_<id>_<подпись>` → `lib/levels-gift.js`: одноразовый вход в клуб на 7 дней, окончание — вместе с подарками за подруг в `lib/referrals.js`, «Уровням» уходит дата на `/api/club-gift`), `VAULT_KEY` (ключ шифрования «Доступов»; без него ключ выводится из `TELEGRAM_WEBHOOK_SECRET` — **не менять этот секрет**, иначе сохранённые пароли не расшифруются), `OWNER_NAME`.
 
 ## Приложение (Mini App) — страницы
 - Старт: `index.html` → `welcome-*.html` → `rituals.html`; доступ и согласие на ПДн — `access-guard.js` (оверлей «Согласна»), `privacy.html`.
