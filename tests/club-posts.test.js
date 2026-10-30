@@ -39,6 +39,8 @@ test('posts go to the club group once and never early; the welcome is pinned onc
   assert.deepEqual(await posts.publish('2026-11-02', '10:00', at('2026-11-02', '10:01')), { skipped: 'already_sent' });
   assert.match(toClub(world)[0].text, /Я говорю ДА/);
 
+  assert.deepEqual(await posts.schedule(at('2026-10-28', '09:00')), []);
+  assert.equal(world.sent('pinChatMessage').length, 0, 'no pin before the club starts');
   await posts.schedule(at('2026-11-02', '09:00'));
   await posts.schedule(at('2026-11-03', '09:00'));
   assert.equal(toClub(world).filter((m) => /Добро пожаловать в клуб «Наполнение»/.test(m.text)).length, 1);
@@ -74,9 +76,17 @@ test('networking day: the two-week results count collaborations, new members and
   assert.match(expert, /yrovni\.ru\/u\/1/);
 });
 
-test('a new club member arriving by chat_member update is welcomed in the group', async () => {
+test('a new club member arriving by chat_member update is welcomed in the group from the club start', async () => {
   const world = createWorld();
-  await call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' }, body: { chat_member: { chat: CLUB, date: 1, old_chat_member: { status: 'left', user: { id: 21 } }, new_chat_member: { status: 'member', user: { id: 21, first_name: 'Вера' } } } } });
+  const join = (id, name) => call(webhook, { method: 'POST', headers: { 'x-telegram-bot-api-secret-token': 'test-webhook-secret' }, body: { chat_member: { chat: CLUB, date: 1, old_chat_member: { status: 'left', user: { id } }, new_chat_member: { status: 'member', user: { id, first_name: name } } } } });
+  const realNow = Date.now;
+  try {
+    Date.now = () => at('2026-10-30', '12:00');
+    await join(20, 'Ира');
+    assert.equal(toClub(world).length, 0, 'no welcome before the club starts');
+    Date.now = () => at('2026-11-02', '12:00');
+    await join(21, 'Вера');
+  } finally { Date.now = realNow; }
   assert.match(toClub(world).at(-1).text, /^Вера, добро пожаловать в клуб «Наполнение»/);
 });
 
