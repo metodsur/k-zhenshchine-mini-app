@@ -48,13 +48,20 @@ test('morning schedules today\'s posts for 10:00 / 13:00 / 17:00 Moscow; nothing
   assert.equal(world.qstash[0].body.kind, 'channel_post');
 });
 
-test('weekly grid: rotating video and feature, Saturday announcement, affirmations never repeat within a week', async () => {
+test('weekly grid: rotating video, Saturday announcement, updated Monday and Sunday copy, affirmations never repeat', async () => {
   createWorld();
   const wed1 = await posts.build('2026-10-28', '10:00');
   const wed2 = await posts.build('2026-11-04', '10:00');
   assert.match(wed1.text, /первое видео .*«Как притягивать нужные ресурсы в любом объёме»/);
   assert.match(wed2.text, /второе видео .*«Нюансы создания желаемой реальности»/);
-  assert.match((await posts.build('2026-11-09', '10:00')).text, /Фишка недели 📱 «Пригласи подруг»/);
+  const monday = await posts.build('2026-11-02', '10:00');
+  assert.match(monday.text, /^Новая неделя — мягкий шаг к себе ☀️🤍/);
+  assert.match(monday.text, /от дефицита — к целостности и наполненности, от наполненности — к изобилию/);
+  assert.match(monday.text, /«Женщина женщине — дом» 🏡🤍/);
+  assert.match(monday.text, /чего я сейчас действительно хочу/);
+  const revisedSunday = await posts.build('2026-11-08', '10:00');
+  assert.match(revisedSunday.text, /На этой неделе мы говорили о собственном пути, передаче знаний, ресурсах, целостности, Дне дружбы и многомерности 🤍/);
+  assert.doesNotMatch(revisedSunday.text, /За эту неделю у нас были/);
   assert.match((await posts.build('2026-10-31', '10:00')).text, /Сегодня Варвара делится сакральными знаниями и практиками многомерности/);
   const sunday = await posts.build('2026-11-01', '13:00');
   assert.match(sunday.text, /^Хочешь выйти в эфир/);
@@ -72,16 +79,23 @@ test('weekly grid: rotating video and feature, Saturday announcement, affirmatio
   }
 });
 
-test('Tuesday broadcasts come from the dashboard «Эксперты»; without experts no post, the team is told', async () => {
+test('Tuesday uses the approved fallback without experts and lists only assigned experts when present', async () => {
   const world = createWorld();
-  assert.deepEqual(await posts.publish('2026-11-03', '10:00', msk('2026-11-03', '10:00')), { skipped: 'no_experts' });
-  assert.equal(toChannel(world).length, 0);
-  assert.match(world.sent('sendMessage').find((m) => m.chat_id === '900').text, /нет ни одного назначенного слота/);
+  const fallback = await posts.build('2026-11-03', '10:00');
+  assert.equal(fallback.post, 'broadcasts_empty');
+  assert.match(fallback.text, /расписание эфиров на эту неделю пока не сформировано/);
+  assert.match(fallback.text, /Передача рождается из наполненности/);
+  assert.match(fallback.html, /start=go_expert/);
+  assert.deepEqual(await posts.publish('2026-11-03', '10:00', msk('2026-11-03', '10:00')), { sent: 'broadcasts_empty' });
+  assert.equal(toChannel(world).length, 1);
+  assert.equal(world.sent('sendMessage').some((m) => m.chat_id === '900' && /нет ни одного назначенного слота/.test(m.text)), false);
   await collections.saveItem('experts', { title: 'Энергия женщины', name: 'Анна', stage: 'slot', air_date: '2026-11-10', air_time: '16:30' }, 't');
   await collections.saveItem('experts', { title: 'Опора', name: 'Мария', stage: 'slot', air_date: '2026-11-10', air_time: '16:00' }, 't');
   await collections.saveItem('experts', { title: 'Не сейчас', name: 'Ольга', stage: 'new', air_date: '2026-11-10', air_time: '17:00' }, 't');
   const tue = await posts.build('2026-11-10', '10:00');
   assert.match(tue.text, /Расписание 🕐\n16:00 — Мария, «Опора»\n16:30 — Анна, «Энергия женщины»\n/);
+  assert.match(tue.text, /Сегодня эфиры по расписанию/);
+  assert.doesNotMatch(tue.text, /5 эфиров по 30 минут|с 16:00 до 18:30/);
   assert.doesNotMatch(tue.text, /Ольга/);
 });
 
