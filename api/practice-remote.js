@@ -107,6 +107,14 @@ module.exports = async function handler(req, res) {
     if (!validId(id) || !/^[a-f0-9]{64}$/.test(token)) return reply(res, 401, { ok: false });
     const device = await readDevice(id);
     if (!device || !crypto.timingSafeEqual(Buffer.from(device.tokenHash || ""), Buffer.from(hashToken(token)))) return reply(res, 401, { ok: false });
+    // Browser storage may be shared by Telegram accounts on the same origin. Bind every
+    // delivery poll to the currently signed-in Telegram user, not only to a stored token.
+    let pollUser;
+    try {
+      const initData = String((req.headers && req.headers["x-telegram-init-data"]) || "");
+      pollUser = verifyInitData(initData, DEVICE_TTL);
+    } catch { return reply(res, 401, { ok: false }); }
+    if (String(pollUser.id) !== String(device.ownerId)) return reply(res, 401, { ok: false });
     if (!(await limited(id, "poll", 30))) return reply(res, 429, { ok: false });
     // The Redis TTL is absolute from enable time; polling never extends the session.
     const raw = await store.command("GET", commandKey(id));

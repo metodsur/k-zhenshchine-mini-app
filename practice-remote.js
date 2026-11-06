@@ -53,7 +53,7 @@
   function poll() {
     if (!device || busy) return;
     fetch("/api/practice-remote?deviceId=" + encodeURIComponent(device.deviceId), {
-      headers: { Authorization: "Bearer " + device.token }, cache: "no-store"
+      headers: { Authorization: "Bearer " + device.token, "X-Telegram-Init-Data": getInitData() }, cache: "no-store"
     }).then(function (r) {
       if (r.status === 401) { device = null; persist(null); if (timer) clearInterval(timer); showControl(false); return null; }
       if (!r.ok) return null;

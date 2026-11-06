@@ -46,8 +46,11 @@ test('practice remote: closed by default; allowlist command delivered once only'
   assert.equal(r.status, 200);
   assert.equal(r.body.practice, 'Практика многомерности');
   assert.equal((await call(post({ action: 'command', initData: auth, deviceId, requestId, path: '/practice' }))).body.duplicate, true);
-  const poll = () => call({ method: 'GET', query: { deviceId }, headers: { authorization: `Bearer ${token}` } });
-  assert.equal((await call({ method: 'GET', query: { deviceId }, headers: { authorization: 'Bearer wrong' } })).status, 401);
+  const poll = (pollInitData = auth) => call({ method: 'GET', query: { deviceId }, headers: { authorization: `Bearer ${token}`, 'x-telegram-init-data': pollInitData } });
+  assert.equal((await call({ method: 'GET', query: { deviceId }, headers: { authorization: `Bearer ${token}` } })).status, 401, 'missing signed Telegram identity is rejected');
+  assert.equal((await poll(initData(OTHER))).status, 401, 'another Telegram account cannot poll with the saved browser token');
+  assert.equal((await poll(oldInitData(OWNER, 1801))).status, 401, 'expired Telegram identity cannot poll');
+  assert.equal((await call({ method: 'GET', query: { deviceId }, headers: { authorization: 'Bearer wrong', 'x-telegram-init-data': auth } })).status, 401);
   r = await poll();
   assert.deepEqual(r.body.command, { id: requestId, path: '/practice', issuedAt: r.body.command.issuedAt });
   assert.equal((await poll()).body.command, null, 'the command must not replay');
