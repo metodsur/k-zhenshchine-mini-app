@@ -1,6 +1,6 @@
 # Owner-only practice remote control — implementation plan
 
-Status: design only. No production changes. Branch: `feature/owner-practice-remote-control`.
+Status: prototype implemented on `feature/owner-practice-remote-control`. No production changes. Branch: `feature/owner-practice-remote-control`.
 
 ## Verified existing app
 - Timeweb Cloud Apps runs `server.js` from `main`; the app has `/practice`, `/integrity`, `/accept`, `/abundance`, `/mirror` pages.
@@ -11,17 +11,16 @@ Status: design only. No production changes. Branch: `feature/owner-practice-remo
 The standard ChatGPT voice conversation has no demonstrated API/tool path to emit remote-control commands. Do not promise that a spoken recommendation automatically changes Telegram UI. First test the navigation channel independently, then select a supported voice interface that can call a backend API.
 
 ## Proposed architecture
-1. Owner signs into the existing Mini App via Telegram initData. Server validates initData signature with the bot token, checks auth_date freshness, and checks owner ID against the server-side `ADMIN_TELEGRAM_IDS` allowlist; do not trust client-provided ID.
-2. Owner starts an ephemeral remote-control session from within the Mini App. The server issues a short-lived, session-bound credential, never embedded in URLs, logs, or repository. UI clearly shows whether remote control is active and has a Stop control.
-3. An authenticated command endpoint validates caller, session, expiry, action and target against a fixed allowlist: `practice`, `integrity`, `accept`, `abundance`, `mirror`. Use replay protection, rate limits and audit entries without secrets.
-4. The already-open owner's Mini App receives commands using authenticated SSE or short polling; it navigates via same-origin app paths only, never arbitrary URLs. On disconnect/expiry it stops responding.
+1. Owner proves identity with Telegram initData. The server validates its HMAC and 5-minute freshness, then compares Telegram ID with the dedicated server-only `PRACTICE_REMOTE_OWNER_ID`; it does not trust a client-provided ID or grant access to other staff in `ADMIN_TELEGRAM_IDS`.
+2. Owner starts an ephemeral remote-control session from `/practice` in the Mini App. The server issues a random device-bound credential with a 30-minute absolute lifetime. It is never embedded in URLs or logs; the UI shows active state and has a Stop control.
+3. The command endpoint validates fresh owner initData, session state, expiry and target against a fixed same-origin path allowlist: `/practice`, `/integrity`, `/accept`, `/abundance`, `/mirror`. It applies request-ID replay protection and a 20-commands/minute rate limit; event logs exclude credentials.
+4. An already-open Mini App receives commands by authenticated short polling and navigates via the allowlisted same-origin path only. It stops responding when disabled or expired.
 5. Owner-only control script should be loaded through the existing app shell (or a carefully scoped entry point) after authentication; it must be inert for all other users. Do not expose new practice content or bypass current access controls.
 6. Integrate voice only after confirming a real voice-to-tool invocation path. If ChatGPT voice cannot invoke the API, build a separate owner-only voice UI, or use an explicit button trigger for the first end-to-end demo.
 
-## Validation before deployment
-- Add unit tests: invalid/expired/replayed initData, non-owner denied, invalid targets denied, expired session denied, stop revokes session, no navigation for other users.
-- Test that each practice route opens in Telegram Desktop and video assets load where configured.
-- Run `npm test`; perform a manual demo on a staging environment.
+## Validation and remaining manual test
+- Automated tests cover non-owner and expired initData, invalid target, disabled session, allowlist, one-time delivery and rate limit. `npm test` passes (136 tests).
+- Manual verification in Telegram Desktop on Windows 10, including media loading, remains to be performed by the owner. The Sandbox cannot launch the user's desktop application.
 - Never push to `main` or deploy without explicit approval.
 
 ## First milestone
