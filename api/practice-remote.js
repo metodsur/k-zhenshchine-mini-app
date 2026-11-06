@@ -5,6 +5,7 @@ const { verifyInitData } = require("../lib/telegram");
 const DEVICE_TTL = 30 * 60;
 const COMMAND_TTL = 60;
 const OWNER_INITDATA_TTL = 5 * 60;
+const POLL_INITDATA_MAX_AGE = DEVICE_TTL + OWNER_INITDATA_TTL;
 const PRACTICES = Object.freeze({
   "/practice": "Практика многомерности",
   "/integrity": "Твоя целостность",
@@ -112,7 +113,8 @@ module.exports = async function handler(req, res) {
     let pollUser;
     try {
       const initData = String((req.headers && req.headers["x-telegram-init-data"]) || "");
-      pollUser = verifyInitData(initData, DEVICE_TTL);
+      // Enable accepts initData up to 5 minutes old; allow that age plus the full session TTL.
+      pollUser = verifyInitData(initData, POLL_INITDATA_MAX_AGE);
     } catch { return reply(res, 401, { ok: false }); }
     if (String(pollUser.id) !== String(device.ownerId)) return reply(res, 401, { ok: false });
     if (!(await limited(id, "poll", 30))) return reply(res, 429, { ok: false });
