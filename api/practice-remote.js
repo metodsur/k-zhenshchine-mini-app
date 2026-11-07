@@ -116,7 +116,7 @@ module.exports = async function handler(req, res) {
       // Enable accepts initData up to 5 minutes old; allow that age plus the full session TTL.
       pollUser = verifyInitData(initData, POLL_INITDATA_MAX_AGE);
     } catch { return reply(res, 401, { ok: false }); }
-    if (String(pollUser.id) !== String(device.ownerId)) return reply(res, 401, { ok: false });
+    if (String(pollUser.id) !== String(device.ownerId)) return reply(res, 403, { ok: false, error: "Owner identity mismatch" });
     if (!(await limited(id, "poll", 30))) return reply(res, 429, { ok: false });
     // The Redis TTL is absolute from enable time; polling never extends the session.
     const raw = await store.command("GET", commandKey(id));
