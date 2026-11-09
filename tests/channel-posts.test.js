@@ -93,10 +93,59 @@ test('Tuesday uses the approved fallback without experts and lists only assigned
   await collections.saveItem('experts', { title: 'Опора', name: 'Мария', stage: 'slot', air_date: '2026-11-10', air_time: '16:00' }, 't');
   await collections.saveItem('experts', { title: 'Не сейчас', name: 'Ольга', stage: 'new', air_date: '2026-11-10', air_time: '17:00' }, 't');
   const tue = await posts.build('2026-11-10', '10:00');
-  assert.match(tue.text, /Расписание 🕐\n16:00 — Мария, «Опора»\n16:30 — Анна, «Энергия женщины»\n/);
-  assert.match(tue.text, /Сегодня эфиры по расписанию/);
+  assert.match(tue.text, /Подтверждённое расписание на сегодня 🕐\n16:00 — Мария, «Опора»\n16:30 — Анна, «Энергия женщины»\n/);
+  assert.match(tue.text, /Вторник — день живого голоса/);
   assert.doesNotMatch(tue.text, /5 эфиров по 30 минут|с 16:00 до 18:30/);
   assert.doesNotMatch(tue.text, /Ольга/);
+});
+
+test('Nov 10–15 date-specific copy is scheduled for the approved eight slots and the usual grid resumes afterward', async () => {
+  createWorld();
+  assert.deepEqual(posts.plan('2026-11-10').map((p) => p.slot), ['10:00']);
+  assert.deepEqual(posts.plan('2026-11-11').map((p) => p.slot), ['10:00']);
+  assert.deepEqual(posts.plan('2026-11-12').map((p) => p.slot), ['10:00']);
+  assert.deepEqual(posts.plan('2026-11-13').map((p) => p.slot), ['10:00', '13:00']);
+  assert.deepEqual(posts.plan('2026-11-14').map((p) => p.slot), ['10:00']);
+  assert.deepEqual(posts.plan('2026-11-15').map((p) => p.slot), ['10:00', '13:00']);
+
+  const tuesday = await posts.build('2026-11-10', '10:00');
+  assert.equal(tuesday.post, 'broadcasts_empty_nov10');
+  assert.match(tuesday.text, /На сегодня подтверждённых эфиров пока нет/);
+  assert.match(tuesday.html, /start=go_expert/);
+
+  const wednesday = await posts.build('2026-11-11', '10:00');
+  assert.match(wednesday.text, /третье видео серии «Изобильная реальность» — «Как получать подарки от пространства»/);
+  assert.match(wednesday.text, /Ритуал дня:/);
+
+  const thursday = await posts.build('2026-11-12', '10:00');
+  assert.match(thursday.text, /добро пожаловать к нам/);
+  assert.match(thursday.text, /Ритуал дня — 15 минут для себя/);
+
+  const fridayWelcome = await posts.build('2026-11-13', '10:00');
+  assert.match(fridayWelcome.text, /добро пожаловать/);
+  assert.match(fridayWelcome.text, /один из важных ритуалов экосистемы/);
+  assert.match(fridayWelcome.text, /близкую по духу/);
+  assert.match(fridayWelcome.text, /можешь быть полезна другой женщине/);
+  assert.match(fridayWelcome.text, /без чувства долга/);
+
+  const speaker = await posts.build('2026-11-13', '13:00');
+  assert.match(speaker.text, /путь к эфиру/);
+  assert.match(speaker.text, /Пригласи 20 женщин/);
+  assert.match(speaker.text, /не автоматическое назначение на эфир/);
+  assert.deepEqual([...speaker.html.matchAll(/go_(\w+)"/g)].map((m) => m[1]), ['about', 'expert']);
+
+  const saturday = await posts.build('2026-11-14', '10:00');
+  assert.match(saturday.text, /Ритуал дня:/);
+  const sunday = await posts.build('2026-11-15', '10:00');
+  assert.match(sunday.text, /Недельный ритуал внедрения/);
+  assert.match(sunday.text, /желаниях, голосах и знаниях, ресурсах, целостности, принятии и многомерности/);
+  const sundayInvite = await posts.build('2026-11-15', '13:00');
+  assert.match(sundayInvite.text, /без обязанности и спешки/);
+  assert.match(sundayInvite.text, /слот команда согласует отдельно/);
+
+  assert.equal(posts.plan('2026-11-16')[0].post, 'monday');
+  assert.equal(posts.plan('2026-11-20')[0].post, 'accept');
+  assert.equal(posts.plan('2026-11-20')[1].post, 'friendship');
 });
 
 test('a post button opens the right page of the app through the bot', async () => {
