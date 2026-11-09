@@ -32,6 +32,74 @@ test('every week of a 4-week round has its own text; then it repeats', async () 
   assert.match(wed, /10 подруг/);
 });
 
+test('Nov 9–15 approved club copy is date-scoped to remaining slots and weekly rotation resumes Nov 16', async () => {
+  const world = createWorld();
+  const expectedSlots = {
+    '2026-11-09': ['10:00', '20:00'],
+    '2026-11-10': ['10:00', '20:00'],
+    '2026-11-11': ['10:00', '20:00'],
+    '2026-11-12': ['10:00', '20:00'],
+    '2026-11-13': ['10:00', '20:00'],
+    '2026-11-14': ['10:00', '20:00'],
+    '2026-11-15': ['10:00', '20:00']
+  };
+  for (const [date, slots] of Object.entries(expectedSlots)) {
+    assert.deepEqual((await posts.plan(date)).map((p) => p.slot), slots);
+  }
+
+  // The Nov 9 morning post is not replaced; only the approved future evening slot is in scope.
+  const mondayMorning = await posts.build('2026-11-09', '10:00', at('2026-11-09', '10:00'));
+  assert.match(mondayMorning.texts[0], /день твоего ДА/);
+  const mondayEvening = await posts.build('2026-11-09', '20:00', at('2026-11-09', '20:00'));
+  assert.match(mondayEvening.texts[0], /Как сегодня прожилось твоё ДА/);
+
+  const tuesday = await posts.build('2026-11-10', '10:00', at('2026-11-10', '10:00'));
+  assert.match(tuesday.texts[0], /Вторник — день принятия/);
+  assert.match(tuesday.texts[0], /Принять — не значит задолжать/);
+  assert.match(tuesday.texts[0], /День эфиров с экспертами/);
+  assert.match(tuesday.texts[0], /\n\n.+$/);
+  const tuesdayMagic = await posts.build('2026-11-10', '20:00', at('2026-11-10', '20:00'));
+  assert.match(tuesdayMagic.texts[0], /Что сегодня ты смогла принять/);
+
+  world.kv.set('stats:club:collabs:total', '7');
+  const wednesday = await posts.build('2026-11-11', '10:00', at('2026-11-11', '10:00'));
+  assert.match(wednesday.texts[0], /День коллабораций/);
+  assert.match(wednesday.texts[0], /В клубе уже 7 коллабораций/);
+  assert.match(wednesday.texts[0], /ясность, время и границы обеих сторон/);
+  assert.equal(wednesday.reply_markup.inline_keyboard.length, 2);
+  assert.match((await posts.build('2026-11-11', '20:00', at('2026-11-11', '20:00'))).texts[0], /С кем ты сегодня познакомилась/);
+
+  const thursdayPlan = await posts.plan('2026-11-12');
+  assert.deepEqual(thursdayPlan.map((p) => p.post), ['ritual', 'magic']);
+  const thursday = await posts.build('2026-11-12', '10:00', at('2026-11-12', '10:00'));
+  assert.match(thursday.texts[0], /день твоих граней/);
+  assert.match(thursday.texts[0], /На этой неделе большого онлайн-нетворкинга нет/);
+  assert.match((await posts.build('2026-11-12', '20:00', at('2026-11-12', '20:00'))).texts[0], /Какую свою грань ты сегодня заметила/);
+
+  const friday = await posts.build('2026-11-13', '10:00', at('2026-11-13', '10:00'));
+  assert.match(friday.texts[0], /Пятница — день признания/);
+  assert.match(friday.texts[0], /не нужно делиться личным в общем чате/);
+  assert.match(friday.texts[0], /«Зеркало» — личная практика с Мастером/);
+  assert.equal(friday.reply_markup.inline_keyboard[0][0].text, 'Записаться на «Зеркало» 🪞');
+  assert.match((await posts.build('2026-11-13', '20:00', at('2026-11-13', '20:00'))).texts[0], /Кто сегодня увидел тебя/);
+
+  const saturday = await posts.build('2026-11-14', '10:00', at('2026-11-14', '10:00'));
+  assert.match(saturday.texts[0], /День наполнения себя/);
+  assert.match(saturday.texts[0], /сакральной практикой из места силы/);
+  assert.match((await posts.build('2026-11-14', '20:00', at('2026-11-14', '20:00'))).texts[0], /Что сегодня тебя наполнило/);
+
+  world.kv.set('stats:club:magic:2026-11-15', '5');
+  const sunday = await posts.build('2026-11-15', '10:00', at('2026-11-15', '10:00'));
+  assert.match(sunday.texts[0], /ритуал — не экзамен по продуктивности/);
+  assert.match(sunday.texts[0], /10 подруг — две недели клуба в подарок/);
+  assert.match(sunday.texts[0], /Ты уже достаточна, чтобы быть здесь/);
+  assert.match((await posts.build('2026-11-15', '20:00', at('2026-11-15', '20:00'))).texts[0], /было 5 историй волшебства/);
+
+  const nextMonday = await posts.build('2026-11-16', '10:00', at('2026-11-16', '10:00'));
+  assert.match(nextMonday.texts[0], /Представь, что неделя уже прошла и ты довольна собой/);
+  assert.match((await posts.build('2026-11-16', '20:00', at('2026-11-16', '20:00'))).texts[0], /Как сегодня прожилось твоё ДА/);
+});
+
 test('posts go to the club group once and never early; the welcome is pinned once', async () => {
   const world = createWorld();
   assert.deepEqual(await posts.publish('2026-11-02', '10:00', at('2026-11-02', '09:59')), { skipped: 'early' });
