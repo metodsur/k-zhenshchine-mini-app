@@ -56,7 +56,7 @@ test('Nov 9–15 approved club copy is date-scoped to remaining slots and weekly
   const tuesday = await posts.build('2026-11-10', '10:00', at('2026-11-10', '10:00'));
   assert.match(tuesday.texts[0], /Вторник — день принятия/);
   assert.match(tuesday.texts[0], /Принять — не значит задолжать/);
-  assert.match(tuesday.texts[0], /День эфиров с экспертами/);
+  assert.match(tuesday.texts[0], /Расписание экспертных встреч на эту неделю пока не подтверждено/);
   assert.match(tuesday.texts[0], /\n\n.+$/);
   const tuesdayMagic = await posts.build('2026-11-10', '20:00', at('2026-11-10', '20:00'));
   assert.match(tuesdayMagic.texts[0], /Что сегодня ты смогла принять/);
@@ -91,7 +91,9 @@ test('Nov 9–15 approved club copy is date-scoped to remaining slots and weekly
   world.kv.set('stats:club:magic:2026-11-15', '5');
   const sunday = await posts.build('2026-11-15', '10:00', at('2026-11-15', '10:00'));
   assert.match(sunday.texts[0], /ритуал — не экзамен по продуктивности/);
-  assert.match(sunday.texts[0], /10 подруг — две недели клуба в подарок/);
+  assert.match(sunday.texts[0], /10 подруг — две недели клуба/);
+  assert.match(sunday.texts[0], /20 — возможность подать заявку на эфир/);
+  assert.doesNotMatch(sunday.texts[0], /20 — твой эфир/);
   assert.match(sunday.texts[0], /Ты уже достаточна, чтобы быть здесь/);
   assert.match((await posts.build('2026-11-15', '20:00', at('2026-11-15', '20:00'))).texts[0], /было 5 историй волшебства/);
 
