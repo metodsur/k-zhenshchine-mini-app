@@ -244,7 +244,19 @@ module.exports = async function handler(req, res) {
     }
     return send(res, 200, { ok: true });
   } catch (error) {
-    console.error("Telegram update processing failed");
+    const message = update.message;
+    const command = typeof message?.text === "string" ? (message.text.trim().match(/^\/[A-Za-z0-9_]+/) || [])[0] || null : null;
+    const errorMessage = String(error?.message || "Unknown error")
+      .replace(/bot\d{5,}:[A-Za-z0-9_-]+/g, "[redacted]")
+      .replace(/https?:\/\/\S+/g, "[url]")
+      .slice(0, 180);
+    console.error("Telegram update processing failed", {
+      updateType: update.message ? "message" : update.callback_query ? "callback_query" : update.chat_member ? "chat_member" : "other",
+      command,
+      errorName: String(error?.name || "Error").slice(0, 64),
+      errorMessage,
+      causeCode: typeof error?.cause?.code === "string" ? error.cause.code.slice(0, 64) : undefined
+    });
     return send(res, 200, { ok: true });
   }
 };
