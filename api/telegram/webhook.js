@@ -92,8 +92,15 @@ module.exports = async function handler(req, res) {
   const required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "TELEGRAM_CHANNEL_ID", "TELEGRAM_CHANNEL_URL", "APP_BASE_URL"];
   if (required.some((name) => !process.env[name])) return send(res, 500, { ok: false, error: "Server configuration error" });
   if (!safeEqualString(req.headers["x-telegram-bot-api-secret-token"], process.env.TELEGRAM_WEBHOOK_SECRET)) return send(res, 403, { ok: false });
-  if (await require("../../lib/migrate").onHold()) return send(res, 503, { ok: false }); // Telegram retries later
   const update = req.body || {};
+  const incomingMessage = update.message;
+  const incomingCommand = typeof incomingMessage?.text === "string" ? (incomingMessage.text.trim().match(/^\/[A-Za-z0-9_]+/) || [])[0] || null : null;
+  console.info("Telegram webhook received " + JSON.stringify({
+    updateType: update.message ? "message" : update.callback_query ? "callback_query" : update.chat_member ? "chat_member" : "other",
+    command: incomingCommand,
+    chatType: incomingMessage?.chat?.type || null
+  }));
+  if (await require("../../lib/migrate").onHold()) return send(res, 503, { ok: false }); // Telegram retries later
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     if (update.callback_query) {
@@ -131,7 +138,10 @@ module.exports = async function handler(req, res) {
         : "Не удалось подтвердить ссылку: она могла устареть или быть уже использована. Вернись на towomen.ru и создай новую ссылку для подключения Telegram." });
       return send(res, 200, { ok: true });
     }
-    if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });
+    if ((await consentGate(update.message)) === "handled") {
+      if (incomingCommand === "/start") console.info("Telegram /start handled: consent prompt sent");
+      return send(res, 200, { ok: true });
+    }
     try {
       if (await require("../../lib/levels-gift").handleStart(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Levels gift failed", error.message); }
@@ -179,6 +189,7 @@ module.exports = async function handler(req, res) {
     }
     if (message?.chat && typeof message.text === "string" && message.text.startsWith("/start") && await isMemberSafe(message.from.id)) {
       await sendMemberEntry(message.chat.id, message.from.id);
+      console.info("Telegram /start reply sent " + JSON.stringify({ route: "member" }));
       return send(res, 200, { ok: true });
     }
     if (message?.chat && typeof message.text === "string" && message.text.startsWith("/start")) {
@@ -192,6 +203,7 @@ module.exports = async function handler(req, res) {
           web_app: { url: appUrl }
         }]] }
       });
+      console.info("Telegram /start reply sent " + JSON.stringify({ route: "visitor" }));
       try { await scheduleReminder(message.chat.id, userId); } catch (error) { console.error("Reminder scheduling failed"); }
     }
     if (message?.chat && typeof message.text === "string" && /^\/chatid(@\w+)?(\s|$)/.test(message.text)
