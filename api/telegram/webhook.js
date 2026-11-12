@@ -250,13 +250,13 @@ module.exports = async function handler(req, res) {
       .replace(/bot\d{5,}:[A-Za-z0-9_-]+/g, "[redacted]")
       .replace(/https?:\/\/\S+/g, "[url]")
       .slice(0, 180);
-    console.error("Telegram update processing failed", {
+    console.error("Telegram update processing failed " + JSON.stringify({
       updateType: update.message ? "message" : update.callback_query ? "callback_query" : update.chat_member ? "chat_member" : "other",
       command,
       errorName: String(error?.name || "Error").slice(0, 64),
       errorMessage,
       causeCode: typeof error?.cause?.code === "string" ? error.cause.code.slice(0, 64) : undefined
-    });
+    }));
     return send(res, 200, { ok: true });
   }
 };
