@@ -1,4 +1,5 @@
 const { safeEqualString } = require("../../lib/telegram");
+const { telegram } = require("../../lib/telegram");
 
 function send(res, status, body) {
   res.statusCode = status;
@@ -46,5 +47,27 @@ style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0">
   if (!safeEqualString(supplied, setupSecret)) return send(res, 403, { ok: false });
 
   const result = await require("../../lib/bot-setup").apply();
-  return send(res, result.ok ? 200 : 502, result);
+  let diagnostics;
+  try {
+    const [bot, webhook] = await Promise.all([
+      telegram("getMe", {}),
+      telegram("getWebhookInfo", {})
+    ]);
+    let webhookUrl = null;
+    try {
+      const parsed = new URL(webhook.url);
+      webhookUrl = `${parsed.origin}${parsed.pathname}`;
+    } catch { /* keep absent or malformed URL hidden */ }
+    diagnostics = {
+      botUsername: bot.username || null,
+      webhookUrl,
+      pendingUpdateCount: Number(webhook.pending_update_count || 0),
+      lastErrorDate: webhook.last_error_date || null,
+      lastErrorMessage: String(webhook.last_error_message || "").replace(/bot\d{5,}:[A-Za-z0-9_-]+/g, "[redacted]").replace(/https?:\/\/\S+/g, "[url]").slice(0, 180) || null,
+      allowedUpdates: Array.isArray(webhook.allowed_updates) ? webhook.allowed_updates : []
+    };
+  } catch (error) {
+    diagnostics = { error: String(error?.message || "Telegram diagnostics unavailable").replace(/bot\d{5,}:[A-Za-z0-9_-]+/g, "[redacted]").replace(/https?:\/\/\S+/g, "[url]").slice(0, 180) };
+  }
+  return send(res, result.ok ? 200 : 502, { ...result, diagnostics });
 };
