@@ -112,6 +112,25 @@ module.exports = async function handler(req, res) {
     try {
       if (await require("../../lib/tasks").handleCommand(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Tasks command failed", error.message); }
+    const message = update.message;
+    const linkMatch = message?.chat?.type === "private" && typeof message.text === "string"
+      ? message.text.trim().match(/^\/start(?:@\w+)?\s+club_([A-Za-z0-9_-]{6,128})\s*$/) : null;
+    if (linkMatch) {
+      const secret = process.env.CLUB_TELEGRAM_SECRET;
+      const base = (process.env.ENERGY_PLATFORM_API_BASE || "https://yrovni.ru/api/club-membership").replace(/\/$/, "");
+      let linked = false;
+      if (secret) {
+        try {
+          const response = await fetch(`${base}/telegram/link`, { method: "POST", headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" }, body: JSON.stringify({ code: linkMatch[1], telegram_id: message.from.id, telegram_username: message.from.username || null }) });
+          const result = await response.json();
+          linked = response.ok && result && result.ok === true;
+        } catch { /* answer with a retry message below */ }
+      }
+      await telegram("sendMessage", { chat_id: message.chat.id, text: linked
+        ? "Telegram подключён 🤍 Вернись на towomen.ru, чтобы завершить оплату."
+        : "Не удалось подтвердить ссылку: она могла устареть или быть уже использована. Вернись на towomen.ru и создай новую ссылку для подключения Telegram." });
+      return send(res, 200, { ok: true });
+    }
     if ((await consentGate(update.message)) === "handled") return send(res, 200, { ok: true });
     try {
       if (await require("../../lib/levels-gift").handleStart(update.message)) return send(res, 200, { ok: true });
@@ -122,7 +141,6 @@ module.exports = async function handler(req, res) {
     try {
       if (await require("../../lib/conversations").handleReply(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Reply handling failed", error.message); }
-    const message = update.message;
     if (message && clubActivity.isClubGroup(message.chat)) {
       try { await clubActivity.trackGroupMessage(message); } catch (error) { console.error("Club activity tracking failed"); }
     }
@@ -186,7 +204,21 @@ module.exports = async function handler(req, res) {
     }
     const change = update.chat_member;
     if (change && clubActivity.isClubGroup(change.chat) && !isMemberStatus(change.old_chat_member?.status) && isMemberStatus(change.new_chat_member?.status)) {
-      try { await require("../../lib/club-posts").onJoin(change.new_chat_member.user); } catch (error) { console.error("Club welcome failed", error.message); }
+      const user = change.new_chat_member.user;
+      let active = false;
+      const secret = process.env.CLUB_TELEGRAM_SECRET;
+      const base = (process.env.ENERGY_PLATFORM_API_BASE || "https://yrovni.ru/api/club-membership").replace(/\/$/, "");
+      if (secret) {
+        try {
+          const response = await fetch(`${base}/telegram/join`, { method: "POST", headers: { Authorization: `Bearer ${secret}`, "Content-Type": "application/json" }, body: JSON.stringify({ telegram_id: user.id }) });
+          const result = await response.json();
+          active = response.ok && result?.ok === true && result.active === true;
+        } catch { /* deny access if entitlement service is unavailable */ }
+      }
+      // The contract's inactive/error response cannot distinguish an expired YooKassa account
+      // from an unlinked legacy/Tribute member. Never remove those members pending migration.
+      // Keep the existing welcome/onJoin behavior for both active and legacy users.
+      try { await require("../../lib/club-posts").onJoin(user); } catch (error) { console.error("Club welcome failed", error.message); }
     }
     const configuredChannel = String(process.env.TELEGRAM_CHANNEL_ID || "").toLowerCase();
     const updateUsername = change?.chat?.username ? `@${change.chat.username}`.toLowerCase() : "";

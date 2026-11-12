@@ -2,7 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { setupEnv, createWorld, call } = require('./helpers/fake-world');
 
-setupEnv({ TELEGRAM_CLUB_CHAT_ID: '-1004375885816', TRIBUTE_API_KEY: 'test-tribute', LEVELS_URL: 'https://levels.example.test', LEVELS_SYNC_SECRET: 'levels-secret' });
+setupEnv({ TELEGRAM_CLUB_CHAT_ID: '-1004375885816', TRIBUTE_API_KEY: 'test-tribute', CLUB_TELEGRAM_SECRET: 'test-club-secret', LEVELS_URL: 'https://levels.example.test', LEVELS_SYNC_SECRET: 'levels-secret' });
+
 const webhook = require('../api/telegram/webhook');
 const gift = require('../lib/levels-gift');
 const referrals = require('../lib/referrals');
@@ -77,15 +78,16 @@ test('a wrong link gives no gift', async () => {
   assert.equal(world.sent('createChatInviteLink').length, 0);
 });
 
-test('she already pays: the team extends the subscription; «Уровни» down — retried in the evening', async () => {
+test('an active YooKassa member receives a manual 7-day extension; «Уровни» sync is retried', async () => {
   const world = createWorld();
-  world.tributeSubscribers = [{ telegramUserId: 705, status: 'active', expireAt: new Date(Date.now() + 40 * DAY).toISOString() }];
+  world.tributeSubscribers = [];
+  world.energyActive = true;
   tribute.resetCache();
   world.levelsDown = true;
   const id = 'cmh1yyyyy0000xyz12345678';
   await start({ id: 705, first_name: 'Света' }, param(id));
-  assert.match(to(world, 705).at(-1).text, /продлим твою подписку на 7 дней/);
-  assert.ok(world.sent('sendMessage').some((m) => m.chat_id === '900' && /продлите ей подписку в Tribute на 7 дней/.test(m.text)));
+  assert.match(to(world, 705).at(-1).text, /Команда свяжется с тобой, чтобы продлить доступ на 7 дней/);
+  assert.ok(world.sent('sendMessage').some((m) => m.chat_id === '900' && /продлите ей доступ вручную на 7 дней без списания/.test(m.text)));
   assert.equal(world.sent('createChatInviteLink').filter((p) => p.name === 'levels:705').length, 0);
   world.levelsDown = false;
   assert.deepEqual(await gift.retrySync(), { pending: 1, sent: 1 });

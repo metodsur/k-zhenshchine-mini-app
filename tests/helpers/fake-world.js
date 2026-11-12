@@ -55,12 +55,13 @@ function createWorld() {
     }
   };
   const blockedChats = new Set();
-  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {}, vk: [], vkError: null, levels: [], levelsDown: false };
+  const world = { autoConsent: true, members: new Set(), memberCounts: {}, tributeSubscribers: null, qstash: [], lists: {}, vk: [], vkError: null, levels: [], levelsDown: false, energyActive: false, energyDown: false };
   global.fetch = async (url, options = {}) => {
     const href = String(url);
     const ok = (result) => ({ ok: true, json: async () => result });
     if (href.startsWith('https://redis.example.test')) return ok({ result: redis(JSON.parse(options.body)) });
     if (href.startsWith('https://tribute.tg/') && world.tributeSubscribers) return ok(world.tributeSubscribers);
+    if (href.endsWith('/telegram/join')) return world.energyDown ? { ok: false, json: async () => ({ ok: false }) } : ok({ ok: true, active: world.energyActive });
     if (href.startsWith('https://qstash.upstash.io/')) { world.qstash.push({ url: href, headers: options.headers, body: JSON.parse(options.body) }); return ok({ messageId: 'm' + world.qstash.length }); }
     if (/api\.telegram\.org\/file\/bot[^/]+\//.test(href)) {
       const bytes = Buffer.from(`file:${href.split('/').pop()}`);

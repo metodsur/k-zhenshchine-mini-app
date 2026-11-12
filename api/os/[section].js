@@ -164,7 +164,7 @@ const sections = {
       const base = String(process.env.APP_BASE_URL || "").replace(/\/$/, "");
       const buttons = {
         meetings: { text: "Выбрать встречу", web_app: { url: `${base}/meetings.html` } },
-        club: { text: "Вступить в клуб", url: "https://t.me/tribute/app?startapp=s17IJ" },
+        club: { text: "Вступить в клуб", url: "https://towomen.ru/" },
         space: { text: "Открыть пространство", web_app: { url: `${base}/space.html` } }
       };
       const result = await crm.broadcast(ok.map((c) => c.id), text, buttons[body.button] || null, who(member));

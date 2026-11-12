@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { setupEnv, createWorld, initData, call } = require('./helpers/fake-world');
 
-setupEnv({ TELEGRAM_CLUB_CHAT_ID: '-1004375885816', TELEGRAM_CLUB_URL: 'https://t.me/+club', TRIBUTE_API_KEY: 'test-tribute' });
+setupEnv({ TELEGRAM_CLUB_CHAT_ID: '-1004375885816', TELEGRAM_CLUB_URL: 'https://t.me/+club', TRIBUTE_API_KEY: 'test-tribute', CLUB_TELEGRAM_SECRET: 'test-club-secret' });
 const webhook = require('../api/telegram/webhook');
 const me = require('../api/auth/me');
 const cron = require('../api/cron/[job]');
@@ -86,14 +86,33 @@ test('ten invited women open two weeks of the club; the gift ends without a subs
   assert.equal((await myLink()).referral.trial.ended, true);
 });
 
-test('a woman who subscribed during the gift stays in the club', async () => {
+test('a woman with an active paid entitlement during the gift stays in the club', async () => {
   const world = createWorld();
   world.tributeSubscribers = [];
   tribute.resetCache();
   for (let i = 1; i <= 10; i++) await join(800 + i, 'ref:501');
-  world.tributeSubscribers = [{ telegramUserId: 501, status: 'active', expireAt: new Date(Date.now() + 40 * DAY).toISOString() }];
-  tribute.resetCache();
+  world.energyActive = true;
   assert.deepEqual(await referrals.runTrials(Date.now() + 14.1 * DAY), { reminded: 0, ended: 1, removed: 0 });
+  assert.equal(world.sent('banChatMember').length, 0);
+});
+
+test('an active YooKassa entitlement prevents gift expiry removal', async () => {
+  const world = createWorld();
+  world.tributeSubscribers = [];
+  tribute.resetCache();
+  for (let i = 1; i <= 10; i++) await join(1000 + i, 'ref:501');
+  world.energyActive = true;
+  assert.deepEqual(await referrals.runTrials(Date.now() + 14.1 * DAY), { reminded: 0, ended: 1, removed: 0 });
+  assert.equal(world.sent('banChatMember').length, 0);
+});
+
+test('an unavailable YooKassa entitlement API defers trial expiry without removal', async () => {
+  const world = createWorld();
+  world.tributeSubscribers = [];
+  tribute.resetCache();
+  for (let i = 1; i <= 10; i++) await join(1100 + i, 'ref:501');
+  world.energyDown = true;
+  assert.deepEqual(await referrals.runTrials(Date.now() + 14.1 * DAY), { reminded: 0, ended: 0, removed: 0 });
   assert.equal(world.sent('banChatMember').length, 0);
 });
 

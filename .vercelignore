@@ -1,0 +1,3 @@
+# This Vercel project is only a redirect layer to the Timeweb-hosted app.
+# The API handlers are deployed and run on Timeweb, not Vercel.
+api
