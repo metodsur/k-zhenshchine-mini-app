@@ -104,6 +104,11 @@ module.exports = async function handler(req, res) {
   try {
     if (await payments.handleUpdate(update)) return send(res, 200, { ok: true });
     if (update.callback_query) {
+      if (typeof update.callback_query.data === "string" && update.callback_query.data.startsWith("cf:")) {
+        try {
+          if (await require("../../lib/content-factory").handleUpdate(update)) return send(res, 200, { ok: true });
+        } catch { return send(res, 503, { ok: false, error: "Content factory unavailable" }); }
+      }
       try {
         if (!(await require("../../lib/collabs").handleCallback(update.callback_query))
           && !(await require("../../lib/pairs").handleCallback(update.callback_query))) await require("../../lib/tasks").handleCallback(update.callback_query);
@@ -151,6 +156,10 @@ module.exports = async function handler(req, res) {
     try {
       if (await require("../../lib/conversations").handleReply(update.message)) return send(res, 200, { ok: true });
     } catch (error) { console.error("Reply handling failed", error.message); }
+    // Opt-in CF intake comes last: task/database files and existing reply states keep precedence.
+    try {
+      if (await require("../../lib/content-factory").handleUpdate(update)) return send(res, 200, { ok: true });
+    } catch { return send(res, 503, { ok: false, error: "Content factory unavailable" }); }
     if (message && clubActivity.isClubGroup(message.chat)) {
       try { await clubActivity.trackGroupMessage(message); } catch (error) { console.error("Club activity tracking failed"); }
     }
