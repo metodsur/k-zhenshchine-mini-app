@@ -56,3 +56,32 @@ test('optional telemetry distinguishes fetch exceptions without altering the req
     if (beforeToken === undefined) delete process.env.TELEGRAM_BOT_TOKEN; else process.env.TELEGRAM_BOT_TOKEN = beforeToken;
   }
 });
+
+test('CF IPv4 dispatcher is scoped and never replaces the global dispatcher', async () => {
+  const { getGlobalDispatcher } = require('undici');
+  const { cfCloudDispatcher } = require('../lib/cf-cloud-transport');
+  const before = getGlobalDispatcher();
+  const one = cfCloudDispatcher();
+  assert.equal(cfCloudDispatcher(), one);
+  assert.equal(getGlobalDispatcher(), before);
+  assert.notEqual(one, before);
+});
+
+test('legacy Telegram calls keep default transport; only CF options pass scoped dispatcher', async () => {
+  const beforeFetch = global.fetch, beforeToken = process.env.TELEGRAM_BOT_TOKEN;
+  process.env.TELEGRAM_BOT_TOKEN = 'test-only';
+  const seen = [], dispatcher = {};
+  global.fetch = async (url, options) => { seen.push(options); return { status: 200, ok: true, json: async () => ({ ok: true, result: {} }) }; };
+  try {
+    await telegram('getMe', {});
+    await telegram('getMe', {}, { dispatcher, redirect: 'error' });
+    assert.equal(Object.hasOwn(seen[0], 'dispatcher'), false);
+    assert.equal(Object.hasOwn(seen[0], 'signal'), false);
+    assert.equal(Object.hasOwn(seen[0], 'redirect'), false);
+    assert.equal(seen[1].dispatcher, dispatcher);
+    assert.equal(seen[1].redirect, 'error');
+  } finally {
+    global.fetch = beforeFetch;
+    if (beforeToken === undefined) delete process.env.TELEGRAM_BOT_TOKEN; else process.env.TELEGRAM_BOT_TOKEN = beforeToken;
+  }
+});
