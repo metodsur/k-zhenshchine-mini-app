@@ -171,7 +171,7 @@ async function checkDeps() {
   const store = require("./lib/store");
   const [storage, telegram, qstash, tribute] = await Promise.all([
     timed(store.command("PING").then((r) => r === "PONG")),
-    timed(fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/getMe`).then((r) => r.ok)),
+    timed(require("./lib/telegram").telegram("getMe", {}, { signal: AbortSignal.timeout(8000) }).then((r) => r?.is_bot === true)),
     timed(fetch(`${String(process.env.QSTASH_URL || "https://qstash.upstash.io").replace(/\/$/, "")}/v2/topics`, { headers: { Authorization: `Bearer ${process.env.QSTASH_TOKEN}` } }).then((r) => r.status < 500)),
     timed(fetch("https://tribute.tg/api/v1/products", { headers: { "Api-Key": String(process.env.TRIBUTE_API_KEY || "") } }).then((r) => r.status < 500))
   ]);

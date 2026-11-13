@@ -453,13 +453,16 @@ async function attachmentFile(req, res) {
     a = found.attachment;
     caption = `📎 Вложение к задаче «${found.task.title}»`;
   }
-  const { telegram } = require("../../lib/telegram");
+  const { telegram, telegramDownload } = require("../../lib/telegram");
   let buffer = null;
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  res.once?.("close", abort);
   try {
-    const file = await telegram("getFile", { file_id: a.file_id });
-    const response = await fetch(`https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`);
-    if (response.ok) buffer = Buffer.from(await response.arrayBuffer());
+    buffer = await telegramDownload(a.file_id, { signal: controller.signal });
   } catch { buffer = null; }
+  finally { res.removeListener?.("close", abort); controller.abort(); }
+  if (res.destroyed) return; // Do not forward/send after the browser disconnected.
   if (!buffer) {
     // Telegram lets bots download only up to 20 MB: bigger files are sent to the viewer in the bot.
     const method = { photo: "sendPhoto", video: "sendVideo", animation: "sendAnimation", video_note: "sendVideoNote", audio: "sendAudio", voice: "sendVoice" }[a.send] || "sendDocument";
