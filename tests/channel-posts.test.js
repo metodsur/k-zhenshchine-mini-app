@@ -144,8 +144,44 @@ test('Nov 10–15 date-specific copy is scheduled for the approved eight slots a
   assert.match(sundayInvite.text, /слот команда согласует отдельно/);
 
   assert.equal(posts.plan('2026-11-16')[0].post, 'monday');
-  assert.equal(posts.plan('2026-11-20')[0].post, 'accept');
-  assert.equal(posts.plan('2026-11-20')[1].post, 'friendship');
+  assert.equal(posts.plan('2026-11-20')[0].post, 'accept_nov20');
+  assert.equal(posts.plan('2026-11-20')[1].post, 'friendship_nov20');
+});
+
+test('Nov 17–22 approved copy uses the regular slots and gates the expert form behind 20 real joins', async () => {
+  createWorld();
+  const slots = {
+    '2026-11-17': ['10:00'], '2026-11-18': ['10:00'], '2026-11-19': ['10:00'],
+    '2026-11-20': ['10:00', '13:00'], '2026-11-21': ['10:00'], '2026-11-22': ['10:00', '13:00']
+  };
+  for (const [date, expected] of Object.entries(slots)) assert.deepEqual(posts.plan(date).map((p) => p.slot), expected);
+
+  const fallback = await posts.build('2026-11-17', '10:00');
+  assert.equal(fallback.post, 'broadcasts_empty_nov17');
+  assert.match(fallback.text, /Пока мы почти не видим активности/);
+  assert.match(fallback.text, /20 женщин присоединиться к пространству/);
+  assert.match(fallback.text, /Считаются те, кто действительно пришёл по твоей ссылке/);
+  assert.match(fallback.text, /Когда присоединится 20-я участница, бот пришлёт тебе доступ к анкете/);
+  assert.deepEqual([...fallback.html.matchAll(/go_(\w+)"/g)].map((m) => m[1]), ['about']);
+
+  await collections.saveItem('experts', { title: 'Опора', name: 'Мария', stage: 'slot', air_date: '2026-11-17', air_time: '16:00' }, 't');
+  const scheduled = await posts.build('2026-11-17', '10:00');
+  assert.equal(scheduled.post, 'broadcasts_nov17');
+  assert.match(scheduled.text, /16:00 — Мария, «Опора»/);
+
+  const wed = await posts.build('2026-11-18', '10:00');
+  assert.match(wed.text, /четвёртое видео серии/);
+  const fri = await posts.build('2026-11-20', '13:00');
+  assert.match(fri.text, /важный ритуал экосистемы/i);
+  assert.match(fri.text, /женщину, близкую по духу/);
+  assert.match(fri.text, /чем ты сама можешь быть полезна другой женщине/);
+
+  const expertPath = await posts.build('2026-11-22', '13:00');
+  assert.match(expertPath.text, /Пригласи 20 женщин присоединиться/);
+  assert.match(expertPath.text, /Считаются те, кто действительно пришёл по твоей ссылке/);
+  assert.match(expertPath.text, /бот пришлёт тебе доступ к анкете эксперта/);
+  assert.deepEqual([...expertPath.html.matchAll(/go_(\w+)"/g)].map((m) => m[1]), ['about']);
+  assert.equal(posts.plan('2026-11-23')[0].post, 'monday');
 });
 
 test('a post button opens the right page of the app through the bot', async () => {
