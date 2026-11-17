@@ -115,10 +115,10 @@
       <p style="margin-top:14px">Ритуалы пространства — маленькие ежедневные действия на пути к большой цели: видимость, ресурсы и изобилие, целостность, дружба и принятие, многомерность, внедрение 🌿</p>
       <p><b style="font-weight:400">Зачем эфиры.</b> День эфиров — это подарок женщинам пространства и твоё проявление. Хороший эфир помогает женщине сделать следующий шаг на своём пути: стать цельнее, наполниться, раскрыть новую грань или проявиться. Поэтому тема эфира — про один из этих этапов, и женщина уносит с него то, что применит уже сегодня.</p>
       <p>🤍 Женщина женщине — дом. Мы рады тебе.</p>
-      <button class="cta" type="button" id="ex-next">Я прочитала, к анкете <span>→</span></button></section>
+      <p class="ex-count" id="ex-count" hidden></p>
+      <button class="cta is-soon" type="button" id="ex-next" disabled>Анкета откроется после 20 приглашённых</button></section>
 
     <section class="dev-section surface" id="ex-form" hidden><h2>Анкета</h2>
-      <p class="ex-count" id="ex-count" hidden></p>
       <form class="dev-form" id="expert-form">
         <label class="ex-q"><span>Кто ты и в чём твоя экспертность? <b>*</b></span><textarea name="about" required maxlength="1000" placeholder="2–3 предложения"></textarea></label>
         <label class="ex-q"><span>Как ты чувствуешь, чем можешь служить пространству? <b>*</b></span><textarea name="serve" required maxlength="1000"></textarea></label>
@@ -158,12 +158,15 @@
 (function expertForm(){
   var wa=window.Telegram&&window.Telegram.WebApp;var initData=wa&&wa.initData||'';
   var intro=document.getElementById('ex-intro'),box=document.getElementById('ex-form'),form=document.getElementById('expert-form');
-  document.getElementById('ex-next').addEventListener('click',function(){box.hidden=false;box.scrollIntoView({behavior:'smooth',block:'start'})});
+  var next=document.getElementById('ex-next'),count=document.getElementById('ex-count');
+  next.addEventListener('click',function(){if(next.disabled)return;box.hidden=false;box.scrollIntoView({behavior:'smooth',block:'start'})});
   // How many women she has invited: 20 opens the broadcast day.
   if(initData)fetch('/api/auth/me',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',body:JSON.stringify({initData:initData,action:'referral'})}).then(function(r){return r.json()}).then(function(d){
-    if(!d||!d.ok||!d.referral)return;var n=d.referral.count,goal=d.referral.expert_goal,c=document.getElementById('ex-count');
-    c.textContent=n>=goal?'По твоей ссылке пришли '+n+' женщин — эфир открыт для тебя 🎉':'По твоей ссылке пришли '+n+' из '+goal+' женщин. Анкету можно заполнить уже сейчас, а эфир откроется, когда придут '+goal+' 🤍';c.hidden=false;
-  }).catch(function(){});
+    if(!d||!d.ok||!d.referral)throw new Error('Не удалось проверить приглашения');
+    var n=d.referral.count,goal=d.referral.expert_goal;c.textContent=n>=goal?'По твоей ссылке присоединились '+n+' женщин — анкета эксперта открыта 🎉':'По твоей ссылке присоединились '+n+' из '+goal+' женщин. Когда присоединится 20-я, бот откроет доступ к анкете 🤍';c.hidden=false;
+    if(n>=goal){next.disabled=false;next.classList.remove('is-soon');next.textContent='Я прочитала, к анкете →'}
+  }).catch(function(){count.textContent='Не удалось проверить число приглашённых. Анкета пока закрыта — попробуй обновить страницу 🤍';count.hidden=false;});
+  else {count.textContent='Открой анкету в приложении Telegram, чтобы проверить число приглашённых 🤍';count.hidden=false;}
   form.addEventListener('submit',function(e){
     e.preventDefault();var st=form.querySelector('.dev-status'),btn=form.querySelector('button[type=submit]');
     if(!initData){st.textContent='Откройте приложение в Telegram, чтобы отправить анкету.';return}
