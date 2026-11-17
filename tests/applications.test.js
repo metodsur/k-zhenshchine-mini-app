@@ -45,10 +45,16 @@ test('master application includes how many meetings she has passed', async () =>
   assert.match(alert.text, /Пройдено встреч: 1 из 6/);
 });
 
-test('expert form: answers, slots and invited count reach the team; values must be accepted', async () => {
+test('expert form is blocked below 20 joined referrals and accepted at 20; values must be accepted', async () => {
   const world = createWorld();
   const form = { kind: 'expert', about: 'Нутрициолог, 8 лет практики', serve: 'Помогаю вернуть энергию', experience: '30 эфиров', cases: 'Клиентка вернула сон за месяц',
     levels_url: 'https://yrovni.ru/anna', topic: 'Энергия женщины через питание', stage: 'Наполнение', takeaway: 'Утренний ритуал на 5 минут', product: '', slots: ['16:30', '17:00', '23:00'] };
+  const belowThreshold = await apply(ANNA, { ...form, values_ok: true });
+  assert.equal(belowThreshold.status, 400);
+  assert.match(belowThreshold.body.error, /20 женщин/);
+  assert.equal(world.lists.applications, undefined);
+  assert.equal(world.sent('sendMessage').filter((m) => m.chat_id === '900').length, 0);
+  world.sets.set(`ref:invited:${ANNA.id}`, new Set(Array.from({ length: 20 }, (_, i) => `invitee-${i + 1}`)));
   let r = await apply(ANNA, { ...form, values_ok: false });
   assert.equal(r.status, 400);
   assert.match(r.body.error, /ценности/);
@@ -58,7 +64,7 @@ test('expert form: answers, slots and invited count reach the team; values must 
   const alert = world.sent('sendMessage').find((m) => m.chat_id === '900');
   assert.match(alert.text, /Эксперт Дня эфиров/);
   assert.match(alert.text, /Анна \(@anna\)/);
-  assert.match(alert.text, /Пригласила: 0 из 20/);
+  assert.match(alert.text, /Пригласила: 20 из 20/);
   assert.match(alert.text, /Слоты: 16:30, 17:00\n/);
   assert.match(alert.text, /Чем может служить пространству: Помогаю вернуть энергию/);
   const saved = JSON.parse(world.lists.applications[0]);
@@ -69,6 +75,7 @@ test('expert form: answers, slots and invited count reach the team; values must 
 test('expert form also reaches the director in the bot and lands on the board «Эксперты»', async () => {
   const world = createWorld();
   await require('../lib/team').saveTeam([{ id: '555', name: 'Анастасия', role: 'director' }, { id: '556', name: 'Ира', role: 'content' }]);
+  world.sets.set(`ref:invited:${ANNA.id}`, new Set(Array.from({ length: 20 }, (_, i) => `invitee-${i + 1}`)));
   const r = await apply(ANNA, { kind: 'expert', about: 'Коуч', serve: 'Опора', topic: 'Женская опора', stage: 'Целостность', takeaway: 'Практика',
     levels_url: 'https://yrovni.ru/anna', slots: ['18:00'], values_ok: true });
   assert.equal(r.status, 200);
@@ -81,6 +88,6 @@ test('expert form also reaches the director in the bot and lands on the board «
   assert.equal(card.stage, 'new');
   assert.equal(card.slots, '18:00');
   assert.equal(card.path_stage, 'Целостность');
-  assert.equal(card.invited, 0);
+  assert.equal(card.invited, 20);
   assert.equal(card.tg_id, '7001');
 });
